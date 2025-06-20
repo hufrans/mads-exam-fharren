@@ -1,0 +1,38 @@
+2025-06-15 12:14:08.600 | INFO     | __main__:<module>:387 - Logbestand geconfigureerd: 'logging\gan_class_3_20250615_121408.log'
+2025-06-15 12:14:08.600 | INFO     | __main__:<module>:389 - Start GAN-training script.
+2025-06-15 12:14:08.600 | INFO     | __main__:<module>:390 - ECG Segment Lengte: 187
+2025-06-15 12:14:08.600 | INFO     | __main__:<module>:391 - Latente Dimensie: 100
+2025-06-15 12:14:08.600 | INFO     | __main__:<module>:392 - Batch Grootte: 64
+2025-06-15 12:14:08.600 | INFO     | __main__:<module>:393 - Aantal Epochs: 5000
+2025-06-15 12:14:08.600 | INFO     | __main__:<module>:394 - Data bestand: data/split/class_3_ecgs.parquet
+2025-06-15 12:14:08.600 | INFO     | __main__:<module>:395 - Huidige Klasse ID voor training: 3
+2025-06-15 12:14:08.600 | INFO     | __main__:<module>:396 - Target Kolom Naam: target
+2025-06-15 12:14:08.615 | INFO     | __main__:<module>:397 - Aantal synthetische samples te genereren: 35000
+2025-06-15 12:14:08.616 | INFO     | __main__:<module>:398 - Initiële Generator LR: 0.0001
+2025-06-15 12:14:08.616 | INFO     | __main__:<module>:399 - Initiële Discriminator LR: 0.0001
+2025-06-15 12:14:08.617 | INFO     | __main__:<module>:400 - ReduceLROnPlateau voor Discriminator: Monitor='disc_loss', Factor=0.1, Patience=20, Min Delta=0.0001, Cooldown=10, Min LR=1e-07
+2025-06-15 12:14:08.618 | INFO     | __main__:build_generator:199 - Generator model opbouwen...
+2025-06-15 12:14:08.778 | DEBUG    | __main__:build_generator:207 - Generator Dense laag output shape: (None, 3072)
+2025-06-15 12:14:08.778 | DEBUG    | __main__:build_generator:210 - Generator Reshape output shape: (None, 24, 128)
+2025-06-15 12:14:08.799 | DEBUG    | __main__:build_generator:215 - Generator Conv1DTranspose 1 output shape: (None, 48, 64)
+2025-06-15 12:14:08.818 | DEBUG    | __main__:build_generator:220 - Generator Conv1DTranspose 2 output shape: (None, 96, 32)
+2025-06-15 12:14:08.838 | DEBUG    | __main__:build_generator:224 - Generator Conv1DTranspose 3 output shape: (None, 192, 1)
+2025-06-15 12:14:08.838 | WARNING  | __main__:build_generator:228 - Generator output shape (192) is niet exact 187. Zal bijsnijden.
+2025-06-15 12:14:08.838 | DEBUG    | __main__:build_generator:234 - Generator Cropping1D output shape: (None, 187, 1)
+2025-06-15 12:14:08.838 | DEBUG    | __main__:build_generator:241 - Generator Final Reshape output shape: (None, 187, 1)
+2025-06-15 12:14:08.838 | INFO     | __main__:build_generator:244 - Generator model succesvol opgebouwd.
+2025-06-15 12:14:08.838 | INFO     | __main__:build_discriminator:262 - Discriminator model opbouwen...
+2025-06-15 12:14:08.883 | DEBUG    | __main__:build_discriminator:267 - Discriminator Conv1D 1 output shape: (None, 94, 64)
+2025-06-15 12:14:08.900 | DEBUG    | __main__:build_discriminator:272 - Discriminator Conv1D 2 output shape: (None, 47, 128)
+2025-06-15 12:14:08.900 | DEBUG    | __main__:build_discriminator:275 - Discriminator Flatten output shape: (None, 6016)
+2025-06-15 12:14:08.926 | DEBUG    | __main__:build_discriminator:278 - Discriminator Dense output shape: (None, 1)
+2025-06-15 12:14:08.926 | INFO     | __main__:build_discriminator:280 - Discriminator model succesvol opgebouwd.
+2025-06-15 12:14:08.927 | INFO     | __main__:load_and_prepare_ecg_data_from_parquet:137 - Laden van data uit Parquet-bestand: data/split/class_3_ecgs.parquet
+2025-06-15 12:14:09.500 | INFO     | __main__:load_and_prepare_ecg_data_from_parquet:140 - Originele data shape: (641, 188)
+2025-06-15 12:14:09.516 | INFO     | __main__:load_and_prepare_ecg_data_from_parquet:145 - Dit bestand bevat data voor klasse: 3.0
+2025-06-15 12:14:09.516 | INFO     | __main__:load_and_prepare_ecg_data_from_parquet:165 - Aantal samples geladen: 641
+2025-06-15 12:14:09.518 | DEBUG    | __main__:load_and_prepare_ecg_data_from_parquet:166 - Shape van de geladen ECG-features: (641, 187)
+2025-06-15 12:14:09.518 | INFO     | __main__:load_and_prepare_ecg_data_from_parquet:177 - Data genormaliseerd tussen 0.00 en 1.00
+2025-06-15 12:14:09.518 | DEBUG    | __main__:load_and_prepare_ecg_data_from_parquet:178 - Genormaliseerde data shape: (641, 187)
+2025-06-15 12:14:09.526 | INFO     | __main__:<module>:418 - TensorFlow Dataset gemaakt met 641 samples.
+2025-06-15 12:14:09.526 | INFO     | __main__:<module>:420 - Start training van de GAN...
