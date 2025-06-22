@@ -76,14 +76,6 @@ def run_experiment(config_path: str, num_features_actual: int, num_classes_actua
 
     # --- Data Laden ---
     logger.info("Start data laden...")
-    # Haal de paden voor de trainings- en testdata op uit de configuratie
-    # train_data_relative_path = config["data"]["train_data_path"] # Deze wordt nu via parameter doorgegeven
-    # test_data_relative_path = config["data"]["test_data_path"] # Deze wordt nu via parameter doorgegeven
-
-    # Construeer absolute paden die door get_data_loaders gebruikt kunnen worden
-    # Deze paden worden niet veranderd met de run_id, omdat dit de input data betreft.
-    # train_data_absolute_path = os.path.join(project_root, train_data_relative_path) # Gebruik direct train_data_file
-    # test_data_absolute_path = os.path.join(project_root, test_data_relative_path) # Gebruik direct test_data_file
     train_data_absolute_path = train_data_file
     test_data_absolute_path = test_data_file
 
@@ -93,7 +85,8 @@ def run_experiment(config_path: str, num_features_actual: int, num_classes_actua
     logger.info(f"Vastgestelde feature count: {num_features_actual}, class count: {num_classes_actual}")
 
     # Definieer de namen van je feature kolommen.
-    feature_columns = [f"feature_{i}" for i in range(num_features_actual)]
+    # Aangepast om de kolomnamen van "0" tot "186" te reflecteren
+    feature_columns = [str(i) for i in range(num_features_actual)] # Dit genereert "0", "1", ..., "186"
     # Definieer de naam van je target kolom.
     target_column = "target"
 
@@ -109,6 +102,10 @@ def run_experiment(config_path: str, num_features_actual: int, num_classes_actua
     if config["model_params"]["cnn"]["output_size"] != num_classes_actual:
         logger.warning(f"CNN model output_size ({config['model_params']['cnn']['output_size']}) komt niet overeen met het werkelijke aantal klassen ({num_classes_actual}). Aangepast.")
         config["model_params"]["cnn"]["output_size"] = num_classes_actual
+    # Belangrijk: CNN input_channels moet nog steeds 1 zijn voor 1D numerieke features
+    # en num_features is de lengte van de feature vector
+    config["model_params"]["cnn"]["num_features"] = num_features_actual 
+
 
     if config["model_params"]["gru"]["output_size"] != num_classes_actual:
         logger.warning(f"GRU model output_size ({config['model_params']['gru']['output_size']}) komt niet overeen met het werkelijke aantal klassen ({num_classes_actual}). Aangepast.")
@@ -162,6 +159,7 @@ def run_experiment(config_path: str, num_features_actual: int, num_classes_actua
     cnn_base_config = config["model_params"]["cnn"].copy() # Kopieer om originele config niet te wijzigen
     cnn_base_config["output_size"] = num_classes_actual 
     cnn_base_config["input_channels"] = 1 # Blijft 1 voor 1D numerieke features
+    cnn_base_config["num_features"] = num_features_actual # Zorg dat dit overeenkomt met de dataset
 
     # Definieer de zoekruimte voor hyperparameter tuning voor de CNN.
     cnn_hyper_params_list = [
@@ -176,12 +174,15 @@ def run_experiment(config_path: str, num_features_actual: int, num_classes_actua
         current_cnn_config = {**cnn_base_config, **cnn_params}
         
         # Dynamische berekening van input_size_after_flattening voor CNN
+        # Dit deel moet correct omgaan met de num_features_actual
         current_length = num_features_actual 
         conv_filters_for_this_experiment = current_cnn_config.get("conv_filters")
 
         # Bereken de gereduceerde lengte na elke MaxPool1d laag
-        for _ in range(len(conv_filters_for_this_experiment)): 
-            current_length = int(current_length / 2) 
+        # Aangepaste logica: er is slechts één MaxPool1d laag na elke conv laag in de CNNModel.
+        # De MaxPool1d laag halveert de lengte.
+        for _ in conv_filters_for_this_experiment: # Loop voor elke conv/pool laag
+            current_length = max(1, int(current_length / 2)) # Zorg dat het minimaal 1 blijft
             
         # De input_size_after_flattening is de laatste filtergrootte vermenigvuldigd met de resterende lengte
         input_size_after_flattening = int(current_length * conv_filters_for_this_experiment[-1])
@@ -263,9 +264,9 @@ if __name__ == "__main__":
         sys.exit(1)
 
     # Definieer de werkelijke aantallen features en klassen in je dataset.
-    # Deze moeten overeenkomen met je echte dataset of de dummy data die je genereert.
-    num_features_actual = 192 
-    num_classes_actual = 5
+    # AANGEPAST: Aantal features is nu 187 (van 0 tot 186)
+    num_features_actual = 187
+    num_classes_actual = 5 # Aangenomen dat dit nog steeds correct is
     
     data_dir = os.path.join(project_root, "data")
     os.makedirs(data_dir, exist_ok=True) 
@@ -290,13 +291,13 @@ if __name__ == "__main__":
         logger.debug(f"Dummy test data pad: {test_parquet_path_for_dummy}")
         
         try:
-            # Genereer dummy trainingsdata (100 voorbeelden)
-            dummy_train_data = {f"feature_{i}": torch.rand(100).tolist() for i in range(num_features_actual)}
+            # Genereer dummy trainingsdata (nu met het correcte aantal features en numerieke kolomnamen)
+            dummy_train_data = {str(i): torch.rand(100).tolist() for i in range(num_features_actual)}
             dummy_train_data["target"] = torch.randint(0, num_classes_actual, (100,)).tolist()
             pd.DataFrame(dummy_train_data).to_parquet(train_parquet_path_for_dummy, index=False)
 
-            # Genereer dummy testdata (50 voorbeelden)
-            dummy_test_data = {f"feature_{i}": torch.rand(50).tolist() for i in range(num_features_actual)}
+            # Genereer dummy testdata (nu met het correcte aantal features en numerieke kolomnamen)
+            dummy_test_data = {str(i): torch.rand(50).tolist() for i in range(num_features_actual)}
             dummy_test_data["target"] = torch.randint(0, num_classes_actual, (50,)).tolist()
             pd.DataFrame(dummy_test_data).to_parquet(test_parquet_path_for_dummy, index=False)
             logger.success(f"Dummy data aangemaakt als Parquet in '{train_parquet_path_for_dummy}' en '{test_parquet_path_for_dummy}'")
