@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 from typing import Dict, Any
+from loguru import logger # Importeer loguru's logger
 
 class CNNModel(nn.Module):
     """
@@ -17,70 +18,63 @@ class CNNModel(nn.Module):
                                     'conv_filters', 'kernel_size', 'use_dropout'.
         """
         super().__init__()
+        logger.info("Initializing CNNModel...")
         if not isinstance(config, dict):
+            logger.error(f"Invalid config type provided: {type(config)}. Expected dictionary.")
             raise TypeError("Config must be a dictionary.")
-        if "input_channels" not in config or not isinstance(config["input_channels"], int) or config["input_channels"] <= 0:
+
+        # --- Validate and extract config parameters with logging ---
+        input_channels = config.get("input_channels")
+        output_size = config.get("output_size")
+        conv_filters = config.get("conv_filters")
+        kernel_size = config.get("kernel_size")
+        hidden_size = config.get("hidden_size")
+        input_size_after_flattening = config.get("input_size_after_flattening")
+
+        if input_channels is None or not isinstance(input_channels, int) or input_channels <= 0:
+            logger.error(f"Invalid or missing 'input_channels' in config: {input_channels}")
             raise ValueError("Config missing 'input_channels' or it's invalid.")
-        if "output_size" not in config or not isinstance(config["output_size"], int) or config["output_size"] <= 0:
+        if output_size is None or not isinstance(output_size, int) or output_size <= 0:
+            logger.error(f"Invalid or missing 'output_size' in config: {output_size}")
             raise ValueError("Config missing 'output_size' or it's invalid.")
-        if "conv_filters" not in config or not isinstance(config["conv_filters"], list) or not all(isinstance(f, int) and f > 0 for f in config["conv_filters"]):
+        if conv_filters is None or not isinstance(conv_filters, list) or not all(isinstance(f, int) and f > 0 for f in conv_filters):
+            logger.error(f"Invalid or missing 'conv_filters' in config: {conv_filters}. Must be a list of positive integers.")
             raise ValueError("Config missing 'conv_filters' or it's invalid (must be a list of positive integers).")
-        if "kernel_size" not in config or not isinstance(config["kernel_size"], int) or config["kernel_size"] <= 0:
+        if kernel_size is None or not isinstance(kernel_size, int) or kernel_size <= 0:
+            logger.error(f"Invalid or missing 'kernel_size' in config: {kernel_size}")
             raise ValueError("Config missing 'kernel_size' or it's invalid.")
+        if hidden_size is None or not isinstance(hidden_size, int) or hidden_size <= 0:
+            logger.error(f"Invalid or missing 'hidden_size' in config: {hidden_size}")
+            raise ValueError("Config missing 'hidden_size' or it's invalid.")
+        if input_size_after_flattening is None or not isinstance(input_size_after_flattening, int) or input_size_after_flattening <= 0:
+            logger.error(f"Invalid or missing 'input_size_after_flattening' for CNN's linear layer: {input_size_after_flattening}. This needs to be calculated based on your data and conv layers.")
+            raise ValueError("Config missing 'input_size_after_flattening' for CNN's linear layer, or it's invalid. This needs to be calculated based on your data and conv layers.")
 
         self.use_dropout = config.get("use_dropout", False)
+        logger.debug(f"CNNModel config: input_channels={input_channels}, output_size={output_size}, conv_filters={conv_filters}, kernel_size={kernel_size}, hidden_size={hidden_size}, use_dropout={self.use_dropout}")
 
+        # --- Convolutional Layers ---
         layers = []
-        in_channels = config["input_channels"]
-        for filters in config["conv_filters"]:
-            layers.append(nn.Conv1d(in_channels, filters, kernel_size=config["kernel_size"], padding='same'))
+        in_channels = input_channels
+        for i, filters in enumerate(conv_filters):
+            layers.append(nn.Conv1d(in_channels, filters, kernel_size=kernel_size, padding='same'))
             layers.append(nn.ReLU())
             layers.append(nn.MaxPool1d(kernel_size=2)) # Reduce dimensionality
+            logger.debug(f"Added Conv1d layer {i+1}: in_channels={in_channels}, out_channels={filters}, kernel_size={kernel_size}")
             in_channels = filters
         self.conv_layers = nn.Sequential(*layers)
+        logger.debug("Convolutional layers built.")
 
-        # Calculate input size for the fully connected layer after convolutional layers
-        # This requires a dummy forward pass or careful calculation based on input size and pooling
-        # For simplicity, let's assume a fixed input size to the fully connected layer after some convolutions
-        # In a real scenario, you'd calculate this dynamically.
-        # Here's a placeholder, you'll need to adjust based on your actual input feature dimension.
-        # Example: if input_size is 10, after a few conv and pool layers, it might be 1 or 2.
-        # A more robust way is to pass a dummy tensor through conv_layers and check its size.
-        
-        # NOTE: Dummy input size for the fully connected layer.
-        # If your data is tabular and you treat each feature as a "sequence element" in a single channel,
-        # and your initial input_size is N_FEATURES, then after several Conv1d and MaxPool1d,
-        # the size will be reduced. You MUST ensure this matches.
-        # A common way is to instantiate a dummy input tensor and pass it through the conv layers:
-        
-        # Example for how to calculate input_size_after_conv dynamically (add this logic to main.py or here if needed)
-        # Assuming input shape for Conv1d is (batch_size, input_channels, sequence_length)
-        # where sequence_length is the original number of features.
-        # dummy_input_len = config.get("original_input_features", 10) # Get this from the dataset's feature count
-        # dummy_input_tensor = torch.randn(1, config["input_channels"], dummy_input_len)
-        # dummy_output_conv = self.conv_layers(dummy_input_tensor)
-        # fc_input_size = dummy_output_conv.view(dummy_output_conv.size(0), -1).size(1)
-        # self.fc1 = nn.Linear(fc_input_size, config["hidden_size"])
-        
-        # For now, let's keep it simple and assume `input_size_after_conv` is a parameter
-        # that needs to be configured correctly in the config or passed during instantiation.
-        # Alternatively, if you have a fixed input size like 10 features, and two MaxPool1D(2) layers,
-        # the effective sequence length after pooling would be 10 / (2*2) = 2.5, which typically floors to 2.
-        # The `in_channels` after convolution is `config["conv_filters"][-1]`.
-        # So, the linear layer input would be `config["conv_filters"][-1] * final_sequence_length`.
-        
-        # I'll use a safer, explicit approach assuming `input_size_after_flattening` can be provided
-        # or calculated externally (e.g., in main.py) and passed.
-        # For now, let's use a placeholder that needs to be calculated outside.
-        # You'll need to pass 'input_size_after_flattening' from main.py after checking your data dimensions.
-        if "input_size_after_flattening" not in config or not isinstance(config["input_size_after_flattening"], int) or config["input_size_after_flattening"] <= 0:
-            raise ValueError("Config missing 'input_size_after_flattening' for CNN's linear layer, or it's invalid. This needs to be calculated based on your data and conv layers.")
-            
-        self.fc1 = nn.Linear(config["input_size_after_flattening"], config["hidden_size"])
+        # --- Fully Connected Layers ---
+        self.fc1 = nn.Linear(input_size_after_flattening, hidden_size)
         self.relu = nn.ReLU()
         if self.use_dropout:
-            self.dropout = nn.Dropout(config.get("dropout_rate", 0.5))
-        self.fc2 = nn.Linear(config["hidden_size"], config["output_size"])
+            dropout_rate = config.get("dropout_rate", 0.5)
+            self.dropout = nn.Dropout(dropout_rate)
+            logger.debug(f"Dropout layer added with rate: {dropout_rate}")
+        self.fc2 = nn.Linear(hidden_size, output_size)
+        
+        logger.info(f"CNNModel initialized. Total parameters: {sum(p.numel() for p in self.parameters() if p.requires_grad)}")
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -94,26 +88,37 @@ class CNNModel(nn.Module):
             torch.Tensor: The output tensor (logits).
         """
         if not isinstance(x, torch.Tensor):
+            logger.error(f"Input to forward pass is not a torch.Tensor: {type(x)}")
             raise TypeError("Input must be a torch.Tensor.")
         
+        logger.debug(f"CNNModel - Initial input tensor shape: {x.shape}")
+
         # Ensure input is 3D for Conv1d (batch_size, channels, sequence_length)
         if x.dim() == 2:
             x = x.unsqueeze(1) # Add channel dimension if not present (e.g., (batch_size, sequence_length) -> (batch_size, 1, sequence_length))
+            logger.debug(f"CNNModel - Input unsqueezed to 3D. New shape: {x.shape}")
         
-        print(f"DEBUG: Input shape to conv_layers: {x.shape}") # <-- VOEG DEZE REGEL TOE
-
+        logger.debug(f"CNNModel - Input shape to conv_layers: {x.shape}") 
         x = self.conv_layers(x)
+        logger.debug(f"CNNModel - After conv_layers shape: {x.shape}")
+
         x = torch.flatten(x, 1) # Flatten all dimensions except batch
+        logger.debug(f"CNNModel - After flatten shape: {x.shape}")
         
         # Defensive check for the flattened size to match the linear layer's input size
-        # This is where the 'input_size_after_flattening' becomes critical.
         if x.size(1) != self.fc1.in_features:
+            logger.critical(f"Flattened input size {x.size(1)} does not match expected linear layer input size {self.fc1.in_features}. "
+                            "Adjust 'input_size_after_flattening' in config or your model's architecture.")
             raise ValueError(f"Flattened input size {x.size(1)} does not match expected linear layer input size {self.fc1.in_features}. "
                              "Adjust 'input_size_after_flattening' in config or your model's architecture.")
 
         x = self.fc1(x)
+        logger.debug(f"CNNModel - After fc1 shape: {x.shape}")
         x = self.relu(x)
+        logger.debug(f"CNNModel - After ReLU shape: {x.shape}")
         if self.use_dropout:
             x = self.dropout(x)
+            logger.debug(f"CNNModel - After Dropout shape: {x.shape}")
         x = self.fc2(x)
+        logger.debug(f"CNNModel - After fc2 (output) shape: {x.shape}")
         return x
