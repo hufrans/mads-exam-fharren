@@ -5,6 +5,7 @@ import pandas as pd
 import torch
 import sys
 from loguru import logger
+import argparse # Importeer argparse
 
 # --- Pad Definities ---
 current_script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -237,55 +238,69 @@ if __name__ == "__main__":
     # Defineer het pad naar het configuratiebestand
     config_file_path = os.path.join(project_root, "config.toml")
     
+    # --- Argument parser setup ---
+    parser = argparse.ArgumentParser(description="Run machine learning experiments.")
+    parser.add_argument(
+        "--dummy", 
+        action="store_true", # Dit betekent dat als --dummy aanwezig is, het True is, anders False
+        help="Use dummy data for training and testing instead of real data. Default is False (use real data)."
+    )
+    args = parser.parse_args()
+
     # Laad de config om de verwachte datapad-variabelen te achterhalen voor dummy data generatie
     try:
         temp_config = load_config(config_file_path)
-        logger.info(f"Tijdelijke configuratie geladen voor dummy data generatie vanuit {config_file_path}.")
+        logger.info(f"Configuratie geladen vanuit {config_file_path}.")
     except Exception as e:
-        logger.error(f"Fout bij het laden van tijdelijke configuratie voor dummy data: {e}")
+        logger.error(f"Fout bij het laden van configuratie: {e}")
         sys.exit(1)
 
     # Definieer de werkelijke aantallen features en klassen in je dataset.
+    # Deze moeten overeenkomen met je echte dataset of de dummy data die je genereert.
     num_features_actual = 192 
     num_classes_actual = 5
-    logger.debug(f"Dummy data parameters: features={num_features_actual}, classes={num_classes_actual}")
-
-    # Construeer absolute paden voor de dummy data bestanden op basis van de config
+    
     data_dir = os.path.join(project_root, "data")
     os.makedirs(data_dir, exist_ok=True) 
     logger.info(f"Zorgen dat de data directory bestaat: {data_dir}")
 
-    # Hier genereren we de dummy data. De bestandsnamen hiervan veranderen we NIET met de run-ID,
-    # omdat dit de "input" data is die consistent moet blijven voor alle runs, tenzij je expliciet
-    # verschillende datasets per run wilt genereren.
-    train_data_filename = temp_config["data"]["train_data_path"].split('/')[-1]
-    test_data_filename = temp_config["data"]["test_data_path"].split('/')[-1]
+    # Hier wordt gecheckt of de --dummy flag is gebruikt
+    if args.dummy:
+        logger.info("--- DUMMY DATA MODUS GEACTIVEERD ---")
+        logger.info(f"Dummy data parameters: features={num_features_actual}, classes={num_classes_actual}")
+        logger.info("Dummy data wordt aangemaakt voor demonstratie. Dit zal de configuratie overschrijven met dummy paden.")
 
-    train_parquet_path_for_dummy = os.path.join(data_dir, train_data_filename)
-    test_parquet_path_for_dummy = os.path.join(data_dir, test_data_filename)
-    logger.debug(f"Dummy training data pad: {train_parquet_path_for_dummy}")
-    logger.debug(f"Dummy test data pad: {test_parquet_path_for_dummy}")
+        train_data_filename = temp_config["data"]["train_data_path"].split('/')[-1]
+        test_data_filename = temp_config["data"]["test_data_path"].split('/')[-1]
+
+        train_parquet_path_for_dummy = os.path.join(data_dir, train_data_filename)
+        test_parquet_path_for_dummy = os.path.join(data_dir, test_data_filename)
+        logger.debug(f"Dummy training data pad: {train_parquet_path_for_dummy}")
+        logger.debug(f"Dummy test data pad: {test_parquet_path_for_dummy}")
+        
+        try:
+            # Genereer dummy trainingsdata (100 voorbeelden)
+            dummy_train_data = {f"feature_{i}": torch.rand(100).tolist() for i in range(num_features_actual)}
+            dummy_train_data["target"] = torch.randint(0, num_classes_actual, (100,)).tolist()
+            pd.DataFrame(dummy_train_data).to_parquet(train_parquet_path_for_dummy, index=False)
+
+            # Genereer dummy testdata (50 voorbeelden)
+            dummy_test_data = {f"feature_{i}": torch.rand(50).tolist() for i in range(num_features_actual)}
+            dummy_test_data["target"] = torch.randint(0, num_classes_actual, (50,)).tolist()
+            pd.DataFrame(dummy_test_data).to_parquet(test_parquet_path_for_dummy, index=False)
+            logger.success(f"Dummy data aangemaakt als Parquet in '{train_parquet_path_for_dummy}' en '{test_parquet_path_for_dummy}'")
+        except Exception as e:
+            logger.error(f"Fout bij het genereren van dummy data: {e}")
+            sys.exit(1)
+        
+        # Omdat dummy data altijd dezelfde namen heeft, wijzen we de config paden naar deze dummy bestanden
+        temp_config["data"]["train_data_path"] = os.path.relpath(train_parquet_path_for_dummy, project_root)
+        temp_config["data"]["test_data_path"] = os.path.relpath(test_parquet_path_for_dummy, project_root)
+
+    else:
+        logger.info("--- STANDAARD MODUS: GEBRUIK ECHTE DATA ---")
+        logger.info(f"Gebruik van data uit configuratiebestand: '{temp_config['data']['train_data_path']}' en '{temp_config['data']['test_data_path']}'.")
     
-    logger.info("--- BELANGRIJK: Kies hier tussen het gebruik van DUMMY DATA of ECHTE DATA ---")
-    logger.info("Dummy data wordt aangemaakt voor demonstratie. COMMENTAAR OF VERWIJDER DEZE SECTIE OM JE ECHTE DATABESTANDEN TE GEBRUIKEN.")
-    
-    try:
-        # Genereer dummy trainingsdata (100 voorbeelden)
-        dummy_train_data = {f"feature_{i}": torch.rand(100).tolist() for i in range(num_features_actual)}
-        dummy_train_data["target"] = torch.randint(0, num_classes_actual, (100,)).tolist()
-        pd.DataFrame(dummy_train_data).to_parquet(train_parquet_path_for_dummy, index=False)
-
-        # Genereer dummy testdata (50 voorbeelden)
-        dummy_test_data = {f"feature_{i}": torch.rand(50).tolist() for i in range(num_features_actual)}
-        dummy_test_data["target"] = torch.randint(0, num_classes_actual, (50,)).tolist()
-        pd.DataFrame(dummy_test_data).to_parquet(test_parquet_path_for_dummy, index=False)
-        logger.success(f"Dummy data aangemaakt als Parquet in '{train_parquet_path_for_dummy}' en '{test_parquet_path_for_dummy}'")
-    except Exception as e:
-        logger.error(f"Fout bij het genereren van dummy data: {e}")
-        sys.exit(1)
-
-    # --- Einde van de dummy data sectie ---
-
     # Start de experimentele run met het opgegeven configuratiebestand en de unieke RUN_ID
     try:
         run_experiment(config_file_path, num_features_actual, num_classes_actual, RUN_ID)
@@ -293,3 +308,4 @@ if __name__ == "__main__":
     except Exception as e:
         logger.critical(f"Een kritieke fout is opgetreden in het hoofdscript: {e}", exc_info=True)
         sys.exit(1)
+
