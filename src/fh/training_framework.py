@@ -326,7 +326,7 @@ class Trainer:
 
         Returns:
             Dict[str, Any]: A summary dictionary of the best performing epoch's metrics
-                            and overall training run metadata.
+                            and overall training run metadata, or an error dictionary if initialization fails.
 
         Raises:
             TypeError: If train_loader, test_loader, or model_config are of incorrect types.
@@ -336,16 +336,44 @@ class Trainer:
         logger.info(f"Starting training run for model: {model_name}, experiment: {experiment_name}")
         if not isinstance(train_loader, DataLoader) or not isinstance(test_loader, DataLoader):
             logger.error(f"Invalid DataLoader type provided. train_loader: {type(train_loader)}, test_loader: {type(test_loader)}.")
-            raise TypeError("train_loader and test_loader must be PyTorch DataLoaders.")
+            # Return an error state to main.py instead of crashing
+            return {
+                "run_id": self.run_id,
+                "model_type": model_name,
+                "experiment_name": experiment_name,
+                "status": "FAILED",
+                "error_message": "Invalid DataLoader type provided."
+            }
         if not isinstance(model_name, str) or not model_name:
             logger.error(f"Invalid model_name: '{model_name}'. Must be a non-empty string.")
-            raise ValueError("model_name must be a non-empty string.")
+            # Return an error state to main.py instead of crashing
+            return {
+                "run_id": self.run_id,
+                "model_type": model_name,
+                "experiment_name": experiment_name,
+                "status": "FAILED",
+                "error_message": f"Invalid model_name: '{model_name}'. Must be a non-empty string."
+            }
         if not isinstance(experiment_name, str) or not experiment_name:
             logger.error(f"Invalid experiment_name: '{experiment_name}'. Must be a non-empty string.")
-            raise ValueError("experiment_name must be a non-empty string.")
+            # Return an error state to main.py instead of crashing
+            return {
+                "run_id": self.run_id,
+                "model_type": model_name,
+                "experiment_name": experiment_name,
+                "status": "FAILED",
+                "error_message": f"Invalid experiment_name: '{experiment_name}'. Must be a non-empty string."
+            }
         if not isinstance(model_config, dict):
             logger.error(f"Invalid model_config type provided: {type(model_config)}. Expected dictionary.")
-            raise TypeError("model_config must be a dictionary.")
+            # Return an error state to main.py instead of crashing
+            return {
+                "run_id": self.run_id,
+                "model_type": model_name,
+                "experiment_name": experiment_name,
+                "status": "FAILED",
+                "error_message": "Invalid model_config type provided. Expected dictionary."
+            }
 
         start_time: datetime = datetime.now()
         
@@ -371,7 +399,14 @@ class Trainer:
             
             if "input_size_after_flattening" not in _model_config:
                 logger.error("CNN model 'input_size_after_flattening' ontbreekt in model_config. Dit is cruciaal voor de lineaire laag. Zorg dat dit correct wordt doorgegeven.")
-                raise ValueError("Missing 'input_size_after_flattening' for CNN model.")
+                # Return an error state instead of raising ValueError and causing sys.exit(1)
+                return {
+                    "run_id": self.run_id,
+                    "model_type": model_name,
+                    "experiment_name": experiment_name,
+                    "status": "FAILED",
+                    "error_message": "CNN model 'input_size_after_flattening' ontbreekt in model_config."
+                }
         
         # Initialize the model using the potentially modified _model_config
         try:
@@ -381,59 +416,79 @@ class Trainer:
             logger.debug(f"Model-specifieke configuratie voor '{model_name}': {_model_config}")
         except Exception as e:
             logger.critical(f"Failed to initialize model '{model_name}' for experiment '{experiment_name}': {e}", exc_info=True)
-            # Remove the specific handler for this run's logger before exiting on critical error
+            # Remove the specific handler for this run's logger before returning error
             if self._log_handler_ids:
-                # We moeten controleren of de handler nog bestaat voordat we hem verwijderen.
-                # Pop het ID uit de lijst.
                 handler_to_remove = self._log_handler_ids.pop()
-                # De meest robuuste manier om een handler te verwijderen is gewoon logger.remove(id) aan te roepen.
-                # Loguru zal geen fout geven als de handler er niet is, en dit voorkomt directe toegang tot _handlers.
                 try:
                     logger.remove(handler_to_remove)
                     logger.debug(f"Removed specific loguru handler {handler_to_remove} for run {self.run_id}.")
                 except ValueError:
-                    # ValueError kan optreden als de handler al verwijderd is of niet bestaat.
-                    # Dit is prima, we wilden hem toch al kwijt.
-                    logger.warning(f"Attempted to remove non-existent or already removed handler {handler_to_remove} for run {self.run_id}. This is expected if an error occurred earlier.")
-                except Exception as e:
-                    logger.error(f"Unexpected error removing handler {handler_to_remove}: {e}")
-            raise # Re-raise the exception after logging
+                    logger.warning(f"Attempted to remove non-existent or already removed handler {handler_to_remove} for run {self.run_id}.")
+                except Exception as e_inner:
+                    logger.error(f"Unexpected error removing handler {handler_to_remove}: {e_inner}")
+            
+            # Return an error state to main.py instead of crashing the entire script
+            return {
+                "run_id": self.run_id,
+                "model_type": model_name,
+                "experiment_name": experiment_name,
+                "status": "FAILED",
+                "error_message": f"Model initialisatie mislukt: {e}"
+            }
 
-        # Aangepaste initialisatie van CrossEntropyLoss met class_weights
+        # Loss function with class weights
         criterion: nn.Module = nn.CrossEntropyLoss(weight=self.class_weights) 
         
+        # Optimizer setup
         optimizer_name = self.settings["training"]["optimizer"]
         learning_rate = self.settings["training"]["learning_rate"]
-        weight_decay = self.settings["training"].get("weight_decay", 0.0) # Get weight_decay, default 0.0
+        weight_decay = self.settings["training"].get("weight_decay", 0.0)
         
-        optimizer: optim.Optimizer = self._get_optimizer(model, optimizer_name, learning_rate, weight_decay)
+        try:
+            optimizer: optim.Optimizer = self._get_optimizer(model, optimizer_name, learning_rate, weight_decay)
+        except ValueError as e: # Catch specific optimizer errors
+             logger.error(f"Fout bij het initialiseren van de optimizer voor {experiment_name}: {e}")
+             return {
+                "run_id": self.run_id,
+                "model_type": model_name,
+                "experiment_name": experiment_name,
+                "status": "FAILED",
+                "error_message": f"Optimizer initialisatie mislukt: {e}"
+            }
         
+        # Scheduler setup
         scheduler = None
         if self.settings["training"].get("use_scheduler", False):
             scheduler_type = self.settings["training"].get("scheduler_type", "ReduceLROnPlateau")
             scheduler_kwargs: Dict[str, Any] = self.settings["training"].get("scheduler_kwargs", {})
-            scheduler = self._get_scheduler(optimizer, scheduler_type, scheduler_kwargs)
+            try:
+                scheduler = self._get_scheduler(optimizer, scheduler_type, scheduler_kwargs)
+            except TypeError as e: # Catch specific scheduler errors
+                logger.error(f"Fout bij het initialiseren van de scheduler voor {experiment_name}: {e}")
+                return {
+                    "run_id": self.run_id,
+                    "model_type": model_name,
+                    "experiment_name": experiment_name,
+                    "status": "FAILED",
+                    "error_message": f"Scheduler initialisatie mislukt: {e}"
+                }
         else:
-            logger.info("Scheduler is disabled in configuration.")
+            logger.info("Scheduler is uitgeschakeld in configuratie.")
 
 
         epochs: int = self.settings["training"]["epochs"]
-        # Aanpassing: volg nu recall, niet loss. Initialiseer op -oneindig.
         best_recall: float = float('-inf')
-        best_accuracy_for_recall: float = float('-inf') # Voor tie-breaking op accuracy
+        best_accuracy_for_recall: float = float('-inf') 
         
-        # Gebruik de geprefixeerde templates
         best_model_path: str = self.best_model_path_template.format(model_name=experiment_name)
         model_results_parquet_path: str = self.results_path_template.format(model_name=experiment_name)
-        # Backup pad ook geprefixeerd met run_id
         model_results_backup_path: str = os.path.join(self.run_log_dir, f"{self.run_id}_{experiment_name}_results.parquet.bak")
         
-        logger.debug(f"Model checkpoint will be saved to: {best_model_path}")
-        logger.debug(f"Results will be saved to: {model_results_parquet_path}")
+        logger.debug(f"Model checkpoint zal worden opgeslagen in: {best_model_path}")
+        logger.debug(f"Resultaten zullen worden opgeslagen in: {model_results_parquet_path}")
         
         best_epoch_metrics: Dict[str, Any] = {} 
 
-        # Log DataLoader sizes and batch info for debugging
         train_samples = len(train_loader.dataset) if train_loader.dataset is not None else 0
         test_samples = len(test_loader.dataset) if test_loader.dataset is not None else 0
 
@@ -445,119 +500,117 @@ class Trainer:
         for epoch in range(1, epochs + 1):
             epoch_start_time: float = time.time()
             
-            # Train and evaluate
-            train_loss: float = self.train_epoch(model, train_loader, criterion, optimizer)
-            test_loss, accuracy_value, recall_value, precision_value, f1_value = self.evaluate_epoch(model, test_loader, criterion) # Get f1_value
-            epoch_duration: float = time.time() - epoch_start_time
-
-            if scheduler and isinstance(scheduler, ReduceLROnPlateau):
-                scheduler.step(test_loss) # ReduceLROnPlateau needs a metric (traditioneel test_loss)
-            elif scheduler and isinstance(scheduler, StepLR):
-                scheduler.step() # StepLR does not need a metric
-            
-            loss_verschil: float = train_loss - test_loss
-            relatief_verschil_loss: float = (loss_verschil / train_loss) if train_loss != 0 else float('inf')
-
-            # COMBINED LOG LINE: This is the primary change for concise logging
-            # Adjusted epoch formatting for alignment
-            logger.info(f"Experiment: {experiment_name}, Epoch: {epoch:{len(str(epochs))}d}/{epochs}, Train Loss: {train_loss:.4f}, Test Loss: {test_loss:.4f}, Accuracy: {accuracy_value:.4f}, Recall: {recall_value:.4f}, Precision: {precision_value:.4f}, F1: {f1_value:.4f}, Duration: {epoch_duration:.2f}s, Current LR: {optimizer.param_groups[0]['lr']:.6f}")
-
-            # Prepare data for the dataframe
-            epoch_data: Dict[str, Any] = {
-                'run_id': self.run_id, 
-                'model_name': experiment_name,
-                'epoch': epoch,
-                'train_loss': train_loss,
-                'test_loss': test_loss,
-                'verschil_loss': loss_verschil,
-                'relatief_verschil_loss': relatief_verschil_loss,
-                'accuracy': accuracy_value,
-                'run_recall': recall_value,
-                'run_precision': precision_value,
-                'run_f1': f1_value, # Added f1 to epoch_data
-                'duration_epoch_seconds': epoch_duration, # Added epoch duration
-                'learning_rate': optimizer.param_groups[0]['lr'], # Added current learning rate
-                'train_samples': train_samples, # Add train samples count to epoch data
-                'test_samples': test_samples,   # Add test samples count to epoch data
-                # Dynamisch toevoegen van klasse-gewichten als aparte kolommen
-                **{f'class_{i}_weight': self.class_weights[i].item() for i in range(self.class_count)},
-                **_model_config 
-            }
-            
-            # --- Rotating Backup Mechanism ---
-            if os.path.exists(model_results_parquet_path):
-                try:
-                    shutil.copy(model_results_parquet_path, model_results_backup_path)
-                    logger.debug(f"Backed up current results from {model_results_parquet_path} to {model_results_backup_path}.")
-                except Exception as e:
-                    logger.warning(f"Failed to create backup for {model_results_parquet_path}. Error: {e}")
-            
-            # --- Read, Update, and Write Results to Disk ---
-            current_df: pd.DataFrame
-            if os.path.exists(model_results_parquet_path):
-                try:
-                    existing_df: pd.DataFrame = pd.read_parquet(model_results_parquet_path)
-                    current_df = pd.concat([existing_df, pd.DataFrame([epoch_data])], ignore_index=True)
-                    logger.debug(f"Appended epoch {epoch} data to existing DataFrame for {experiment_name}.")
-                except Exception as e:
-                    logger.error(f"Failed to read existing Parquet file {model_results_parquet_path}. Starting new DataFrame. Error: {e}")
-                    current_df = pd.DataFrame([epoch_data])
-            else:
-                current_df = pd.DataFrame([epoch_data])
-                logger.debug(f"Created new DataFrame for epoch {epoch} results for {experiment_name}.")
-            
             try:
-                current_df.to_parquet(model_results_parquet_path, index=False)
-                # Removed the specific log line for saving epoch results
-                # logger.info(f"Results for epoch {epoch} saved to {model_results_parquet_path}.")
-            except Exception as e:
-                logger.error(f"Failed to save results for epoch {epoch} to {model_results_parquet_path}. Error: {e}")
+                train_loss: float = self.train_epoch(model, train_loader, criterion, optimizer)
+                test_loss, accuracy_value, recall_value, precision_value, f1_value = self.evaluate_epoch(model, test_loader, criterion)
+                epoch_duration: float = time.time() - epoch_start_time
 
-            # Save the best model (based on recall, then accuracy)
-            if recall_value > best_recall:
-                best_recall = recall_value
-                best_accuracy_for_recall = accuracy_value
+                if scheduler and isinstance(scheduler, ReduceLROnPlateau):
+                    scheduler.step(test_loss)
+                elif scheduler and isinstance(scheduler, StepLR):
+                    scheduler.step()
+                
+                loss_verschil: float = train_loss - test_loss
+                relatief_verschil_loss: float = (loss_verschil / train_loss) if train_loss != 0 else float('inf')
+
+                logger.info(f"Experiment: {experiment_name}, Epoch: {epoch:{len(str(epochs))}d}/{epochs}, Train Loss: {train_loss:.4f}, Test Loss: {test_loss:.4f}, Accuracy: {accuracy_value:.4f}, Recall: {recall_value:.4f}, Precision: {precision_value:.4f}, F1: {f1_value:.4f}, Duration: {epoch_duration:.2f}s, Current LR: {optimizer.param_groups[0]['lr']:.6f}")
+
+                # Prepare data for the dataframe
+                epoch_data: Dict[str, Any] = {
+                    'run_id': self.run_id, 
+                    'model_name': experiment_name,
+                    'epoch': epoch,
+                    'train_loss': train_loss,
+                    'test_loss': test_loss,
+                    'verschil_loss': loss_verschil,
+                    'relatief_verschil_loss': relatief_verschil_loss,
+                    'accuracy': accuracy_value,
+                    'run_recall': recall_value,
+                    'run_precision': precision_value,
+                    'run_f1': f1_value, 
+                    'duration_epoch_seconds': epoch_duration,
+                    'learning_rate': optimizer.param_groups[0]['lr'],
+                    'train_samples': train_samples,
+                    'test_samples': test_samples,   
+                    **{f'class_{i}_weight': self.class_weights[i].item() for i in range(self.class_count)},
+                    **_model_config 
+                }
+                
+                # --- Rotating Backup Mechanism ---
+                if os.path.exists(model_results_parquet_path):
+                    try:
+                        shutil.copy(model_results_parquet_path, model_results_backup_path)
+                        logger.debug(f"Backed up current results from {model_results_parquet_path} to {model_results_backup_path}.")
+                    except Exception as e:
+                        logger.warning(f"Failed to create backup for {model_results_parquet_path}. Error: {e}")
+                
+                # --- Read, Update, and Write Results to Disk ---
+                current_df: pd.DataFrame
+                if os.path.exists(model_results_parquet_path):
+                    try:
+                        existing_df: pd.DataFrame = pd.read_parquet(model_results_parquet_path)
+                        current_df = pd.concat([existing_df, pd.DataFrame([epoch_data])], ignore_index=True)
+                        logger.debug(f"Appended epoch {epoch} data to existing DataFrame for {experiment_name}.")
+                    except Exception as e:
+                        logger.error(f"Failed to read existing Parquet file {model_results_parquet_path}. Starting new DataFrame. Error: {e}")
+                        current_df = pd.DataFrame([epoch_data])
+                else:
+                    current_df = pd.DataFrame([epoch_data])
+                    logger.debug(f"Created new DataFrame for epoch {epoch} results for {experiment_name}.")
+                
                 try:
-                    torch.save(model.state_dict(), best_model_path)
-                    logger.success(f"Saved best model for {experiment_name} to {best_model_path} (Recall: {best_recall:.4f}, Accuracy: {best_accuracy_for_recall:.4f}).")
-                    best_epoch_metrics = { 
-                        "best_train_loss": train_loss, # Toegevoegd: train_loss van de beste epoch
-                        "best_test_loss": test_loss, # behoud loss voor context
-                        "best_accuracy": accuracy_value,
-                        "best_recall": recall_value,
-                        "best_precision": precision_value,
-                        "best_f1": f1_value,
-                        "best_epoch": epoch
-                    }
+                    current_df.to_parquet(model_results_parquet_path, index=False)
                 except Exception as e:
-                    logger.error(f"Failed to save best model for {experiment_name} to {best_model_path}. Error: {e}")
-            elif recall_value == best_recall and accuracy_value > best_accuracy_for_recall:
-                best_accuracy_for_recall = accuracy_value
-                try:
-                    torch.save(model.state_dict(), best_model_path)
-                    logger.success(f"Saved best model for {experiment_name} to {best_model_path} (Recall: {best_recall:.4f}, Improved Accuracy: {best_accuracy_for_recall:.4f}).")
-                    best_epoch_metrics = { 
-                        "best_train_loss": train_loss, # Toegevoegd: train_loss van de beste epoch
-                        "best_test_loss": test_loss, # behoud loss voor context
-                        "best_accuracy": accuracy_value,
-                        "best_recall": recall_value,
-                        "best_precision": precision_value,
-                        "best_f1": f1_value,
-                        "best_epoch": epoch
-                    }
-                except Exception as e:
-                    logger.error(f"Failed to save best model for {experiment_name} to {best_model_path}. Error: {e}")
-            else:
-                logger.debug(f"Current recall {recall_value:.4f} not better than best {best_recall:.4f} (or accuracy not better if recall is equal). Model not saved.")
+                    logger.error(f"Failed to save results for epoch {epoch} to {model_results_parquet_path}. Error: {e}")
+
+                # Save the best model (based on recall, then accuracy)
+                if recall_value > best_recall:
+                    best_recall = recall_value
+                    best_accuracy_for_recall = accuracy_value
+                    try:
+                        torch.save(model.state_dict(), best_model_path)
+                        logger.success(f"Saved best model for {experiment_name} to {best_model_path} (Recall: {best_recall:.4f}, Accuracy: {best_accuracy_for_recall:.4f}).")
+                        best_epoch_metrics = { 
+                            "best_train_loss": train_loss, 
+                            "best_test_loss": test_loss,
+                            "best_accuracy": accuracy_value,
+                            "best_recall": recall_value,
+                            "best_precision": precision_value,
+                            "best_f1": f1_value,
+                            "best_epoch": epoch
+                        }
+                    except Exception as e:
+                        logger.error(f"Failed to save best model for {experiment_name} to {best_model_path}. Error: {e}")
+                elif recall_value == best_recall and accuracy_value > best_accuracy_for_recall:
+                    best_accuracy_for_recall = accuracy_value
+                    try:
+                        torch.save(model.state_dict(), best_model_path)
+                        logger.success(f"Saved best model for {experiment_name} to {best_model_path} (Recall: {best_recall:.4f}, Improved Accuracy: {best_accuracy_for_recall:.4f}).")
+                        best_epoch_metrics = { 
+                            "best_train_loss": train_loss, 
+                            "best_test_loss": test_loss,
+                            "best_accuracy": accuracy_value,
+                            "best_recall": recall_value,
+                            "best_precision": precision_value,
+                            "best_f1": f1_value,
+                            "best_epoch": epoch
+                        }
+                    except Exception as e:
+                        logger.error(f"Failed to save best model for {experiment_name} to {best_model_path}. Error: {e}")
+                else:
+                    logger.debug(f"Huidige recall {recall_value:.4f} niet beter dan beste {best_recall:.4f} (of nauwkeurigheid niet beter als recall gelijk is). Model niet opgeslagen.")
             
-            # Optional: Implement early stopping based on self.settings
-            # if early_stopping_condition_met:
-            #     logger.info(f"Early stopping triggered at epoch {epoch} for model {experiment_name}.")
-            #     break
+            except Exception as e:
+                logger.error(f"Fout tijdens epoch {epoch} voor experiment {experiment_name}: {e}", exc_info=True)
+                # Indien een epoch mislukt, kunnen we ervoor kiezen om gewoon door te gaan naar de volgende epoch
+                # of de hele training voor dit model als mislukt te markeren en te breken.
+                # Voor nu loggen we de fout en gaan we door naar de volgende epoch.
+                # Als je de training voor dit model wilt stoppen na een epoch-fout, voeg dan 'break' toe.
+                pass # Ga door naar de volgende epoch
 
         end_time: datetime = datetime.now()
         duration: timedelta = end_time - start_time
-        logger.info(f"Training for model {experiment_name} finished. Total duration: {duration}")
+        logger.info(f"Training voor model {experiment_name} voltooid. Totale duur: {duration}")
 
         # Final results dictionary
         final_results: Dict[str, Any] = {
@@ -567,34 +620,33 @@ class Trainer:
             "duration": str(duration),
             "model_type": model_name,
             "experiment_name": experiment_name,
-            "epochs_run": epoch,
-            "optimizer": optimizer_name, # Directly use the optimizer_name string
-            "learning_rate_initial": learning_rate, # Directly use the learning_rate float
-            "weight_decay": weight_decay, # Added weight_decay
-            "scheduler_type": self.settings["training"].get("scheduler_type", "None"), # Include scheduler type
+            "epochs_run": epoch, # Dit zal het laatste epoch-nummer zijn, zelfs als er fouten waren.
+            "optimizer": optimizer_name, 
+            "learning_rate_initial": learning_rate, 
+            "weight_decay": weight_decay, 
+            "scheduler_type": self.settings["training"].get("scheduler_type", "None"),
             "scheduler_factor": self.settings["training"]["scheduler_kwargs"].get("factor") if scheduler else None,
             "scheduler_patience": self.settings["training"]["scheduler_kwargs"].get("patience") if scheduler else None,
-            "train_data_file": os.path.basename(self.train_data_path), # Add basename of train data file
-            "test_data_file": os.path.basename(self.test_data_path),   # Add basename of test data file
-            "train_samples": train_samples, # Add train samples count
-            "test_samples": test_samples,   # Add test samples count
-            # Dynamisch toevoegen van klasse-gewichten aan de eindresultaten
+            "train_data_file": os.path.basename(self.train_data_path), 
+            "test_data_file": os.path.basename(self.test_data_path),   
+            "train_samples": train_samples, 
+            "test_samples": test_samples,   
             **{f'class_{i}_weight': self.class_weights[i].item() for i in range(self.class_count)},
-            **best_epoch_metrics, 
-            "model_specific_config": _model_config 
+            **best_epoch_metrics, # Deze zal leeg zijn als geen enkele epoch succesvol was
+            "model_specific_config": _model_config,
+            "status": "COMPLETED" if best_epoch_metrics else "COMPLETED_WITH_ERRORS" # Voeg een status toe
         }
-        logger.debug(f"Final summary results for {experiment_name}: {final_results}")
+        logger.debug(f"Finale samenvattingsresultaten voor {experiment_name}: {final_results}")
 
         # BELANGRIJK: Verwijder de specifieke handler die door deze Trainer-instantie is toegevoegd
         if self._log_handler_ids:
-            # Pop het ID uit de lijst.
             handler_to_remove = self._log_handler_ids.pop()
             try:
                 logger.remove(handler_to_remove)
-                logger.debug(f"Removed specific loguru handler {handler_to_remove} for run {self.run_id}.")
+                logger.debug(f"Specifieke Loguru handler {handler_to_remove} verwijderd voor run {self.run_id}.")
             except ValueError:
-                logger.warning(f"Attempted to remove non-existent or already removed handler {handler_to_remove} for run {self.run_id}. This is expected if an error occurred earlier or it was cleaned up by another process (unlikely for Loguru).")
+                logger.warning(f"Poging om niet-bestaande of reeds verwijderde handler {handler_to_remove} te verwijderen voor run {self.run_id}.")
             except Exception as e:
-                logger.error(f"Unexpected error removing handler {handler_to_remove}: {e}")
+                logger.error(f"Onverwachte fout bij het verwijderen van handler {handler_to_remove}: {e}")
 
         return final_results
