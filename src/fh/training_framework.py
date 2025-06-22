@@ -418,7 +418,9 @@ class Trainer:
 
 
         epochs: int = self.settings["training"]["epochs"]
-        best_test_loss: float = float('inf')
+        # Aanpassing: volg nu recall, niet loss. Initialiseer op -oneindig.
+        best_recall: float = float('-inf')
+        best_accuracy_for_recall: float = float('-inf') # Voor tie-breaking op accuracy
         
         # Gebruik de geprefixeerde templates
         best_model_path: str = self.best_model_path_template.format(model_name=experiment_name)
@@ -442,8 +444,6 @@ class Trainer:
         # --- Training Loop ---
         for epoch in range(1, epochs + 1):
             epoch_start_time: float = time.time()
-            # Removed the general "--- Epoch X/Y for Experiment ---" log
-            # logger.info(f"--- Epoch {epoch}/{epochs} for {experiment_name} ---")
             
             # Train and evaluate
             train_loss: float = self.train_epoch(model, train_loader, criterion, optimizer)
@@ -451,7 +451,7 @@ class Trainer:
             epoch_duration: float = time.time() - epoch_start_time
 
             if scheduler and isinstance(scheduler, ReduceLROnPlateau):
-                scheduler.step(test_loss) # ReduceLROnPlateau needs a metric
+                scheduler.step(test_loss) # ReduceLROnPlateau needs a metric (traditioneel test_loss)
             elif scheduler and isinstance(scheduler, StepLR):
                 scheduler.step() # StepLR does not need a metric
             
@@ -512,25 +512,40 @@ class Trainer:
             except Exception as e:
                 logger.error(f"Failed to save results for epoch {epoch} to {model_results_parquet_path}. Error: {e}")
 
-            # Save the best model (based on test loss)
-            if test_loss < best_test_loss:
-                best_test_loss = test_loss
+            # Save the best model (based on recall, then accuracy)
+            if recall_value > best_recall:
+                best_recall = recall_value
+                best_accuracy_for_recall = accuracy_value
                 try:
                     torch.save(model.state_dict(), best_model_path)
-                    # Removed the specific log line for saving best model
-                    # logger.success(f"Saved best model for {experiment_name} to {best_model_path} (Test Loss: {best_test_loss:.4f}).")
+                    logger.success(f"Saved best model for {experiment_name} to {best_model_path} (Recall: {best_recall:.4f}, Accuracy: {best_accuracy_for_recall:.4f}).")
                     best_epoch_metrics = { 
-                        "best_test_loss": test_loss,
+                        "best_test_loss": test_loss, # behoud loss voor context
                         "best_accuracy": accuracy_value,
                         "best_recall": recall_value,
                         "best_precision": precision_value,
-                        "best_f1": f1_value, # Added f1 to best_epoch_metrics
+                        "best_f1": f1_value,
+                        "best_epoch": epoch
+                    }
+                except Exception as e:
+                    logger.error(f"Failed to save best model for {experiment_name} to {best_model_path}. Error: {e}")
+            elif recall_value == best_recall and accuracy_value > best_accuracy_for_recall:
+                best_accuracy_for_recall = accuracy_value
+                try:
+                    torch.save(model.state_dict(), best_model_path)
+                    logger.success(f"Saved best model for {experiment_name} to {best_model_path} (Recall: {best_recall:.4f}, Improved Accuracy: {best_accuracy_for_recall:.4f}).")
+                    best_epoch_metrics = { 
+                        "best_test_loss": test_loss, # behoud loss voor context
+                        "best_accuracy": accuracy_value,
+                        "best_recall": recall_value,
+                        "best_precision": precision_value,
+                        "best_f1": f1_value,
                         "best_epoch": epoch
                     }
                 except Exception as e:
                     logger.error(f"Failed to save best model for {experiment_name} to {best_model_path}. Error: {e}")
             else:
-                logger.debug(f"Current test loss {test_loss:.4f} not better than best {best_test_loss:.4f}. Model not saved.")
+                logger.debug(f"Current recall {recall_value:.4f} not better than best {best_recall:.4f} (or accuracy not better if recall is equal). Model not saved.")
             
             # Optional: Implement early stopping based on self.settings
             # if early_stopping_condition_met:
