@@ -366,7 +366,7 @@ class Trainer:
             
         elif model_name == "cnn_model":
             if _model_config.get("output_size") != self.class_count:
-                logger.warning(f"{model_name} output_size ({_model_config.get('output_size')}) komt niet overeen met het werkelijke aantal klassen ({self.class_count}). Aangepast.")
+                logger.warning(f"CNN model output_size ({_model_config.get('output_size')}) komt niet overeen met het werkelijke aantal klassen ({self.class_count}). Aangepast.")
             _model_config["output_size"] = self.class_count
             
             if "input_size_after_flattening" not in _model_config:
@@ -479,7 +479,8 @@ class Trainer:
                 'learning_rate': optimizer.param_groups[0]['lr'], # Added current learning rate
                 'train_samples': train_samples, # Add train samples count to epoch data
                 'test_samples': test_samples,   # Add test samples count to epoch data
-                'class_weights': self.class_weights.tolist(), # Add class weights to epoch data
+                # Dynamisch toevoegen van klasse-gewichten als aparte kolommen
+                **{f'class_{i}_weight': self.class_weights[i].item() for i in range(self.class_count)},
                 **_model_config 
             }
             
@@ -520,6 +521,7 @@ class Trainer:
                     torch.save(model.state_dict(), best_model_path)
                     logger.success(f"Saved best model for {experiment_name} to {best_model_path} (Recall: {best_recall:.4f}, Accuracy: {best_accuracy_for_recall:.4f}).")
                     best_epoch_metrics = { 
+                        "best_train_loss": train_loss, # Toegevoegd: train_loss van de beste epoch
                         "best_test_loss": test_loss, # behoud loss voor context
                         "best_accuracy": accuracy_value,
                         "best_recall": recall_value,
@@ -535,6 +537,7 @@ class Trainer:
                     torch.save(model.state_dict(), best_model_path)
                     logger.success(f"Saved best model for {experiment_name} to {best_model_path} (Recall: {best_recall:.4f}, Improved Accuracy: {best_accuracy_for_recall:.4f}).")
                     best_epoch_metrics = { 
+                        "best_train_loss": train_loss, # Toegevoegd: train_loss van de beste epoch
                         "best_test_loss": test_loss, # behoud loss voor context
                         "best_accuracy": accuracy_value,
                         "best_recall": recall_value,
@@ -575,7 +578,8 @@ class Trainer:
             "test_data_file": os.path.basename(self.test_data_path),   # Add basename of test data file
             "train_samples": train_samples, # Add train samples count
             "test_samples": test_samples,   # Add test samples count
-            "class_weights": self.class_weights.tolist(), # Add class weights to final results
+            # Dynamisch toevoegen van klasse-gewichten aan de eindresultaten
+            **{f'class_{i}_weight': self.class_weights[i].item() for i in range(self.class_count)},
             **best_epoch_metrics, 
             "model_specific_config": _model_config 
         }
