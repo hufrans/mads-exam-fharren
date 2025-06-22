@@ -6,13 +6,22 @@ train_data_path = ["data/heart_big_train.parq", "data/heart_big_train_synthetic.
 
 [training]
 batch_size = 32        # Grootte van de batches die aan het model worden gevoerd
-epochs = 10            # Aantal trainings-epochs (passes over de volledige dataset)
+epochs = 50            # Aantal trainings-epochs (passes over de volledige dataset)
 learning_rate = 0.001  # Initiële learning rate voor de optimizer
 optimizer = "Adam"     # Type optimizer om te gebruiken (bijv. "Adam", "SGD")
 scheduler_factor = 0.1 # Factor waarmee de learning rate wordt verminderd door de scheduler (bijv. 0.1 voor 10x reductie)
 scheduler_patience = 3 # Aantal epochs zonder verbetering voordat de learning rate wordt aangepast
 log_dir = "runs"       # Directory waar trainingslogs en modelartefacten worden opgeslagen
-scheduler_kwargs = {mode = "min", factor = 0.1, patience = 3} # Extra argumenten voor de learning rate scheduler (voor PyTorch's ReduceLROnPlateau).
+
+early_stopping_patience  = 15                  # Aantal epochs om te wachten zonder verbetering van testloss
+early_stopping_min_delta = 0.001               # Minimale verbetering in testloss om als 'verbetering' te tellen
+use_scheduler            = true                # Zet deze op 'true' om de scheduler in te schakelen
+scheduler_type           = "ReduceLROnPlateau" # Of "StepLR", afhankelijk van je voorkeur
+
+[training.scheduler_kwargs] # Nieuwe sectie voor scheduler argumenten
+mode = "min"  # Voor ReduceLROnPlateau: 'min' voor monitoring van verlies, 'max' voor monitoring van metrics (bijv. accuracy)
+factor = 0.1  # De factor waarmee de leerfrequentie wordt verminderd (nieuwe_lr = oude_lr * factor)
+patience = 5  # Aantal epochs zonder verbetering voordat de leerfrequentie wordt verminderd
 
 # --- Model Specifieke Parameters ---
 # Let op: de 'input_size_after_flattening' voor de CNN wordt dynamisch berekend in main.py.
@@ -37,3 +46,14 @@ hidden_size = 128 # Grootte van de verborgen toestand (hidden state) van de GRU-
 num_layers = 2    # Aantal gestapelde GRU-lagen
 output_size = 5   # Output grootte van het GRU model (aantal klassen)
 dropout = 0.2     # Dropout rate toegepast op de output van elke GRU-laag (behalve de laatste)
+
+[model_params.cnn_se_skip]
+input_channels = 1            # Aantal input kanalen (1 voor 1D numerieke features)
+hidden_size = 64              # Grootte van de volledig verbonden (dense) verborgen laag na de laatste conv block
+num_layers = 2                # Aantal herhalende CNN-SE-Skip blokken
+output_size = 5               # Output grootte van het model (aantal klassen)
+conv_filters_per_block = 32   # Aantal filters in elke convolutionele laag binnen een blok
+kernel_size_per_block = 3     # Grootte van de convolutionele kernel binnen een blok
+use_dropout = true            # Boolean om aan te geven of dropout gebruikt moet worden
+dropout_rate = 0.3            # Dropout rate indien use_dropout = true
+reduction_ratio = 8           # Reductiefactor voor het Squeeze-and-Excitation blok
