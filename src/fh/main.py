@@ -4,41 +4,62 @@ from datetime import datetime
 import pandas as pd
 import torch
 import sys
-from loguru import logger # Importeer Loguru's logger
+from loguru import logger
 
-# --- Loguru configuratie voor main.py ---
-# Verwijder standaard handlers om te voorkomen dat er dubbele logs verschijnen
-logger.remove()
-# Voeg een handler toe voor console output (INFO niveau en hoger)
-logger.add(sys.stderr, level="INFO")
-# Optioneel: voeg een handler toe voor een algemeen logbestand voor main.py activiteit
-# Let op: de Trainer zal zijn EIGEN specifieke logbestanden aanmaken in zijn log_dir
-# Dit 'main.log' is meer voor algemene app-start-up en shutdown berichten.
-logger.add("main_application.log", level="INFO", rotation="10 MB", retention="7 days", compression="zip")
-# --- Einde Loguru configuratie ---
-
-
-# Voeg de project root toe aan de PYTHONPATH voor correcte imports
+# --- Pad Definities ---
 current_script_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.join(current_script_dir, "..", "..")
-sys.path.insert(0, project_root)
+sys.path.insert(0, project_root) # Voeg de project root toe aan de PYTHONPATH
 logger.debug(f"Project root added to PYTHONPATH: {project_root}")
+
+# Definieer de basis directories voor logs en runs/resultaten
+# Deze paden moeten overeenkomen met wat in config.toml staat onder [paths]
+# LOG_BASE_DIR is voor algemene logs (main_application.log) EN unieke run-logmappen die de Trainer creëert.
+LOG_BASE_DIR = os.path.join(project_root, "logs") 
+# RUNS_BASE_DIR is specifiek voor de samenvatting van alle modellen aan het einde.
+RUNS_BASE_DIR = os.path.join(project_root, "runs") 
+
+# Zorg ervoor dat de logs en runs directories bestaan
+os.makedirs(LOG_BASE_DIR, exist_ok=True)
+os.makedirs(RUNS_BASE_DIR, exist_ok=True)
+
+# --- Genereer een unieke run-ID voor deze executie ---
+# Deze ID wordt gebruikt voor alle output bestandsnamen en mappen die bij deze run horen.
+RUN_ID = datetime.now().strftime("%Y%m%d-%H%M%S")
+
+# --- Loguru Configuratie voor het hoofdscript (main.py) ---
+logger.remove() # Verwijder standaard handlers om te voorkomen dat er dubbele logs verschijnen
+# Voeg EENMALIG een handler toe voor console output (INFO niveau en hoger, met kleur)
+logger.add(sys.stderr, level="INFO", colorize=True, enqueue=True) # enqueue=True voor thread-safe logging
+
+# Voeg een handler toe voor een algemeen logbestand voor main.py activiteit met run-ID
+main_log_file_path = os.path.join(LOG_BASE_DIR, f"{RUN_ID}_main_application.log")
+logger.add(main_log_file_path, 
+           level="INFO", # Houd dit op INFO voor algemene berichten
+           rotation="10 MB", 
+           retention="7 days", 
+           compression="zip",
+           serialize=False, # Geen JSON formaat voor leesbaarheid
+           enqueue=True) # enqueue=True voor thread-safe logging
+logger.info(f"Start van het hoofdscript. Algemene logs worden opgeslagen in '{main_log_file_path}'.")
+# --- Einde Loguru configuratie ---
+
 
 # Aangepaste imports voor de projectstructuur: src/fh/
 from src.fh.data_loader import get_data_loaders
 from src.fh.training_framework import Trainer
-from src.fh.models.baseline_model import BaselineModel
-from src.fh.models.cnn_model import CNNModel
-from src.fh.models.gru_model import GRUModel
 from src.fh.utils import load_config # Gebruik jouw load_config functie
 
-def run_experiment(config_path: str) -> None:
+def run_experiment(config_path: str, num_features_actual: int, num_classes_actual: int, current_run_id: str) -> None:
     """
     Hoofdfunctie om het machine learning experiment te orkestreren.
     Laadt data, traint modellen en logt resultaten.
 
     Args:
         config_path (str): Pad naar het TOML configuratiebestand.
+        num_features_actual (int): Het daadwerkelijke aantal features in de dataset.
+        num_classes_actual (int): Het daadwerkelijke aantal klassen in de dataset.
+        current_run_id (str): De unieke ID voor de huidige run.
     """
     logger.info(f"Start van het experiment met configuratiebestand: {config_path}")
     # Laad de configuratie vanuit het opgegeven TOML-bestand
@@ -57,14 +78,12 @@ def run_experiment(config_path: str) -> None:
     test_data_relative_path = config["data"]["test_data_path"]
 
     # Construeer absolute paden die door get_data_loaders gebruikt kunnen worden
+    # Deze paden worden niet veranderd met de run_id, omdat dit de input data betreft.
     train_data_absolute_path = os.path.join(project_root, train_data_relative_path)
     test_data_absolute_path = os.path.join(project_root, test_data_relative_path)
     logger.debug(f"Trainingsdata pad: {train_data_absolute_path}")
     logger.debug(f"Testdata pad: {test_data_absolute_path}")
 
-    # BELANGRIJK: Definieer hier het daadwerkelijke aantal features en klassen in je dataset.
-    num_features_actual = 192 # Aangepast naar 192
-    num_classes_actual = 5    # Jouw aantal unieke klassen (5 separate classes)
     logger.info(f"Vastgestelde feature count: {num_features_actual}, class count: {num_classes_actual}")
 
     # Definieer de namen van je feature kolommen.
@@ -84,7 +103,6 @@ def run_experiment(config_path: str) -> None:
     if config["model_params"]["cnn"]["output_size"] != num_classes_actual:
         logger.warning(f"CNN model output_size ({config['model_params']['cnn']['output_size']}) komt niet overeen met het werkelijke aantal klassen ({num_classes_actual}). Aangepast.")
         config["model_params"]["cnn"]["output_size"] = num_classes_actual
-    # Voor CNN blijft input_channels 1, omdat we 1D-features hebben.
 
     if config["model_params"]["gru"]["output_size"] != num_classes_actual:
         logger.warning(f"GRU model output_size ({config['model_params']['gru']['output_size']}) komt niet overeen met het werkelijke aantal klassen ({num_classes_actual}). Aangepast.")
@@ -110,20 +128,23 @@ def run_experiment(config_path: str) -> None:
 
     # --- Initialiseer Trainer ---
     logger.info("Initialiseren van de Trainer...")
-    trainer = Trainer(config_path) # Trainer gebruikt ook de config_path om instellingen te laden
+    # Geef de LOG_BASE_DIR en de UNIEKE RUN_ID door aan de Trainer.
+    # De Trainer zal deze RUN_ID gebruiken om zijn eigen logmappen en outputbestanden te benoemen.
+    trainer = Trainer(config, num_features_actual, num_classes_actual, 
+                      log_base_dir=LOG_BASE_DIR,
+                      run_id=current_run_id) 
     all_experiment_results = [] # Lijst om resultaten van alle modelruns te verzamelen
     logger.info("Trainer succesvol geïnitialiseerd.")
 
     # --- Baseline Model Training ---
     logger.info("\n--- Start Training Baseline Model ---")
     baseline_config = config["model_params"]["baseline"]
-    baseline_model = BaselineModel(baseline_config)
     baseline_results = trainer.run_training(
-        baseline_model,
-        train_loader,
-        test_loader,
-        "Baseline", # Modelnaam voor logging
-        baseline_config # Hyperparameters voor logging
+        model_name="baseline_model", # Geef de naam van het model door
+        train_loader=train_loader,
+        test_loader=test_loader,
+        experiment_name="Baseline", # Modelnaam voor logging
+        model_config=baseline_config # Hyperparameters voor logging
     )
     all_experiment_results.append(baseline_results)
     logger.info("Baseline model training voltooid.")
@@ -146,24 +167,26 @@ def run_experiment(config_path: str) -> None:
         logger.info(f"\n--- Uitvoeren CNN Experiment {i+1}/{len(cnn_hyper_params_list)} ---")
         current_cnn_config = {**cnn_base_config, **cnn_params}
         
+        # Dynamische berekening van input_size_after_flattening voor CNN
         current_length = num_features_actual 
         conv_filters_for_this_experiment = current_cnn_config.get("conv_filters")
 
+        # Bereken de gereduceerde lengte na elke MaxPool1d laag
         for _ in range(len(conv_filters_for_this_experiment)): 
-            current_length = torch.floor(torch.tensor(current_length / 2)).item()
+            current_length = int(current_length / 2) 
             
+        # De input_size_after_flattening is de laatste filtergrootte vermenigvuldigd met de resterende lengte
         input_size_after_flattening = int(current_length * conv_filters_for_this_experiment[-1])
         
         current_cnn_config["input_size_after_flattening"] = input_size_after_flattening
         logger.info(f"Berekende CNN input_size_after_flattening voor lineaire laag: {input_size_after_flattening}")
         
-        cnn_model = CNNModel(current_cnn_config)
         cnn_results = trainer.run_training(
-            cnn_model,
-            train_loader,
-            test_loader,
-            f"CNN_Experiment_{i+1}", 
-            current_cnn_config 
+            model_name="cnn_model", # Geef de naam van het model door
+            train_loader=train_loader,
+            test_loader=test_loader,
+            experiment_name=f"CNN_Experiment_{i+1}", 
+            model_config=current_cnn_config 
         )
         all_experiment_results.append(cnn_results)
     logger.info("CNN model training voltooid.")
@@ -185,20 +208,22 @@ def run_experiment(config_path: str) -> None:
     for i, gru_params in enumerate(gru_hyper_params_list):
         logger.info(f"\n--- Uitvoeren GRU Experiment {i+1}/{len(gru_hyper_params_list)} ---")
         current_gru_config = {**gru_base_config, **gru_params}
-        gru_model = GRUModel(current_gru_config)
         gru_results = trainer.run_training(
-            gru_model,
-            train_loader,
-            test_loader,
-            f"GRU_Experiment_{i+1}", 
-            current_gru_config 
+            model_name="gru_model", # Geef de naam van het model door
+            train_loader=train_loader,
+            test_loader=test_loader,
+            experiment_name=f"GRU_Experiment_{i+1}", 
+            model_config=current_gru_config 
         )
         all_experiment_results.append(gru_results)
     logger.info("GRU model training voltooid.")
 
     # Optioneel: Sla een samenvatting op van de eindresultaten van alle modelruns
     summary_df = pd.DataFrame(all_experiment_results)
-    summary_output_path = os.path.join(trainer.log_dir, "all_model_summary.parquet")
+    
+    # Sla de samenvatting op in de runs_base_dir met de run-ID vooraan
+    summary_output_path = os.path.join(RUNS_BASE_DIR, f"{current_run_id}_all_model_summary.parquet")
+
     try:
         summary_df.to_parquet(summary_output_path, index=False)
         logger.success(f"Alle experiment samenvattingen opgeslagen naar {summary_output_path}")
@@ -209,14 +234,7 @@ def run_experiment(config_path: str) -> None:
 
 # Dit blok wordt alleen uitgevoerd wanneer het script direct wordt aangeroepen (niet bij importeren als module)
 if __name__ == "__main__":
-    logger.info("Start van het hoofdscript.")
-    # Bepaal de project root directory voor robuuste padhantering
-    current_dir = os.path.dirname(os.path.abspath(__file__)) 
-    project_root = os.path.join(current_dir, "..", "..") 
-    sys.path.insert(0, project_root)
-    logger.debug(f"Project root ingesteld op: {project_root}")
-
-    # Definieer het pad naar het configuratiebestand
+    # Defineer het pad naar het configuratiebestand
     config_file_path = os.path.join(project_root, "config.toml")
     
     # Laad de config om de verwachte datapad-variabelen te achterhalen voor dummy data generatie
@@ -237,6 +255,9 @@ if __name__ == "__main__":
     os.makedirs(data_dir, exist_ok=True) 
     logger.info(f"Zorgen dat de data directory bestaat: {data_dir}")
 
+    # Hier genereren we de dummy data. De bestandsnamen hiervan veranderen we NIET met de run-ID,
+    # omdat dit de "input" data is die consistent moet blijven voor alle runs, tenzij je expliciet
+    # verschillende datasets per run wilt genereren.
     train_data_filename = temp_config["data"]["train_data_path"].split('/')[-1]
     test_data_filename = temp_config["data"]["test_data_path"].split('/')[-1]
 
@@ -265,6 +286,10 @@ if __name__ == "__main__":
 
     # --- Einde van de dummy data sectie ---
 
-    # Start de experimentele run met het opgegeven configuratiebestand
-    run_experiment(config_file_path)
-    logger.info("Hoofdscript succesvol voltooid.")
+    # Start de experimentele run met het opgegeven configuratiebestand en de unieke RUN_ID
+    try:
+        run_experiment(config_file_path, num_features_actual, num_classes_actual, RUN_ID)
+        logger.info("Hoofdscript succesvol voltooid.")
+    except Exception as e:
+        logger.critical(f"Een kritieke fout is opgetreden in het hoofdscript: {e}", exc_info=True)
+        sys.exit(1)
