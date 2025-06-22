@@ -1,107 +1,151 @@
 import pandas as pd
 import torch
 from torch.utils.data import Dataset, DataLoader
-from typing import Tuple, Dict, Any
-from loguru import logger # Importeer loguru's logger
+from sklearn.preprocessing import StandardScaler
+from typing import Tuple, List
+from loguru import logger
 
-class CustomDataset(Dataset):
+class ParquetDataset(Dataset):
     """
-    A custom PyTorch Dataset for loading and preparing data from Parquet files.
+    Een aangepaste PyTorch Dataset voor Parquet DataFrames.
+    Deze klasse accepteert een reeds geladen DataFrame, scheidt features en targets,
+    en past optioneel standaardisatie toe.
     """
-    def __init__(self, data_path: str, feature_columns: list[str], target_column: str) -> None:
+    def __init__(self, dataframe: pd.DataFrame, feature_columns: List[str], target_column: str, scaler: StandardScaler = None):
         """
-        Initializes the dataset.
+        Initialiseert de dataset.
 
         Args:
-            data_path (str): The path to the Parquet data file.
-            feature_columns (list[str]): A list of column names to be used as features.
-            target_column (str): The name of the column to be used as the target.
+            dataframe (pd.DataFrame): De reeds geladen DataFrame.
+            feature_columns (List[str]): Een lijst van kolomnamen die als features moeten worden gebruikt.
+            target_column (str): De naam van de kolom die als target moet worden gebruikt.
+            scaler (StandardScaler, optioneel): Een getrainde StandardScaler om features te transformeren.
+                                                Indien None, vindt er geen schaling plaats.
         """
-        logger.info(f"Initializing CustomDataset from: {data_path}")
-        try:
-            # Lees Parquet-bestand in plaats van CSV
-            self.data = pd.read_parquet(data_path)
-            logger.success(f"Data successfully loaded from {data_path}. Found {len(self.data)} samples.")
-        except FileNotFoundError:
-            logger.error(f"Data file not found at: {data_path}")
-            raise FileNotFoundError(f"Data file not found at: {data_path}")
-        except Exception as e:
-            logger.error(f"Error loading data from {data_path}: {e}")
-            raise IOError(f"Error loading data from {data_path}: {e}")
+        self.df = dataframe
+        logger.debug(f"Dataset geïnitialiseerd met DataFrame. Aantal rijen: {len(self.df)}")
 
-        if not all(col in self.data.columns for col in feature_columns):
-            missing_cols = [col for col in feature_columns if col not in self.data.columns]
-            logger.error(f"Missing feature columns in data from {data_path}: {missing_cols}")
-            raise ValueError(f"Missing feature columns in data: {missing_cols}")
-        if target_column not in self.data.columns:
-            logger.error(f"Missing target column '{target_column}' in data from {data_path}.")
+        # Controleer of alle feature_columns en target_column aanwezig zijn in de DataFrame
+        missing_features = [col for col in feature_columns if col not in self.df.columns]
+        if missing_features:
+            logger.error(f"Ontbrekende feature kolommen in data: {missing_features}")
+            raise ValueError(f"Missing feature columns in data: {missing_features}")
+        
+        if target_column not in self.df.columns:
+            logger.error(f"Ontbrekende target kolom '{target_column}' in data.")
             raise ValueError(f"Missing target column '{target_column}' in data.")
 
-        self.features = self.data[feature_columns].values
-        self.targets = self.data[target_column].values
-        logger.debug(f"Features shape: {self.features.shape}, Targets shape: {self.targets.shape}")
+        self.feature_columns = feature_columns
+        self.target_column = target_column
+        self.scaler = scaler
+
+        self.features = self.df[self.feature_columns].values
+        self.targets = self.df[self.target_column].values
+
+        if self.scaler is not None:
+            logger.debug("Scaler wordt toegepast op features.")
+            self.features = self.scaler.transform(self.features)
+        
+        # Converteer naar PyTorch tensors
+        self.features = torch.tensor(self.features, dtype=torch.float32)
+        self.targets = torch.tensor(self.targets, dtype=torch.long) # Targets zijn doorgaans long voor classificatie
 
     def __len__(self) -> int:
-        """
-        Returns the total number of samples in the dataset.
-        """
-        return len(self.data)
+        """Retourneert het totale aantal samples in de dataset."""
+        return len(self.df)
 
     def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
         """
-        Retrieves a sample from the dataset at the given index.
+        Haalt een sample en het bijbehorende target op basis van de index.
 
         Args:
-            idx (int): The index of the sample to retrieve.
+            idx (int): De index van het sample.
 
         Returns:
-            Tuple[torch.Tensor, torch.Tensor]: A tuple containing the features and target.
+            Tuple[torch.Tensor, torch.Tensor]: Een tuple met de feature-tensor en de target-tensor.
         """
-        features = torch.tensor(self.features[idx], dtype=torch.float32)
-        targets = torch.tensor(self.targets[idx], dtype=torch.long) # Assuming classification target
-        # logger.debug(f"Retrieving item {idx}: features shape {features.shape}, target {targets}") # Te veel logs voor elke item
-        return features, targets
+        return self.features[idx], self.targets[idx]
 
 def get_data_loaders(
-    train_data_path: str,
+    train_data_path: str, # Nu weer een enkel pad
     test_data_path: str,
-    feature_columns: list[str],
+    feature_columns: List[str],
     target_column: str,
     batch_size: int
-) -> Tuple[DataLoader, DataLoader]:
+) -> Tuple[DataLoader, DataLoader, pd.DataFrame, pd.DataFrame]: # Retourneert ook de DataFrames
     """
-    Creates and returns PyTorch DataLoaders for training and testing.
+    Laadt trainings- en testdata en creëert PyTorch DataLoaders.
 
     Args:
-        train_data_path (str): Path to the training data Parquet file.
-        test_data_path (str): Path to the test data Parquet file.
-        feature_columns (list[str]): Columns to use as features.
-        target_column (str): Column to use as target.
-        batch_size (int): The batch size for the DataLoaders.
+        train_data_path (str): Pad naar het trainings Parquet-bestand.
+        test_data_path (str): Pad naar het test Parquet-bestand.
+        feature_columns (List[str]): Kolomnamen voor features.
+        target_column (str): Kolomnaam voor targets.
+        batch_size (int): Batchgrootte voor DataLoaders.
 
     Returns:
-        Tuple[DataLoader, DataLoader]: A tuple containing the train and test DataLoaders.
+        Tuple[DataLoader, DataLoader, pd.DataFrame, pd.DataFrame]:
+            - train_loader (DataLoader): DataLoader voor trainingsdata.
+            - test_loader (DataLoader): DataLoader voor testdata.
+            - train_df (pd.DataFrame): De trainings DataFrame.
+            - test_df (pd.DataFrame): De test DataFrame.
     """
-    logger.info(f"Creating data loaders with batch_size={batch_size}.")
-    logger.debug(f"Train data path: {train_data_path}")
-    logger.debug(f"Test data path: {test_data_path}")
-    logger.debug(f"Feature columns: {feature_columns}")
-    logger.debug(f"Target column: {target_column}")
+    logger.info(f"Start aanmaken data loaders. Training bestand: {train_data_path}, Test bestand: {test_data_path}")
 
-    if not isinstance(batch_size, int) or batch_size <= 0:
-        logger.error(f"Invalid batch_size provided: {batch_size}. Must be a positive integer.")
-        raise ValueError("batch_size must be a positive integer.")
-
+    # Laad trainingsdata (geen concatenatie meer hier)
     try:
-        train_dataset = CustomDataset(train_data_path, feature_columns, target_column)
-        test_dataset = CustomDataset(test_data_path, feature_columns, target_column)
-    except (FileNotFoundError, IOError, ValueError) as e:
-        logger.critical(f"Failed to create datasets due to data loading error: {e}")
-        raise # Re-raise the exception after logging
+        train_df = pd.read_parquet(train_data_path)
+        logger.info(f"Succesvol trainingsbestand '{train_data_path}' geladen ({len(train_df)} rijen).")
+    except FileNotFoundError:
+        logger.error(f"Trainingsbestand niet gevonden: {train_data_path}. Zorg ervoor dat het pad correct is.")
+        raise FileNotFoundError(f"Trainingsbestand niet gevonden: {train_data_path}")
+    except Exception as e:
+        logger.error(f"Fout bij het laden van trainingsbestand {train_data_path}: {e}")
+        raise Exception(f"Fout bij het laden van trainingsbestand {train_data_path}: {e}")
 
+    # Laad testdata
+    try:
+        test_df = pd.read_parquet(test_data_path)
+        logger.info(f"Succesvol testbestand '{test_data_path}' geladen ({len(test_df)} rijen).")
+    except FileNotFoundError:
+        logger.error(f"Testbestand niet gevonden: {test_data_path}. Zorg ervoor dat het pad correct is.")
+        raise FileNotFoundError(f"Testbestand niet gevonden: {test_data_path}")
+    except Exception as e:
+        logger.error(f"Fout bij het laden van testbestand {test_data_path}: {e}")
+        raise Exception(f"Fout bij het laden van testbestand {test_data_path}: {e}")
+
+    # Initialiseer en train StandardScaler op de trainingsfeatures
+    scaler = StandardScaler()
+    try:
+        # Controleer of alle feature_columns aanwezig zijn in de trainings DataFrame
+        missing_features_train = [col for col in feature_columns if col not in train_df.columns]
+        if missing_features_train:
+            logger.error(f"Ontbrekende feature kolommen in training data: {missing_features_train}")
+            raise ValueError(f"Missing feature columns in training data: {missing_features_train}")
+        
+        # Controleer of target_column aanwezig is in de trainings DataFrame
+        if target_column not in train_df.columns:
+            logger.error(f"Ontbrekende target kolom '{target_column}' in training data.")
+            raise ValueError(f"Missing target column '{target_column}' in training data.")
+
+        scaler.fit(train_df[feature_columns].values)
+        logger.info("StandardScaler getraind op trainingsdata.")
+    except Exception as e:
+        logger.error(f"Fout bij het fitten van StandardScaler op trainingsdata: {e}")
+        raise Exception(f"Fout bij het fitten van StandardScaler: {e}")
+
+    # Creëer datasets met de getrainde scaler
+    try:
+        train_dataset = ParquetDataset(train_df, feature_columns, target_column, scaler)
+        test_dataset = ParquetDataset(test_df, feature_columns, target_column, scaler)
+        logger.info("Datasets succesvol aangemaakt.")
+    except Exception as e:
+        logger.error(f"Fout bij het aanmaken van datasets: {e}")
+        raise Exception(f"Fout bij het aanmaken van datasets: {e}")
+
+    # Creëer DataLoaders
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+    logger.info("DataLoaders succesvol aangemaakt.")
 
-    logger.success(f"Successfully created train loader with {len(train_loader.dataset)} samples "
-                   f"and test loader with {len(test_loader.dataset)} samples.")
-    return train_loader, test_loader
+    return train_loader, test_loader, train_df, test_df

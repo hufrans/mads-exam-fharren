@@ -1,8 +1,8 @@
 # config.toml
 
 [data]
-train_data_path = "data/heart_big_train.parq" # Pad naar je trainingsdata (relatief ten opzichte van de project root)
-test_data_path = "data/heart_big_test.parq"   # Pad naar je testdata (relatief ten opzichte van de project root)
+test_data_path = "data/heart_big_test.parq"                                               # Pad naar je trainingsdata (relatief ten opzichte van de project root)
+train_data_path = ["data/heart_big_train.parq", "data/heart_big_train_synthetic.parquet"] # Pad naar je testdata (relatief ten opzichte van de project root)
 
 [training]
 batch_size = 32        # Grootte van de batches die aan het model worden gevoerd
