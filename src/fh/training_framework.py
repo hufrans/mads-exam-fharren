@@ -1,9 +1,9 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.optim.lr_scheduler import ReduceLROnPlateau, StepLR # Import StepLR if you want to use it
+from torch.optim.lr_scheduler import ReduceLROnPlateau, StepLR
 from torch.utils.data import DataLoader
-from sklearn.metrics import recall_score, accuracy_score, precision_score, f1_score # Added f1_score
+from sklearn.metrics import recall_score, accuracy_score, precision_score, f1_score
 import pandas as pd
 import os
 import time
@@ -39,6 +39,7 @@ class Trainer:
         train_data_path (str): Absolute path to the training data file.
         test_data_path (str): Absolute path to the test data file.
         class_weights (torch.Tensor): Tensor of weights for each class, used in the loss function.
+        best_model_generalizes (bool): Tracks if the currently saved best model has test_loss < train_loss.
     """
     def __init__(self, config: Dict[str, Any], feature_count: int, class_count: int, log_base_dir: str, run_id: str, train_data_path: str, test_data_path: str, class_weights: torch.Tensor) -> None:
         """
@@ -67,39 +68,43 @@ class Trainer:
         self.run_id = run_id
         self.train_data_path = train_data_path # Store the path
         self.test_data_path = test_data_path   # Store the path
-        self.class_weights = class_weights.to(self.device) # Store and move class weights to device
+        # Verplaats class_weights to device hier, want deze is nodig in de criterion
+        self.class_weights = class_weights.to(self.device) 
         
-        # De run-specifieke log directory begint nu met de run_id
         self.run_log_dir = os.path.join(log_base_dir, f"{self.run_id}_run_logs")
-        os.makedirs(self.run_log_dir, exist_ok=True)
         
-        # Bestandsnamen beginnen met run_id
-        self.best_model_path_template = os.path.join(self.run_log_dir, f"{self.run_id}_{{model_name}}_best_model.pth")
-        self.results_path_template = os.path.join(self.run_log_dir, f"{self.run_id}_{{model_name}}_results.parquet")
+        # Zorg ervoor dat _log_handler_ids ALTIJD is gedefinieerd, zelfs als de logger setup mislukt.
+        self._log_handler_ids = [] 
 
-        # --- Loguru configuratie voor de Trainer ---
-        # We slaan de IDs van de handlers op die we ZELF toevoegen
-        self._log_handler_ids = []
+        try:
+            os.makedirs(self.run_log_dir, exist_ok=True)
+            
+            self.best_model_path_template = os.path.join(self.run_log_dir, f"{self.run_id}_{{model_name}}_best_model.pth")
+            self.results_path_template = os.path.join(self.run_log_dir, f"{self.run_id}_{{model_name}}_results.parquet")
 
-        # Voeg een unieke file handler toe voor deze specifieke run (geprefixeerd met run_id)
-        # We slaan de ID op, zodat deze later expliciet kan worden verwijderd na de training.
-        file_handler_id = logger.add(os.path.join(self.run_log_dir, f"{self.run_id}_trainer_run_training.log"), 
-                                     level="DEBUG", # BELANGRIJK: Zet dit op DEBUG voor gedetailleerde logs van de training
-                                     rotation="10 MB", 
-                                     retention="7 days", 
-                                     compression="zip", 
-                                     serialize=False,
-                                     enqueue=True) # Essentieel voor thread-safety
-        self._log_handler_ids.append(file_handler_id)
-        
-        # OPMERKING: De Trainer is NIET verantwoordelijk voor het toevoegen van de console logger.
-        # Dit wordt afgehandeld door main.py om duplicatie te voorkomen en globaal consistent te zijn.
-        # De code om te controleren op en potentieel een console handler toe te voegen is hier verwijderd.
+            file_handler_id = logger.add(os.path.join(self.run_log_dir, f"{self.run_id}_trainer_run_training.log"), 
+                                         level="DEBUG", 
+                                         rotation="10 MB", 
+                                         retention="7 days", 
+                                         compression="zip", 
+                                         serialize=False,
+                                         enqueue=True) 
+            self._log_handler_ids.append(file_handler_id)
+            
+            logger.info(f"Initializing Trainer. Using device: {self.device}")
+            logger.info(f"Logging and outputs for this run will be stored in: {self.run_log_dir}")
+            logger.debug(f"Best model path template: {self.best_model_path_template}")
+            logger.debug(f"Results path template: {self.results_path_template}")
 
-        logger.info(f"Initializing Trainer. Using device: {self.device}")
-        logger.info(f"Logging and outputs for this run will be stored in: {self.run_log_dir}")
-        logger.debug(f"Best model path template: {self.best_model_path_template}")
-        logger.debug(f"Results path template: {self.results_path_template}")
+        except Exception as e:
+            logger.error(f"Fout tijdens het instellen van de Loguru logger in Trainer.__init__: {e}")
+            # Ga door, maar logging naar het specifieke bestand is mogelijk niet actief.
+            # Het self._log_handler_ids attribuut bestaat nu tenminste, zij het leeg.
+
+        # Initialiseer de staat voor het bijhouden van generalisatie van het beste model
+        self.best_model_generalizes: bool = False
+        self.best_relative_loss_difference_for_save: float = float('inf')
+
 
     def _get_optimizer(self, model: nn.Module, optimizer_name: str, learning_rate: float, weight_decay: float = 0.0) -> optim.Optimizer:
         """
@@ -159,8 +164,8 @@ class Trainer:
                 optimizer,
                 mode=scheduler_kwargs.get("mode", "min"),
                 factor=scheduler_kwargs.get("factor", 0.1),
-                patience=scheduler_kwargs.get("patience", 10),
-                verbose=True # Voeg verbose toe voor logmeldingen van scheduler
+                patience=scheduler_kwargs.get("patience", 10)
+                # 'verbose' parameter verwijderd omdat deze niet meer wordt ondersteund of is afgeschreven in sommige PyTorch versies.
             )
             logger.debug(f"ReduceLROnPlateau scheduler created with mode='{scheduler.mode}', factor={scheduler.factor}, patience={scheduler.patience}.")
         elif scheduler_type == "StepLR":
@@ -199,17 +204,17 @@ class Trainer:
             average_mode: str = 'weighted'
             recall: float = recall_score(targets_np, predictions_np, average=average_mode, zero_division=0)
             precision: float = precision_score(targets_np, predictions_np, average=average_mode, zero_division=0)
-            f1: float = f1_score(targets_np, predictions_np, average=average_mode, zero_division=0) # Added f1_score
+            f1: float = f1_score(targets_np, predictions_np, average=average_mode, zero_division=0)
             logger.debug(f"Calculated weighted recall, precision, and f1-score (unique targets > 1).")
-        else: # Handle cases with only one unique class in targets
+        else:
             recall: float = 0.0 
             precision: float = 0.0 
-            f1: float = 0.0 # Added f1_score
+            f1: float = 0.0
             logger.warning(f"Only 1 unique class ({targets_np.iloc[0]}) in targets. Recall, Precision, and F1-score set to 0.0.")
         
         accuracy: float = accuracy_score(targets_np, predictions_np)
         logger.debug(f"Calculated metrics: Accuracy={accuracy:.4f}, Recall={recall:.4f}, Precision={precision:.4f}, F1={f1:.4f}.")
-        return {"recall": recall, "accuracy": accuracy, "precision": precision, "f1_score": f1} # Return f1_score
+        return {"recall": recall, "accuracy": accuracy, "precision": precision, "f1_score": f1}
 
     def train_epoch(self, model: nn.Module, data_loader: DataLoader, criterion: nn.Module, optimizer: optim.Optimizer) -> float:
         """
@@ -238,15 +243,11 @@ class Trainer:
             loss.backward()
             optimizer.step()
             total_loss += loss.item() * inputs.size(0)
-            # Removed redundant logger.debug for each batch
-            # logger.debug(f"Batch {batch_idx+1}/{len(data_loader)}: Loss={loss.item():.4f}")
 
         avg_loss = total_loss / len(data_loader.dataset)
-        # Removed redundant logger.info for training epoch finished
-        # logger.info(f"Training Epoch finished. Average Train Loss: {avg_loss:.4f}")
         return avg_loss
 
-    def evaluate_epoch(self, model: nn.Module, data_loader: DataLoader, criterion: nn.Module) -> Tuple[float, float, float, float, float]: # Added f1_score to return type
+    def evaluate_epoch(self, model: nn.Module, data_loader: DataLoader, criterion: nn.Module) -> Tuple[float, float, float, float, float]:
         """
         Evaluates the model's performance on a given dataset for one epoch.
 
@@ -264,7 +265,7 @@ class Trainer:
                 - accuracy (float): The accuracy score.
                 - recall (float): The recall score.
                 - precision (float): The precision score.
-                - f1 (float): The F1-score. # Added F1-score
+                - f1 (float): The F1-score.
         """
         model.eval()
         total_loss: float = 0.0
@@ -281,8 +282,6 @@ class Trainer:
                 _, predicted = torch.max(outputs.data, 1)
                 all_predictions.extend(predicted.cpu().numpy())
                 all_targets.extend(targets.cpu().numpy())
-                # Removed redundant logger.debug for evaluation batch
-                # logger.debug(f"Evaluation Batch {batch_idx+1}/{len(data_loader)}")
 
         avg_loss: float = total_loss / len(data_loader.dataset)
         
@@ -291,12 +290,10 @@ class Trainer:
 
         if len(predictions_tensor) == 0:
             logger.warning("No predictions made during evaluation. Returning 0 for metrics.")
-            return avg_loss, 0.0, 0.0, 0.0, 0.0 # Return 0 for f1 as well
+            return avg_loss, 0.0, 0.0, 0.0, 0.0
 
         metrics: Dict[str, float] = self._calculate_metrics(predictions_tensor, targets_tensor)
-        # Removed redundant logger.info for evaluation epoch finished
-        # logger.info(f"Evaluation Epoch finished. Average Test Loss: {avg_loss:.4f}, Accuracy: {metrics['accuracy']:.4f}")
-        return avg_loss, metrics["accuracy"], metrics["recall"], metrics["precision"], metrics["f1_score"] # Return f1_score
+        return avg_loss, metrics["accuracy"], metrics["recall"], metrics["precision"], metrics["f1_score"]
 
 
     def run_training(
@@ -336,7 +333,6 @@ class Trainer:
         logger.info(f"Starting training run for model: {model_name}, experiment: {experiment_name}")
         if not isinstance(train_loader, DataLoader) or not isinstance(test_loader, DataLoader):
             logger.error(f"Invalid DataLoader type provided. train_loader: {type(train_loader)}, test_loader: {type(test_loader)}.")
-            # Return an error state to main.py instead of crashing
             return {
                 "run_id": self.run_id,
                 "model_type": model_name,
@@ -346,7 +342,6 @@ class Trainer:
             }
         if not isinstance(model_name, str) or not model_name:
             logger.error(f"Invalid model_name: '{model_name}'. Must be a non-empty string.")
-            # Return an error state to main.py instead of crashing
             return {
                 "run_id": self.run_id,
                 "model_type": model_name,
@@ -356,7 +351,6 @@ class Trainer:
             }
         if not isinstance(experiment_name, str) or not experiment_name:
             logger.error(f"Invalid experiment_name: '{experiment_name}'. Must be a non-empty string.")
-            # Return an error state to main.py instead of crashing
             return {
                 "run_id": self.run_id,
                 "model_type": model_name,
@@ -366,7 +360,6 @@ class Trainer:
             }
         if not isinstance(model_config, dict):
             logger.error(f"Invalid model_config type provided: {type(model_config)}. Expected dictionary.")
-            # Return an error state to main.py instead of crashing
             return {
                 "run_id": self.run_id,
                 "model_type": model_name,
@@ -383,6 +376,7 @@ class Trainer:
         # Create a mutable copy of model_config to potentially modify
         _model_config = model_config.copy()
 
+        # Update input/output sizes based on actual data dimensions (defensive programming)
         if model_name in ["baseline_model", "gru_model"]:
             if _model_config.get("input_size") != self.feature_count:
                 logger.warning(f"{model_name} input_size ({_model_config.get('input_size')}) komt niet overeen met het werkelijke aantal features ({self.feature_count}). Aangepast.")
@@ -399,7 +393,20 @@ class Trainer:
             
             if "input_size_after_flattening" not in _model_config:
                 logger.error("CNN model 'input_size_after_flattening' ontbreekt in model_config. Dit is cruciaal voor de lineaire laag. Zorg dat dit correct wordt doorgegeven.")
-                # Return an error state instead of raising ValueError and causing sys.exit(1)
+                return {
+                    "run_id": self.run_id,
+                    "model_type": model_name,
+                    "experiment_name": experiment_name,
+                    "status": "FAILED",
+                    "error_message": "CNN model 'input_size_after_flattening' ontbreekt in model_config."
+                }
+        elif model_name == "cnn_se_skip_model":
+            if _model_config.get("output_size") != self.class_count:
+                logger.warning(f"CNN_SE_Skip model output_size ({_model_config.get('output_size')}) komt niet overeen met het werkelijke aantal klassen ({self.class_count}). Aangepast.")
+            _model_config["output_size"] = self.class_count
+
+            if "input_size_after_flattening" not in _model_config:
+                logger.error("CNN_SE_Skip model 'input_size_after_flattening' ontbreekt in model_config. Dit is cruciaal voor de lineaire laag. Zorg dat dit correct wordt doorgegeven.")
                 return {
                     "run_id": self.run_id,
                     "model_type": model_name,
@@ -408,7 +415,6 @@ class Trainer:
                     "error_message": "CNN model 'input_size_after_flattening' ontbreekt in model_config."
                 }
         
-        # Initialize the model using the potentially modified _model_config
         try:
             model = get_model(model_name, _model_config).to(self.device)
             logger.info(f"Model '{model_name}' van experiment '{experiment_name}' geïnitialiseerd en verplaatst naar {self.device}.")
@@ -416,8 +422,7 @@ class Trainer:
             logger.debug(f"Model-specifieke configuratie voor '{model_name}': {_model_config}")
         except Exception as e:
             logger.critical(f"Failed to initialize model '{model_name}' for experiment '{experiment_name}': {e}", exc_info=True)
-            # Remove the specific handler for this run's logger before returning error
-            if self._log_handler_ids:
+            if self._log_handler_ids: # Deze check is nu veiliger, omdat _log_handler_ids altijd bestaat
                 handler_to_remove = self._log_handler_ids.pop()
                 try:
                     logger.remove(handler_to_remove)
@@ -427,7 +432,6 @@ class Trainer:
                 except Exception as e_inner:
                     logger.error(f"Unexpected error removing handler {handler_to_remove}: {e_inner}")
             
-            # Return an error state to main.py instead of crashing the entire script
             return {
                 "run_id": self.run_id,
                 "model_type": model_name,
@@ -436,17 +440,15 @@ class Trainer:
                 "error_message": f"Model initialisatie mislukt: {e}"
             }
 
-        # Loss function with class weights
         criterion: nn.Module = nn.CrossEntropyLoss(weight=self.class_weights) 
         
-        # Optimizer setup
         optimizer_name = self.settings["training"]["optimizer"]
         learning_rate = self.settings["training"]["learning_rate"]
         weight_decay = self.settings["training"].get("weight_decay", 0.0)
         
         try:
             optimizer: optim.Optimizer = self._get_optimizer(model, optimizer_name, learning_rate, weight_decay)
-        except ValueError as e: # Catch specific optimizer errors
+        except ValueError as e:
              logger.error(f"Fout bij het initialiseren van de optimizer voor {experiment_name}: {e}")
              return {
                 "run_id": self.run_id,
@@ -456,14 +458,13 @@ class Trainer:
                 "error_message": f"Optimizer initialisatie mislukt: {e}"
             }
         
-        # Scheduler setup
         scheduler = None
         if self.settings["training"].get("use_scheduler", False):
             scheduler_type = self.settings["training"].get("scheduler_type", "ReduceLROnPlateau")
             scheduler_kwargs: Dict[str, Any] = self.settings["training"].get("scheduler_kwargs", {})
             try:
                 scheduler = self._get_scheduler(optimizer, scheduler_type, scheduler_kwargs)
-            except TypeError as e: # Catch specific scheduler errors
+            except TypeError as e:
                 logger.error(f"Fout bij het initialiseren van de scheduler voor {experiment_name}: {e}")
                 return {
                     "run_id": self.run_id,
@@ -477,9 +478,19 @@ class Trainer:
 
 
         epochs: int = self.settings["training"]["epochs"]
+        
         best_recall: float = float('-inf')
         best_accuracy_for_recall: float = float('-inf') 
-        
+
+        # Early stopping parameters
+        early_stopping_patience: int = self.settings["training"].get("early_stopping_patience", 10)
+        early_stopping_min_delta: float = self.settings["training"].get("early_stopping_min_delta", 0.001)
+        patience_counter: int = 0
+        best_val_loss_for_early_stopping: float = float('inf') # Track lowest validation loss for early stopping
+
+        # Acceptabele drempel voor relatief verliesverschil
+        ACCEPTABLE_REL_LOSS_DIFF_THRESHOLD: float = 5.0 # 5%
+
         best_model_path: str = self.best_model_path_template.format(model_name=experiment_name)
         model_results_parquet_path: str = self.results_path_template.format(model_name=experiment_name)
         model_results_backup_path: str = os.path.join(self.run_log_dir, f"{self.run_id}_{experiment_name}_results.parquet.bak")
@@ -510,10 +521,15 @@ class Trainer:
                 elif scheduler and isinstance(scheduler, StepLR):
                     scheduler.step()
                 
-                loss_verschil: float = train_loss - test_loss
-                relatief_verschil_loss: float = (loss_verschil / train_loss) if train_loss != 0 else float('inf')
+                loss_difference_abs: float = abs(train_loss - test_loss)
+                
+                if test_loss != 0:
+                    relatief_verschil_loss: float = (loss_difference_abs / test_loss) * 100.0
+                else:
+                    relatief_verschil_loss: float = float('inf') # Indien test_loss 0 is, is relatief verschil oneindig
+                
 
-                logger.info(f"Experiment: {experiment_name}, Epoch: {epoch:{len(str(epochs))}d}/{epochs}, Train Loss: {train_loss:.4f}, Test Loss: {test_loss:.4f}, Accuracy: {accuracy_value:.4f}, Recall: {recall_value:.4f}, Precision: {precision_value:.4f}, F1: {f1_value:.4f}, Duration: {epoch_duration:.2f}s, Current LR: {optimizer.param_groups[0]['lr']:.6f}")
+                logger.info(f"Experiment: {experiment_name}, Epoch: {epoch:{len(str(epochs))}d}/{epochs}, Train Loss: {train_loss:.4f}, Test Loss: {test_loss:.4f}, Abs Loss Diff: {loss_difference_abs:.4f}, Rel Loss Diff (%): {relatief_verschil_loss:.2f}, Accuracy: {accuracy_value:.4f}, Recall: {recall_value:.4f}, Precision: {precision_value:.4f}, F1: {f1_value:.4f}, Duration: {epoch_duration:.2f}s, Current LR: {optimizer.param_groups[0]['lr']:.6f}")
 
                 # Prepare data for the dataframe
                 epoch_data: Dict[str, Any] = {
@@ -522,8 +538,8 @@ class Trainer:
                     'epoch': epoch,
                     'train_loss': train_loss,
                     'test_loss': test_loss,
-                    'verschil_loss': loss_verschil,
-                    'relatief_verschil_loss': relatief_verschil_loss,
+                    'loss_difference_abs': loss_difference_abs, 
+                    'loss_difference_rel_perc': relatief_verschil_loss, 
                     'accuracy': accuracy_value,
                     'run_recall': recall_value,
                     'run_precision': precision_value,
@@ -563,13 +579,89 @@ class Trainer:
                 except Exception as e:
                     logger.error(f"Failed to save results for epoch {epoch} to {model_results_parquet_path}. Error: {e}")
 
-                # Save the best model (based on recall, then accuracy)
-                if recall_value > best_recall:
+                # --- Early Stopping Logic ---
+                if test_loss < best_val_loss_for_early_stopping - early_stopping_min_delta:
+                    best_val_loss_for_early_stopping = test_loss
+                    patience_counter = 0 
+                    logger.debug(f"Test loss improved to {test_loss:.4f}. Patience reset.")
+                else:
+                    patience_counter += 1
+                    logger.debug(f"Test loss did not improve significantly. Patience counter: {patience_counter}/{early_stopping_patience}.")
+
+                if patience_counter >= early_stopping_patience:
+                    logger.warning(f"Early stopping triggered at epoch {epoch} for experiment {experiment_name}. Test loss did not improve for {early_stopping_patience} epochs.")
+                    best_epoch_metrics["early_stopped_epoch"] = epoch 
+                    break
+
+                # --- Save the best model based on the new criteria ---
+                should_save = False
+
+                current_is_generalizing = (test_loss < train_loss)
+                current_is_acceptable_rel_diff = (relatief_verschil_loss <= ACCEPTABLE_REL_LOSS_DIFF_THRESHOLD)
+
+                # Deze vlaggen voor het 'beste model' worden bijgewerkt als we een nieuw beste model opslaan
+                best_is_generalizing = self.best_model_generalizes
+                best_is_acceptable_rel_diff = (self.best_relative_loss_difference_for_save <= ACCEPTABLE_REL_LOSS_DIFF_THRESHOLD)
+
+
+                logger.debug(f"Epoch {epoch} Best Model Check: Current Generalizing={current_is_generalizing}, Best Generalizing={best_is_generalizing}")
+                logger.debug(f"Epoch {epoch} Best Model Check: Current RelDiff Acceptable={current_is_acceptable_rel_diff}, Best RelDiff Acceptable={best_is_acceptable_rel_diff}")
+                logger.debug(f"Epoch {epoch} Best Model Check: Current RelDiff={relatief_verschil_loss:.2f}, Best RelDiff={self.best_relative_loss_difference_for_save:.2f}")
+                logger.debug(f"Epoch {epoch} Best Model Check: Current Recall={recall_value:.4f}, Best Recall={best_recall:.4f}")
+                logger.debug(f"Epoch {epoch} Best Model Check: Current Accuracy={accuracy_value:.4f}, Best Accuracy={best_accuracy_for_recall:.4f}")
+
+
+                # Prioriteit 1: Generalisatie (test_loss < train_loss)
+                if current_is_generalizing and not best_is_generalizing:
+                    logger.debug(f"Epoch {epoch}: Current model generalizes, but best does not. Setting should_save = True.")
+                    should_save = True
+                elif current_is_generalizing == best_is_generalizing: # Beide generaliseren OF beide generaliseren niet
+                    logger.debug(f"Epoch {epoch}: Both current and best models have same generalization status. Proceeding to RelDiff check.")
+                    # Prioriteit 2: Relatief Verliesverschil <= 5%
+                    if current_is_acceptable_rel_diff and not best_is_acceptable_rel_diff:
+                        logger.debug(f"Epoch {epoch}: Current model has acceptable RelDiff, but best does not. Setting should_save = True.")
+                        should_save = True
+                    elif current_is_acceptable_rel_diff == best_is_acceptable_rel_diff: # Beide acceptabel OF beide niet acceptabel
+                        logger.debug(f"Epoch {epoch}: Both current and best models have same RelDiff acceptability. Proceeding to smallest RelDiff.")
+                        # Prioriteit 3: Kleinste Relatieve Verliesverschil
+                        if relatief_verschil_loss < self.best_relative_loss_difference_for_save:
+                            logger.debug(f"Epoch {epoch}: Current RelDiff {relatief_verschil_loss:.2f} < Best RelDiff {self.best_relative_loss_difference_for_save:.2f}. Setting should_save = True.")
+                            should_save = True
+                        elif relatief_verschil_loss == self.best_relative_loss_difference_for_save:
+                            logger.debug(f"Epoch {epoch}: Current RelDiff == Best RelDiff. Proceeding to Recall check.")
+                            # Prioriteit 4: Hoogste Recall
+                            if recall_value > best_recall:
+                                logger.debug(f"Epoch {epoch}: Current Recall {recall_value:.4f} > Best Recall {best_recall:.4f}. Setting should_save = True.")
+                                should_save = True
+                            elif recall_value == best_recall:
+                                logger.debug(f"Epoch {epoch}: Current Recall == Best Recall. Proceeding to Accuracy check.")
+                                # Prioriteit 5: Hoogste Nauwkeurigheid
+                                if accuracy_value > best_accuracy_for_recall:
+                                    logger.debug(f"Epoch {epoch}: Current Accuracy {accuracy_value:.4f} > Best Accuracy {best_accuracy_for_recall:.4f}. Setting should_save = True.")
+                                    should_save = True
+                                else:
+                                    logger.debug(f"Epoch {epoch}: Current Accuracy {accuracy_value:.4f} <= Best Accuracy {best_accuracy_for_recall:.4f}. Not saving.")
+                            else: # recall_value < best_recall
+                                logger.debug(f"Epoch {epoch}: Current Recall {recall_value:.4f} < Best Recall {best_recall:.4f}. Not saving.")
+                        else: # relatief_verschil_loss > self.best_relative_loss_difference_for_save
+                            logger.debug(f"Epoch {epoch}: Current RelDiff {relatief_verschil_loss:.2f} > Best RelDiff {self.best_relative_loss_difference_for_save:.2f}. Not saving.")
+                    else: # current_is_acceptable_rel_diff is False and best_is_acceptable_rel_diff is True
+                        logger.debug(f"Epoch {epoch}: Current model is not acceptable RelDiff, but best is. Not saving.")
+                else: # current_is_generalizing is False and best_is_generalizing is True
+                    logger.debug(f"Epoch {epoch}: Current model does not generalize, but best does. Not saving.")
+
+
+                if should_save:
+                    self.best_relative_loss_difference_for_save = relatief_verschil_loss
                     best_recall = recall_value
                     best_accuracy_for_recall = accuracy_value
+                    self.best_model_generalizes = current_is_generalizing # Update generalisatiestatus van het beste model
                     try:
                         torch.save(model.state_dict(), best_model_path)
-                        logger.success(f"Saved best model for {experiment_name} to {best_model_path} (Recall: {best_recall:.4f}, Accuracy: {best_accuracy_for_recall:.4f}).")
+                        log_msg = f"Saved best model for {experiment_name} to {best_model_path} " \
+                                  f"(Rel Loss Diff (%): {self.best_relative_loss_difference_for_save:.2f}, " \
+                                  f"Recall: {best_recall:.4f}, Accuracy: {best_accuracy_for_recall:.4f})."
+                        logger.success(log_msg)
                         best_epoch_metrics = { 
                             "best_train_loss": train_loss, 
                             "best_test_loss": test_loss,
@@ -577,36 +669,18 @@ class Trainer:
                             "best_recall": recall_value,
                             "best_precision": precision_value,
                             "best_f1": f1_value,
-                            "best_epoch": epoch
-                        }
-                    except Exception as e:
-                        logger.error(f"Failed to save best model for {experiment_name} to {best_model_path}. Error: {e}")
-                elif recall_value == best_recall and accuracy_value > best_accuracy_for_recall:
-                    best_accuracy_for_recall = accuracy_value
-                    try:
-                        torch.save(model.state_dict(), best_model_path)
-                        logger.success(f"Saved best model for {experiment_name} to {best_model_path} (Recall: {best_recall:.4f}, Improved Accuracy: {best_accuracy_for_recall:.4f}).")
-                        best_epoch_metrics = { 
-                            "best_train_loss": train_loss, 
-                            "best_test_loss": test_loss,
-                            "best_accuracy": accuracy_value,
-                            "best_recall": recall_value,
-                            "best_precision": precision_value,
-                            "best_f1": f1_value,
+                            "best_loss_difference_abs": loss_difference_abs,
+                            "best_loss_difference_rel_perc": relatief_verschil_loss,
                             "best_epoch": epoch
                         }
                     except Exception as e:
                         logger.error(f"Failed to save best model for {experiment_name} to {best_model_path}. Error: {e}")
                 else:
-                    logger.debug(f"Huidige recall {recall_value:.4f} niet beter dan beste {best_recall:.4f} (of nauwkeurigheid niet beter als recall gelijk is). Model niet opgeslagen.")
+                    logger.debug(f"Huidige model niet beter dan beste volgens criteria. Model niet opgeslagen. (Rel Loss Diff: {relatief_verschil_loss:.2f}%, Recall: {recall_value:.4f}, Accuracy: {accuracy_value:.4f})")
             
             except Exception as e:
                 logger.error(f"Fout tijdens epoch {epoch} voor experiment {experiment_name}: {e}", exc_info=True)
-                # Indien een epoch mislukt, kunnen we ervoor kiezen om gewoon door te gaan naar de volgende epoch
-                # of de hele training voor dit model als mislukt te markeren en te breken.
-                # Voor nu loggen we de fout en gaan we door naar de volgende epoch.
-                # Als je de training voor dit model wilt stoppen na een epoch-fout, voeg dan 'break' toe.
-                pass # Ga door naar de volgende epoch
+                pass
 
         end_time: datetime = datetime.now()
         duration: timedelta = end_time - start_time
@@ -620,7 +694,7 @@ class Trainer:
             "duration": str(duration),
             "model_type": model_name,
             "experiment_name": experiment_name,
-            "epochs_run": epoch, # Dit zal het laatste epoch-nummer zijn, zelfs als er fouten waren.
+            "epochs_run": epoch,
             "optimizer": optimizer_name, 
             "learning_rate_initial": learning_rate, 
             "weight_decay": weight_decay, 
@@ -632,13 +706,12 @@ class Trainer:
             "train_samples": train_samples, 
             "test_samples": test_samples,   
             **{f'class_{i}_weight': self.class_weights[i].item() for i in range(self.class_count)},
-            **best_epoch_metrics, # Deze zal leeg zijn als geen enkele epoch succesvol was
+            **best_epoch_metrics,
             "model_specific_config": _model_config,
-            "status": "COMPLETED" if best_epoch_metrics else "COMPLETED_WITH_ERRORS" # Voeg een status toe
+            "status": "COMPLETED" if "early_stopped_epoch" in best_epoch_metrics else ("COMPLETED" if best_epoch_metrics else "COMPLETED_WITH_ERRORS")
         }
         logger.debug(f"Finale samenvattingsresultaten voor {experiment_name}: {final_results}")
 
-        # BELANGRIJK: Verwijder de specifieke handler die door deze Trainer-instantie is toegevoegd
         if self._log_handler_ids:
             handler_to_remove = self._log_handler_ids.pop()
             try:
