@@ -229,10 +229,12 @@ class Trainer:
             loss.backward()
             optimizer.step()
             total_loss += loss.item() * inputs.size(0)
-            logger.debug(f"Batch {batch_idx+1}/{len(data_loader)}: Loss={loss.item():.4f}")
+            # Removed redundant logger.debug for each batch
+            # logger.debug(f"Batch {batch_idx+1}/{len(data_loader)}: Loss={loss.item():.4f}")
 
         avg_loss = total_loss / len(data_loader.dataset)
-        logger.info(f"Training Epoch finished. Average Train Loss: {avg_loss:.4f}")
+        # Removed redundant logger.info for training epoch finished
+        # logger.info(f"Training Epoch finished. Average Train Loss: {avg_loss:.4f}")
         return avg_loss
 
     def evaluate_epoch(self, model: nn.Module, data_loader: DataLoader, criterion: nn.Module) -> Tuple[float, float, float, float, float]: # Added f1_score to return type
@@ -270,7 +272,8 @@ class Trainer:
                 _, predicted = torch.max(outputs.data, 1)
                 all_predictions.extend(predicted.cpu().numpy())
                 all_targets.extend(targets.cpu().numpy())
-                logger.debug(f"Evaluation Batch {batch_idx+1}/{len(data_loader)}")
+                # Removed redundant logger.debug for evaluation batch
+                # logger.debug(f"Evaluation Batch {batch_idx+1}/{len(data_loader)}")
 
         avg_loss: float = total_loss / len(data_loader.dataset)
         
@@ -282,7 +285,8 @@ class Trainer:
             return avg_loss, 0.0, 0.0, 0.0, 0.0 # Return 0 for f1 as well
 
         metrics: Dict[str, float] = self._calculate_metrics(predictions_tensor, targets_tensor)
-        logger.info(f"Evaluation Epoch finished. Average Test Loss: {avg_loss:.4f}, Accuracy: {metrics['accuracy']:.4f}")
+        # Removed redundant logger.info for evaluation epoch finished
+        # logger.info(f"Evaluation Epoch finished. Average Test Loss: {avg_loss:.4f}, Accuracy: {metrics['accuracy']:.4f}")
         return avg_loss, metrics["accuracy"], metrics["recall"], metrics["precision"], metrics["f1_score"] # Return f1_score
 
 
@@ -373,14 +377,17 @@ class Trainer:
                 # We moeten controleren of de handler nog bestaat voordat we hem verwijderen.
                 # Pop het ID uit de lijst.
                 handler_to_remove = self._log_handler_ids.pop()
-                # OPMERKING: De check 'if handler_to_remove in logger._handlers:' is hier VEILIGER.
-                # Als de handler er al uit is (bijv. door een vorige kritieke fout die niet netjes is afgehandeld),
-                # dan voorkomt dit een KeyError.
-                if handler_to_remove in logger._handlers: # Dit is de regel die de error veroorzaakte!
+                # De meest robuuste manier om een handler te verwijderen is gewoon logger.remove(id) aan te roepen.
+                # Loguru zal geen fout geven als de handler er niet is, en dit voorkomt directe toegang tot _handlers.
+                try:
                     logger.remove(handler_to_remove)
-                    logger.debug(f"Removed specific loguru handler for run {self.run_id}.")
-                else:
-                    logger.warning(f"Attempted to remove non-existent handler {handler_to_remove} for run {self.run_id}.")
+                    logger.debug(f"Removed specific loguru handler {handler_to_remove} for run {self.run_id}.")
+                except ValueError:
+                    # ValueError kan optreden als de handler al verwijderd is of niet bestaat.
+                    # Dit is prima, we wilden hem toch al kwijt.
+                    logger.warning(f"Attempted to remove non-existent or already removed handler {handler_to_remove} for run {self.run_id}. This is expected if an error occurred earlier.")
+                except Exception as e:
+                    logger.error(f"Unexpected error removing handler {handler_to_remove}: {e}")
             raise # Re-raise the exception after logging
 
         criterion: nn.Module = nn.CrossEntropyLoss() 
@@ -417,7 +424,8 @@ class Trainer:
         # --- Training Loop ---
         for epoch in range(1, epochs + 1):
             epoch_start_time: float = time.time()
-            logger.info(f"--- Epoch {epoch}/{epochs} for {experiment_name} ---")
+            # Removed the general "--- Epoch X/Y for Experiment ---" log
+            # logger.info(f"--- Epoch {epoch}/{epochs} for {experiment_name} ---")
             
             # Train and evaluate
             train_loss: float = self.train_epoch(model, train_loader, criterion, optimizer)
@@ -432,9 +440,9 @@ class Trainer:
             loss_verschil: float = train_loss - test_loss
             relatief_verschil_loss: float = (loss_verschil / train_loss) if train_loss != 0 else float('inf')
 
-            logger.info(f"Epoch {epoch} Summary for {experiment_name}: Train Loss: {train_loss:.4f}, Test Loss: {test_loss:.4f}, "
-                        f"Accuracy: {accuracy_value:.4f}, Recall: {recall_value:.4f}, Precision: {precision_value:.4f}, F1: {f1_value:.4f}, " # Added F1
-                        f"Duration: {epoch_duration:.2f}s, Current LR: {optimizer.param_groups[0]['lr']:.6f}")
+            # COMBINED LOG LINE: This is the primary change for concise logging
+            # Adjusted epoch formatting for alignment
+            logger.info(f"Experiment: {experiment_name}, Epoch: {epoch:{len(str(epochs))}d}/{epochs}, Train Loss: {train_loss:.4f}, Test Loss: {test_loss:.4f}, Accuracy: {accuracy_value:.4f}, Recall: {recall_value:.4f}, Precision: {precision_value:.4f}, F1: {f1_value:.4f}, Duration: {epoch_duration:.2f}s, Current LR: {optimizer.param_groups[0]['lr']:.6f}")
 
             # Prepare data for the dataframe
             epoch_data: Dict[str, Any] = {
@@ -478,7 +486,8 @@ class Trainer:
             
             try:
                 current_df.to_parquet(model_results_parquet_path, index=False)
-                logger.info(f"Results for epoch {epoch} saved to {model_results_parquet_path}.")
+                # Removed the specific log line for saving epoch results
+                # logger.info(f"Results for epoch {epoch} saved to {model_results_parquet_path}.")
             except Exception as e:
                 logger.error(f"Failed to save results for epoch {epoch} to {model_results_parquet_path}. Error: {e}")
 
@@ -487,7 +496,8 @@ class Trainer:
                 best_test_loss = test_loss
                 try:
                     torch.save(model.state_dict(), best_model_path)
-                    logger.success(f"Saved best model for {experiment_name} to {best_model_path} (Test Loss: {best_test_loss:.4f}).")
+                    # Removed the specific log line for saving best model
+                    # logger.success(f"Saved best model for {experiment_name} to {best_model_path} (Test Loss: {best_test_loss:.4f}).")
                     best_epoch_metrics = { 
                         "best_test_loss": test_loss,
                         "best_accuracy": accuracy_value,
@@ -534,15 +544,11 @@ class Trainer:
         if self._log_handler_ids:
             # Pop het ID uit de lijst.
             handler_to_remove = self._log_handler_ids.pop()
-            # De meest robuuste manier om een handler te verwijderen is gewoon logger.remove(id) aan te roepen.
-            # Loguru zal geen fout geven als de handler er niet is, en dit voorkomt directe toegang tot _handlers.
             try:
                 logger.remove(handler_to_remove)
                 logger.debug(f"Removed specific loguru handler {handler_to_remove} for run {self.run_id}.")
             except ValueError:
-                # ValueError kan optreden als de handler al verwijderd is of niet bestaat.
-                # Dit is prima, we wilden hem toch al kwijt.
-                logger.warning(f"Attempted to remove non-existent or already removed handler {handler_to_remove} for run {self.run_id}. This is expected if an error occurred earlier.")
+                logger.warning(f"Attempted to remove non-existent or already removed handler {handler_to_remove} for run {self.run_id}. This is expected if an error occurred earlier or it was cleaned up by another process (unlikely for Loguru).")
             except Exception as e:
                 logger.error(f"Unexpected error removing handler {handler_to_remove}: {e}")
 
