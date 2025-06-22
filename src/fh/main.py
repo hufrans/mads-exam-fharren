@@ -6,6 +6,8 @@ import torch
 import sys
 from loguru import logger
 import argparse # Importeer argparse
+from sklearn.utils import class_weight # Importeer class_weight
+import numpy as np # Importeer numpy
 
 # --- Pad Definities ---
 current_script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -85,8 +87,7 @@ def run_experiment(config_path: str, num_features_actual: int, num_classes_actua
     logger.info(f"Vastgestelde feature count: {num_features_actual}, class count: {num_classes_actual}")
 
     # Definieer de namen van je feature kolommen.
-    # Aangepast om de kolomnamen van "0" tot "186" te reflecteren
-    feature_columns = [str(i) for i in range(num_features_actual)] # Dit genereert "0", "1", ..., "186"
+    feature_columns = [str(i) for i in range(num_features_actual)]
     # Definieer de naam van je target kolom.
     target_column = "target"
 
@@ -102,8 +103,6 @@ def run_experiment(config_path: str, num_features_actual: int, num_classes_actua
     if config["model_params"]["cnn"]["output_size"] != num_classes_actual:
         logger.warning(f"CNN model output_size ({config['model_params']['cnn']['output_size']}) komt niet overeen met het werkelijke aantal klassen ({num_classes_actual}). Aangepast.")
         config["model_params"]["cnn"]["output_size"] = num_classes_actual
-    # Belangrijk: CNN input_channels moet nog steeds 1 zijn voor 1D numerieke features
-    # en num_features is de lengte van de feature vector
     config["model_params"]["cnn"]["num_features"] = num_features_actual 
 
 
@@ -117,6 +116,24 @@ def run_experiment(config_path: str, num_features_actual: int, num_classes_actua
     logger.info(f"Laden van data van {train_data_absolute_path} en {test_data_absolute_path}...")
     # Creëer PyTorch DataLoaders voor training en testen
     try:
+        # Laden van de trainingsdata om klasse-gewichten te berekenen
+        train_df = pd.read_parquet(train_data_absolute_path)
+        train_targets = train_df[target_column].values
+
+        # Bereken klasse-gewichten
+        # 'balanced' mode past gewichten aan inverse proportioneel aan de klassefrequenties
+        # classes: unieke klasselabels in de dataset
+        # y: de array van klasselabels
+        class_weights_np = class_weight.compute_class_weight(
+            class_weight='balanced',
+            # Belangrijke wijziging hier: converteer naar numpy array
+            classes=np.array(sorted(train_df[target_column].unique())), 
+            y=train_targets
+        )
+        # Converteer naar PyTorch tensor en verplaats naar CPU
+        class_weights = torch.tensor(class_weights_np, dtype=torch.float32)
+        logger.info(f"Berekende klasse-gewichten: {class_weights.tolist()}")
+
         train_loader, test_loader = get_data_loaders(
             train_data_absolute_path, 
             test_data_absolute_path, 
@@ -137,7 +154,8 @@ def run_experiment(config_path: str, num_features_actual: int, num_classes_actua
                       log_base_dir=LOG_BASE_DIR,
                       run_id=current_run_id,
                       train_data_path=train_data_absolute_path, # Door te geven
-                      test_data_path=test_data_absolute_path) # Door te geven
+                      test_data_path=test_data_absolute_path, # Door te geven
+                      class_weights=class_weights) # Geef klasse-gewichten door
     all_experiment_results = [] # Lijst om resultaten van alle modelruns te verzamelen
     logger.info("Trainer succesvol geïnitialiseerd.")
 
@@ -264,9 +282,8 @@ if __name__ == "__main__":
         sys.exit(1)
 
     # Definieer de werkelijke aantallen features en klassen in je dataset.
-    # AANGEPAST: Aantal features is nu 187 (van 0 tot 186)
     num_features_actual = 187
-    num_classes_actual = 5 # Aangenomen dat dit nog steeds correct is
+    num_classes_actual = 5 
     
     data_dir = os.path.join(project_root, "data")
     os.makedirs(data_dir, exist_ok=True) 
@@ -323,4 +340,3 @@ if __name__ == "__main__":
     except Exception as e:
         logger.critical(f"Een kritieke fout is opgetreden in het hoofdscript: {e}", exc_info=True)
         sys.exit(1)
-

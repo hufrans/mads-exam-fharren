@@ -38,8 +38,9 @@ class Trainer:
         _log_handler_ids (list): Internal list to keep track of Loguru handler IDs added by this Trainer instance.
         train_data_path (str): Absolute path to the training data file.
         test_data_path (str): Absolute path to the test data file.
+        class_weights (torch.Tensor): Tensor of weights for each class, used in the loss function.
     """
-    def __init__(self, config: Dict[str, Any], feature_count: int, class_count: int, log_base_dir: str, run_id: str, train_data_path: str, test_data_path: str) -> None:
+    def __init__(self, config: Dict[str, Any], feature_count: int, class_count: int, log_base_dir: str, run_id: str, train_data_path: str, test_data_path: str, class_weights: torch.Tensor) -> None:
         """
         Initializes the Trainer with configuration and data-related parameters.
 
@@ -56,6 +57,7 @@ class Trainer:
             run_id (str): De unieke ID voor de huidige run, doorgegeven vanuit main.py.
             train_data_path (str): Absolute path to the training data file.
             test_data_path (str): Absolute path to the test data file.
+            class_weights (torch.Tensor): Tensor of weights for each class, used in the loss function.
         """
         self.settings = config
         self.feature_count = feature_count
@@ -65,6 +67,7 @@ class Trainer:
         self.run_id = run_id
         self.train_data_path = train_data_path # Store the path
         self.test_data_path = test_data_path   # Store the path
+        self.class_weights = class_weights.to(self.device) # Store and move class weights to device
         
         # De run-specifieke log directory begint nu met de run_id
         self.run_log_dir = os.path.join(log_base_dir, f"{self.run_id}_run_logs")
@@ -396,7 +399,8 @@ class Trainer:
                     logger.error(f"Unexpected error removing handler {handler_to_remove}: {e}")
             raise # Re-raise the exception after logging
 
-        criterion: nn.Module = nn.CrossEntropyLoss() 
+        # Aangepaste initialisatie van CrossEntropyLoss met class_weights
+        criterion: nn.Module = nn.CrossEntropyLoss(weight=self.class_weights) 
         
         optimizer_name = self.settings["training"]["optimizer"]
         learning_rate = self.settings["training"]["learning_rate"]
@@ -473,6 +477,9 @@ class Trainer:
                 'run_f1': f1_value, # Added f1 to epoch_data
                 'duration_epoch_seconds': epoch_duration, # Added epoch duration
                 'learning_rate': optimizer.param_groups[0]['lr'], # Added current learning rate
+                'train_samples': train_samples, # Add train samples count to epoch data
+                'test_samples': test_samples,   # Add test samples count to epoch data
+                'class_weights': self.class_weights.tolist(), # Add class weights to epoch data
                 **_model_config 
             }
             
@@ -553,6 +560,7 @@ class Trainer:
             "test_data_file": os.path.basename(self.test_data_path),   # Add basename of test data file
             "train_samples": train_samples, # Add train samples count
             "test_samples": test_samples,   # Add test samples count
+            "class_weights": self.class_weights.tolist(), # Add class weights to final results
             **best_epoch_metrics, 
             "model_specific_config": _model_config 
         }
