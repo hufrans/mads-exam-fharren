@@ -427,6 +427,14 @@ class Trainer:
         
         best_epoch_metrics: Dict[str, Any] = {} 
 
+        # Log DataLoader sizes and batch info for debugging
+        train_samples = len(train_loader.dataset) if train_loader.dataset is not None else 0
+        test_samples = len(test_loader.dataset) if test_loader.dataset is not None else 0
+
+        logger.info(f"Trainingsdataset: {os.path.basename(self.train_data_path)}, Samples: {train_samples}, Batch grootte: {train_loader.batch_size}, Aantal batches: {len(train_loader)}.")
+        logger.info(f"Testdataset: {os.path.basename(self.test_data_path)}, Samples: {test_samples}, Batch grootte: {test_loader.batch_size}, Aantal batches: {len(test_loader)}.")
+
+
         # --- Training Loop ---
         for epoch in range(1, epochs + 1):
             epoch_start_time: float = time.time()
@@ -463,8 +471,8 @@ class Trainer:
                 'run_recall': recall_value,
                 'run_precision': precision_value,
                 'run_f1': f1_value, # Added f1 to epoch_data
-                'duration_epoch_seconds': epoch_duration,
-                'learning_rate': optimizer.param_groups[0]['lr'],
+                'duration_epoch_seconds': epoch_duration, # Added epoch duration
+                'learning_rate': optimizer.param_groups[0]['lr'], # Added current learning rate
                 **_model_config 
             }
             
@@ -543,6 +551,8 @@ class Trainer:
             "scheduler_patience": self.settings["training"]["scheduler_kwargs"].get("patience") if scheduler else None,
             "train_data_file": os.path.basename(self.train_data_path), # Add basename of train data file
             "test_data_file": os.path.basename(self.test_data_path),   # Add basename of test data file
+            "train_samples": train_samples, # Add train samples count
+            "test_samples": test_samples,   # Add test samples count
             **best_epoch_metrics, 
             "model_specific_config": _model_config 
         }
