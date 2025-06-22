@@ -1,65 +1,39 @@
 # config.toml
 
 [data]
-# Pad naar je trainingsdata (relatief ten opzichte van de project root)
-train_data_path = "data/heart_big_train.parq"
-# Pad naar je testdata (relatief ten opzichte van de project root)
-test_data_path = "data/heart_big_test.parq"
+train_data_path = "data/heart_big_train.parq" # Pad naar je trainingsdata (relatief ten opzichte van de project root)
+test_data_path = "data/heart_big_test.parq"   # Pad naar je testdata (relatief ten opzichte van de project root)
 
 [training]
-# Grootte van de batches die aan het model worden gevoerd
-batch_size = 32
-# Aantal trainings-epochs (passes over de volledige dataset)
-epochs = 10
-# Initiële learning rate voor de optimizer
-learning_rate = 0.001
-# Type optimizer om te gebruiken (bijv. "Adam", "SGD")
-optimizer = "Adam"
-# Factor waarmee de learning rate wordt verminderd door de scheduler (bijv. 0.1 voor 10x reductie)
-scheduler_factor = 0.1
-# Aantal epochs zonder verbetering voordat de learning rate wordt aangepast
-scheduler_patience = 3
-# Directory waar trainingslogs en modelartefacten worden opgeslagen
-log_dir = "runs"
-# Extra argumenten voor de learning rate scheduler (voor PyTorch's ReduceLROnPlateau).
-# 'verbose' is verwijderd omdat dit een TypeError veroorzaakte in sommige PyTorch versies.
-scheduler_kwargs = {mode = "min", factor = 0.1, patience = 3}
+batch_size = 32        # Grootte van de batches die aan het model worden gevoerd
+epochs = 10            # Aantal trainings-epochs (passes over de volledige dataset)
+learning_rate = 0.001  # Initiële learning rate voor de optimizer
+optimizer = "Adam"     # Type optimizer om te gebruiken (bijv. "Adam", "SGD")
+scheduler_factor = 0.1 # Factor waarmee de learning rate wordt verminderd door de scheduler (bijv. 0.1 voor 10x reductie)
+scheduler_patience = 3 # Aantal epochs zonder verbetering voordat de learning rate wordt aangepast
+log_dir = "runs"       # Directory waar trainingslogs en modelartefacten worden opgeslagen
+scheduler_kwargs = {mode = "min", factor = 0.1, patience = 3} # Extra argumenten voor de learning rate scheduler (voor PyTorch's ReduceLROnPlateau).
 
 # --- Model Specifieke Parameters ---
 # Let op: de 'input_size_after_flattening' voor de CNN wordt dynamisch berekend in main.py.
 
 [model_params.baseline]
-# Input grootte van het baseline model (aantal features)
-input_size = 187 # Aangepast naar 187 kolommen
-# Output grootte van het baseline model (aantal klassen)
-output_size = 5  # Aangepast naar 5 klassen
+input_size = 187 # Input grootte van het baseline model (aantal features)
+output_size = 5  # Output grootte van het baseline model (aantal klassen)
 
 [model_params.cnn]
-# Aantal input kanalen (1 voor 1D numerieke features, zoals een tijdreeks of platte features)
-input_channels = 1
-# Grootte van de volledig verbonden (dense) verborgen laag
-hidden_size = 64
-# Aantal convolutionele lagen in het model
-num_layers = 2 # Deze heeft meer betrekking op de diepte van de CNN-blokken
-# Output grootte van het CNN model (aantal klassen)
-output_size = 5  # Aangepast naar 5 klassen
-# Lijst van het aantal filters in elke convolutionele laag
-conv_filters = [32, 64]
-# Grootte van de convolutionele kernel
-kernel_size = 3
-# Boolean om aan te geven of dropout gebruikt moet worden
-use_dropout = true
-# Dropout rate indien use_dropout = true
-dropout_rate = 0.5
+input_channels = 1      # Aantal input kanalen (1 voor 1D numerieke features, zoals een tijdreeks of platte features)
+hidden_size = 64        # Grootte van de volledig verbonden (dense) verborgen laag
+num_layers = 2          # Aantal convolutionele lagen in het model # Deze heeft meer betrekking op de diepte van de CNN-blokken
+output_size = 5         # Output grootte van het CNN model (aantal klassen)
+conv_filters = [32, 64] # Lijst van het aantal filters in elke convolutionele laag
+kernel_size = 3         # Grootte van de convolutionele kernel
+use_dropout = true      # Boolean om aan te geven of dropout gebruikt moet worden
+dropout_rate = 0.5      # Dropout rate indien use_dropout = true
 
 [model_params.gru]
-# Input grootte van het GRU model (aantal features per tijdstap)
-input_size = 187 # Aangepast naar 187 kolommen
-# Grootte van de verborgen toestand (hidden state) van de GRU-cellen
-hidden_size = 128
-# Aantal gestapelde GRU-lagen
-num_layers = 2
-# Output grootte van het GRU model (aantal klassen)
-output_size = 5  # Aangepast naar 5 klassen
-# Dropout rate toegepast op de output van elke GRU-laag (behalve de laatste)
-dropout = 0.2
+input_size = 187  # Input grootte van het GRU model (aantal features per tijdstap)
+hidden_size = 128 # Grootte van de verborgen toestand (hidden state) van de GRU-cellen
+num_layers = 2    # Aantal gestapelde GRU-lagen
+output_size = 5   # Output grootte van het GRU model (aantal klassen)
+dropout = 0.2     # Dropout rate toegepast op de output van elke GRU-laag (behalve de laatste)
