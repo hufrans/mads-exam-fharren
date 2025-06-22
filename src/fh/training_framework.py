@@ -36,8 +36,10 @@ class Trainer:
         best_model_path_template (str): Template for saving the best model checkpoint.
         results_path_template (str): Template for saving epoch-wise results.
         _log_handler_ids (list): Internal list to keep track of Loguru handler IDs added by this Trainer instance.
+        train_data_path (str): Absolute path to the training data file.
+        test_data_path (str): Absolute path to the test data file.
     """
-    def __init__(self, config: Dict[str, Any], feature_count: int, class_count: int, log_base_dir: str, run_id: str) -> None:
+    def __init__(self, config: Dict[str, Any], feature_count: int, class_count: int, log_base_dir: str, run_id: str, train_data_path: str, test_data_path: str) -> None:
         """
         Initializes the Trainer with configuration and data-related parameters.
 
@@ -52,6 +54,8 @@ class Trainer:
             class_count (int): Het aantal klassen in de output (voor classificatie).
             log_base_dir (str): Het basispad voor alle logbestanden (bijv. 'project_root/logs').
             run_id (str): De unieke ID voor de huidige run, doorgegeven vanuit main.py.
+            train_data_path (str): Absolute path to the training data file.
+            test_data_path (str): Absolute path to the test data file.
         """
         self.settings = config
         self.feature_count = feature_count
@@ -59,6 +63,8 @@ class Trainer:
         self.device: torch.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         
         self.run_id = run_id
+        self.train_data_path = train_data_path # Store the path
+        self.test_data_path = test_data_path   # Store the path
         
         # De run-specifieke log directory begint nu met de run_id
         self.run_log_dir = os.path.join(log_base_dir, f"{self.run_id}_run_logs")
@@ -535,6 +541,8 @@ class Trainer:
             "scheduler_type": self.settings["training"].get("scheduler_type", "None"), # Include scheduler type
             "scheduler_factor": self.settings["training"]["scheduler_kwargs"].get("factor") if scheduler else None,
             "scheduler_patience": self.settings["training"]["scheduler_kwargs"].get("patience") if scheduler else None,
+            "train_data_file": os.path.basename(self.train_data_path), # Add basename of train data file
+            "test_data_file": os.path.basename(self.test_data_path),   # Add basename of test data file
             **best_epoch_metrics, 
             "model_specific_config": _model_config 
         }

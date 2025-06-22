@@ -51,7 +51,7 @@ from src.fh.data_loader import get_data_loaders
 from src.fh.training_framework import Trainer
 from src.fh.utils import load_config # Gebruik jouw load_config functie
 
-def run_experiment(config_path: str, num_features_actual: int, num_classes_actual: int, current_run_id: str) -> None:
+def run_experiment(config_path: str, num_features_actual: int, num_classes_actual: int, current_run_id: str, train_data_file: str, test_data_file: str) -> None:
     """
     Hoofdfunctie om het machine learning experiment te orkestreren.
     Laadt data, traint modellen en logt resultaten.
@@ -61,6 +61,8 @@ def run_experiment(config_path: str, num_features_actual: int, num_classes_actua
         num_features_actual (int): Het daadwerkelijke aantal features in de dataset.
         num_classes_actual (int): Het daadwerkelijke aantal klassen in de dataset.
         current_run_id (str): De unieke ID voor de huidige run.
+        train_data_file (str): De absolute bestandsnaam van de trainingsdata.
+        test_data_file (str): De absolute bestandsnaam van de testdata.
     """
     logger.info(f"Start van het experiment met configuratiebestand: {config_path}")
     # Laad de configuratie vanuit het opgegeven TOML-bestand
@@ -75,13 +77,16 @@ def run_experiment(config_path: str, num_features_actual: int, num_classes_actua
     # --- Data Laden ---
     logger.info("Start data laden...")
     # Haal de paden voor de trainings- en testdata op uit de configuratie
-    train_data_relative_path = config["data"]["train_data_path"]
-    test_data_relative_path = config["data"]["test_data_path"]
+    # train_data_relative_path = config["data"]["train_data_path"] # Deze wordt nu via parameter doorgegeven
+    # test_data_relative_path = config["data"]["test_data_path"] # Deze wordt nu via parameter doorgegeven
 
     # Construeer absolute paden die door get_data_loaders gebruikt kunnen worden
     # Deze paden worden niet veranderd met de run_id, omdat dit de input data betreft.
-    train_data_absolute_path = os.path.join(project_root, train_data_relative_path)
-    test_data_absolute_path = os.path.join(project_root, test_data_relative_path)
+    # train_data_absolute_path = os.path.join(project_root, train_data_relative_path) # Gebruik direct train_data_file
+    # test_data_absolute_path = os.path.join(project_root, test_data_relative_path) # Gebruik direct test_data_file
+    train_data_absolute_path = train_data_file
+    test_data_absolute_path = test_data_file
+
     logger.debug(f"Trainingsdata pad: {train_data_absolute_path}")
     logger.debug(f"Testdata pad: {test_data_absolute_path}")
 
@@ -133,7 +138,9 @@ def run_experiment(config_path: str, num_features_actual: int, num_classes_actua
     # De Trainer zal deze RUN_ID gebruiken om zijn eigen logmappen en outputbestanden te benoemen.
     trainer = Trainer(config, num_features_actual, num_classes_actual, 
                       log_base_dir=LOG_BASE_DIR,
-                      run_id=current_run_id) 
+                      run_id=current_run_id,
+                      train_data_path=train_data_absolute_path, # Door te geven
+                      test_data_path=test_data_absolute_path) # Door te geven
     all_experiment_results = [] # Lijst om resultaten van alle modelruns te verzamelen
     logger.info("Trainer succesvol geïnitialiseerd.")
 
@@ -264,6 +271,10 @@ if __name__ == "__main__":
     os.makedirs(data_dir, exist_ok=True) 
     logger.info(f"Zorgen dat de data directory bestaat: {data_dir}")
 
+    # Bepaal hier de uiteindelijke paden voor de training en test data
+    final_train_data_path = ""
+    final_test_data_path = ""
+
     # Hier wordt gecheckt of de --dummy flag is gebruikt
     if args.dummy:
         logger.info("--- DUMMY DATA MODUS GEACTIVEERD ---")
@@ -293,17 +304,20 @@ if __name__ == "__main__":
             logger.error(f"Fout bij het genereren van dummy data: {e}")
             sys.exit(1)
         
-        # Omdat dummy data altijd dezelfde namen heeft, wijzen we de config paden naar deze dummy bestanden
-        temp_config["data"]["train_data_path"] = os.path.relpath(train_parquet_path_for_dummy, project_root)
-        temp_config["data"]["test_data_path"] = os.path.relpath(test_parquet_path_for_dummy, project_root)
+        # Wijzen de finale paden naar de dummy bestanden
+        final_train_data_path = train_parquet_path_for_dummy
+        final_test_data_path = test_parquet_path_for_dummy
 
     else:
         logger.info("--- STANDAARD MODUS: GEBRUIK ECHTE DATA ---")
-        logger.info(f"Gebruik van data uit configuratiebestand: '{temp_config['data']['train_data_path']}' en '{temp_config['data']['test_data_path']}'.")
+        # Construeer absolute paden op basis van de config voor echte data
+        final_train_data_path = os.path.join(project_root, temp_config["data"]["train_data_path"])
+        final_test_data_path = os.path.join(project_root, temp_config["data"]["test_data_path"])
+        logger.info(f"Gebruik van data uit configuratiebestand: '{final_train_data_path}' en '{final_test_data_path}'.")
     
     # Start de experimentele run met het opgegeven configuratiebestand en de unieke RUN_ID
     try:
-        run_experiment(config_file_path, num_features_actual, num_classes_actual, RUN_ID)
+        run_experiment(config_file_path, num_features_actual, num_classes_actual, RUN_ID, final_train_data_path, final_test_data_path)
         logger.info("Hoofdscript succesvol voltooid.")
     except Exception as e:
         logger.critical(f"Een kritieke fout is opgetreden in het hoofdscript: {e}", exc_info=True)
