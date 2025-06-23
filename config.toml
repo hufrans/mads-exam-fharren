@@ -6,7 +6,7 @@ train_data_path = ["data/heart_big_train.parq", "data/heart_big_train_synthetic.
 
 [training]
 batch_size = 32        # Grootte van de batches die aan het model worden gevoerd
-epochs = 50            # Aantal trainings-epochs (passes over de volledige dataset)
+epochs = 100           # Aantal trainings-epochs (passes over de volledige dataset)
 learning_rate = 0.001  # Initiële learning rate voor de optimizer
 optimizer = "Adam"     # Type optimizer om te gebruiken (bijv. "Adam", "SGD")
 scheduler_factor = 0.1 # Factor waarmee de learning rate wordt verminderd door de scheduler (bijv. 0.1 voor 10x reductie)
@@ -17,6 +17,7 @@ early_stopping_patience  = 15                  # Aantal epochs om te wachten zon
 early_stopping_min_delta = 0.001               # Minimale verbetering in testloss om als 'verbetering' te tellen
 use_scheduler            = true                # Zet deze op 'true' om de scheduler in te schakelen
 scheduler_type           = "ReduceLROnPlateau" # Of "StepLR", afhankelijk van je voorkeur
+weight_decay             = 0.0001              # Voorbeeld van weight decay (L2 regularisatie)
 
 [training.scheduler_kwargs] # Nieuwe sectie voor scheduler argumenten
 mode = "min"  # Voor ReduceLROnPlateau: 'min' voor monitoring van verlies, 'max' voor monitoring van metrics (bijv. accuracy)
