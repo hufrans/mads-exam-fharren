@@ -54,7 +54,59 @@ from src.fh.data_loader import get_data_loaders
 from src.fh.training_framework import Trainer
 from src.fh.utils import load_config # Gebruik jouw load_config functie
 
-def run_experiment(config_path: str, num_features_actual: int, num_classes_actual: int, current_run_id: str, all_train_data_files: List[str], test_data_file: str) -> None:
+def calculate_and_add_ranking(results_df: pd.DataFrame, total_epochs_allowed: int) -> pd.DataFrame:
+    """
+    Berekent en voegt een 'ranking_score' toe aan het DataFrame met resultaten.
+    Een lagere score is beter. Voegt ook een expliciete 'ranking' kolom toe.
+    """
+    if results_df.empty:
+        return results_df
+
+    # Gewicht parameters voor de ranking score (af te stemmen indien nodig)
+    WEIGHT_REL_LOSS_DIFF = 0.5
+    WEIGHT_RECALL = 50.0
+    WEIGHT_ACCURACY = 50.0
+    PENALTY_EPOCH_1 = 100.0 # Hoge straf voor beste model in epoch 1
+    PENALTY_EARLY_EPOCH = 50.0 # Medium straf voor beste model in de eerste 10% epochs
+
+    early_convergence_threshold_epochs = int(total_epochs_allowed * 0.10)
+
+    # Initialiseer ranking_score kolom
+    results_df['ranking_score'] = 0.0
+
+    # Bereken de score per rij
+    for index, row in results_df.iterrows():
+        score = 0.0
+
+        # Loss component
+        # We willen dat relatief_verschil_loss laag is, dus direct toevoegen
+        score += row['best_loss_difference_rel_perc'] * WEIGHT_REL_LOSS_DIFF
+
+        # Metrics component (recall, accuracy). Hoger is beter, dus (1 - metric) om lager=beter te maken.
+        score += (1.0 - row['best_recall']) * WEIGHT_RECALL
+        score += (1.0 - row['best_accuracy']) * WEIGHT_ACCURACY
+
+        # Straf voor vroege convergentie
+        if row['best_epoch'] == 1:
+            score += PENALTY_EPOCH_1
+            logger.debug(f"Penalty toegevoegd voor Epoch 1: {row['experiment_name']}")
+        elif row['best_epoch'] <= early_convergence_threshold_epochs:
+            score += PENALTY_EARLY_EPOCH
+            logger.debug(f"Penalty toegevoegd voor vroege epoch ({row['best_epoch']}/{early_convergence_threshold_epochs}): {row['experiment_name']}")
+        
+        results_df.loc[index, 'ranking_score'] = score
+        logger.debug(f"Ranking score voor {row['experiment_name']}: {score:.2f}")
+
+    # Sorteer het DataFrame op de ranking_score
+    results_df = results_df.sort_values(by='ranking_score', ascending=True).reset_index(drop=True)
+    
+    # Voeg de expliciete ranking kolom toe
+    results_df['ranking'] = results_df.index + 1 # +1 omdat index begint bij 0
+    
+    return results_df
+
+
+def run_experiment(config_path: str, num_features_actual: int, num_classes_actual: int, current_run_id: str, all_train_data_files: List[str], test_data_file: str, runs_base_dir: str, log_base_dir: str) -> None:
     """
     Hoofdfunctie om het machine learning experiment te orkestreren.
     Laadt data, traint modellen en logt resultaten.
@@ -66,6 +118,8 @@ def run_experiment(config_path: str, num_features_actual: int, num_classes_actua
         current_run_id (str): De unieke ID voor de huidige run.
         all_train_data_files (List[str]): Een lijst van absolute bestandsnamen van de trainingsdata.
         test_data_file (str): De absolute bestandsnaam van de testdata.
+        runs_base_dir (str): De basisdirectory voor de samenvattende resultaten.
+        log_base_dir (str): De basisdirectory voor de logbestanden.
     """
     logger.info(f"Start van het experiment met configuratiebestand: {config_path}")
     # Laad de configuratie vanuit het opgegeven TOML-bestand
@@ -83,6 +137,9 @@ def run_experiment(config_path: str, num_features_actual: int, num_classes_actua
     feature_columns = [str(j) for j in range(num_features_actual)]
     # Definieer de naam van je target kolom.
     target_column = "target"
+    
+    # Total epochs voor ranking penalty
+    total_epochs_for_ranking = config["training"]["epochs"]
 
     # --- NIEUWE VOLGORDE VAN TRAININGEN: Model per model over alle datasets ---
 
@@ -111,7 +168,7 @@ def run_experiment(config_path: str, num_features_actual: int, num_classes_actua
             logger.info(f"Berekende klasse-gewichten voor {os.path.basename(train_data_absolute_path)}: {class_weights.tolist()}")
 
             trainer = Trainer(config, num_features_actual, num_classes_actual, 
-                              log_base_dir=LOG_BASE_DIR,
+                              log_base_dir=log_base_dir, # Gebruik parameter
                               run_id=current_run_id, 
                               train_data_path=train_data_absolute_path, 
                               test_data_path=test_data_absolute_path,
@@ -130,7 +187,13 @@ def run_experiment(config_path: str, num_features_actual: int, num_classes_actua
                 model_config=baseline_config_for_run 
             )
             all_experiment_results.append(baseline_results)
-            logger.info(f"Baseline model training voltooid voor {os.path.basename(train_data_absolute_path)}.")
+            
+            # Sla tussentijdse samenvatting op met ranking
+            summary_df = pd.DataFrame(all_experiment_results)
+            summary_df = calculate_and_add_ranking(summary_df, total_epochs_for_ranking)
+            summary_output_path = os.path.join(runs_base_dir, f"{current_run_id}_all_model_summary.parquet") # Gebruik parameter
+            summary_df.to_parquet(summary_output_path, index=False)
+            logger.success(f"Baseline model training voltooid voor {os.path.basename(train_data_absolute_path)}. Samenvatting bijgewerkt.")
         except Exception as e:
             logger.error(f"Fout tijdens Baseline model training voor {os.path.basename(train_data_absolute_path)}: {e}")
             all_experiment_results.append({
@@ -140,7 +203,13 @@ def run_experiment(config_path: str, num_features_actual: int, num_classes_actua
                 "status": "FAILED_TRAINING",
                 "error_message": f"Fout tijdens training: {e}"
             })
-            continue # Ga door met de volgende trainingsbestanden voor dit modeltype
+            # Sla tussentijdse samenvatting op met ranking na fout
+            summary_df = pd.DataFrame(all_experiment_results)
+            summary_df = calculate_and_add_ranking(summary_df, total_epochs_for_ranking)
+            summary_output_path = os.path.join(runs_base_dir, f"{current_run_id}_all_model_summary.parquet") # Gebruik parameter
+            summary_df.to_parquet(summary_output_path, index=False)
+            continue 
+
 
     # 2) GRU Model Training op alle datasets
     logger.info("\n--- Start Training GRU Model op alle datasets ---")
@@ -167,7 +236,7 @@ def run_experiment(config_path: str, num_features_actual: int, num_classes_actua
             logger.info(f"Berekende klasse-gewichten voor {os.path.basename(train_data_absolute_path)}: {class_weights.tolist()}")
 
             trainer = Trainer(config, num_features_actual, num_classes_actual, 
-                              log_base_dir=LOG_BASE_DIR,
+                              log_base_dir=log_base_dir, # Gebruik parameter
                               run_id=current_run_id, 
                               train_data_path=train_data_absolute_path, 
                               test_data_path=test_data_absolute_path,
@@ -194,6 +263,12 @@ def run_experiment(config_path: str, num_features_actual: int, num_classes_actua
                     model_config=current_gru_config_for_run 
                 )
                 all_experiment_results.append(gru_results)
+                # Sla tussentijdse samenvatting op met ranking
+                summary_df = pd.DataFrame(all_experiment_results)
+                summary_df = calculate_and_add_ranking(summary_df, total_epochs_for_ranking)
+                summary_output_path = os.path.join(runs_base_dir, f"{current_run_id}_all_model_summary.parquet") # Gebruik parameter
+                summary_df.to_parquet(summary_output_path, index=False)
+                logger.success(f"GRU Experiment {j+1} voltooid voor {os.path.basename(train_data_absolute_path)}. Samenvatting bijgewerkt.")
             logger.info(f"GRU model training voltooid voor {os.path.basename(train_data_absolute_path)}.")
         except Exception as e:
             logger.error(f"Fout tijdens GRU model training voor {os.path.basename(train_data_absolute_path)}: {e}")
@@ -204,7 +279,12 @@ def run_experiment(config_path: str, num_features_actual: int, num_classes_actua
                 "status": "FAILED_TRAINING",
                 "error_message": f"Fout tijdens training: {e}"
             })
-            continue # Ga door met de volgende trainingsbestanden voor dit modeltype
+            # Sla tussentijdse samenvatting op met ranking na fout
+            summary_df = pd.DataFrame(all_experiment_results)
+            summary_df = calculate_and_add_ranking(summary_df, total_epochs_for_ranking)
+            summary_output_path = os.path.join(runs_base_dir, f"{current_run_id}_all_model_summary.parquet") # Gebruik parameter
+            summary_df.to_parquet(summary_output_path, index=False)
+            continue
 
 
     # 3) CNN Model Training op alle datasets
@@ -232,7 +312,7 @@ def run_experiment(config_path: str, num_features_actual: int, num_classes_actua
             logger.info(f"Berekende klasse-gewichten voor {os.path.basename(train_data_absolute_path)}: {class_weights.tolist()}")
 
             trainer = Trainer(config, num_features_actual, num_classes_actual, 
-                              log_base_dir=LOG_BASE_DIR,
+                              log_base_dir=log_base_dir, # Gebruik parameter
                               run_id=current_run_id, 
                               train_data_path=train_data_absolute_path, 
                               test_data_path=test_data_absolute_path,
@@ -272,6 +352,12 @@ def run_experiment(config_path: str, num_features_actual: int, num_classes_actua
                     model_config=current_cnn_config_for_run 
                 )
                 all_experiment_results.append(cnn_results)
+                # Sla tussentijdse samenvatting op met ranking
+                summary_df = pd.DataFrame(all_experiment_results)
+                summary_df = calculate_and_add_ranking(summary_df, total_epochs_for_ranking)
+                summary_output_path = os.path.join(runs_base_dir, f"{current_run_id}_all_model_summary.parquet") # Gebruik parameter
+                summary_df.to_parquet(summary_output_path, index=False)
+                logger.success(f"CNN Experiment {j+1} voltooid voor {os.path.basename(train_data_absolute_path)}. Samenvatting bijgewerkt.")
             logger.info(f"CNN model training voltooid voor {os.path.basename(train_data_absolute_path)}.")
         except Exception as e:
             logger.error(f"Fout tijdens CNN model training voor {os.path.basename(train_data_absolute_path)}: {e}")
@@ -282,7 +368,12 @@ def run_experiment(config_path: str, num_features_actual: int, num_classes_actua
                 "status": "FAILED_TRAINING",
                 "error_message": f"Fout tijdens training: {e}"
             })
-            continue # Ga door met de volgende trainingsbestanden voor dit modeltype
+            # Sla tussentijdse samenvatting op met ranking na fout
+            summary_df = pd.DataFrame(all_experiment_results)
+            summary_df = calculate_and_add_ranking(summary_df, total_epochs_for_ranking)
+            summary_output_path = os.path.join(runs_base_dir, f"{current_run_id}_all_model_summary.parquet") # Gebruik parameter
+            summary_df.to_parquet(summary_output_path, index=False)
+            continue
 
 
     # 4) CNN_SE_Skip Model Training op alle datasets
@@ -311,7 +402,7 @@ def run_experiment(config_path: str, num_features_actual: int, num_classes_actua
                 logger.info(f"Berekende klasse-gewichten voor {os.path.basename(train_data_absolute_path)}: {class_weights.tolist()}")
 
                 trainer = Trainer(config, num_features_actual, num_classes_actual, 
-                                  log_base_dir=LOG_BASE_DIR,
+                                  log_base_dir=log_base_dir, # Gebruik parameter
                                   run_id=current_run_id, 
                                   train_data_path=train_data_absolute_path, 
                                   test_data_path=test_data_absolute_path,
@@ -352,6 +443,12 @@ def run_experiment(config_path: str, num_features_actual: int, num_classes_actua
                         model_config=current_cnn_se_skip_config_for_run 
                     )
                     all_experiment_results.append(cnn_se_skip_results)
+                    # Sla tussentijdse samenvatting op met ranking
+                    summary_df = pd.DataFrame(all_experiment_results)
+                    summary_df = calculate_and_add_ranking(summary_df, total_epochs_for_ranking)
+                    summary_output_path = os.path.join(runs_base_dir, f"{current_run_id}_all_model_summary.parquet") # Gebruik parameter
+                    summary_df.to_parquet(summary_output_path, index=False)
+                    logger.success(f"CNN_SE_Skip Experiment {j+1} voltooid voor {os.path.basename(train_data_absolute_path)}. Samenvatting bijgewerkt.")
                 logger.info(f"CNN_SE_Skip model training voltooid voor {os.path.basename(train_data_absolute_path)}.")
             except Exception as e:
                 logger.error(f"Fout tijdens CNN_SE_Skip model training voor {os.path.basename(train_data_absolute_path)}: {e}")
@@ -362,21 +459,27 @@ def run_experiment(config_path: str, num_features_actual: int, num_classes_actua
                     "status": "FAILED_TRAINING",
                     "error_message": f"Fout tijdens training: {e}"
                 })
-                continue # Ga door met de volgende trainingsbestanden voor dit modeltype
+                # Sla tussentijdse samenvatting op met ranking na fout
+                summary_df = pd.DataFrame(all_experiment_results)
+                summary_df = calculate_and_add_ranking(summary_df, total_epochs_for_ranking)
+                summary_output_path = os.path.join(runs_base_dir, f"{current_run_id}_all_model_summary.parquet") # Gebruik parameter
+                summary_df.to_parquet(summary_output_path, index=False)
+                continue
     else:
         logger.info("CNN_SE_Skip model is niet geconfigureerd in config.toml, overslaan van training.")
 
 
-    # Optioneel: Sla een samenvatting op van de eindresultaten van alle modelruns
-    summary_df = pd.DataFrame(all_experiment_results)
-    
-    summary_output_path = os.path.join(RUNS_BASE_dir, f"{current_run_id}_all_model_summary.parquet") 
-
+    # Alle experimenten voltooid, finale opslag van de samenvatting
+    # De samenvatting is al bijgewerkt na elke sub-run, dus deze finale opslag is optioneel
+    # en zorgt er alleen voor dat de ranking van de allerlaatste run ook nog eens wordt vastgelegd.
+    final_summary_df = pd.DataFrame(all_experiment_results)
+    final_summary_df = calculate_and_add_ranking(final_summary_df, total_epochs_for_ranking)
+    final_summary_output_path = os.path.join(runs_base_dir, f"{current_run_id}_all_model_summary_final.parquet") # Gebruik parameter
     try:
-        summary_df.to_parquet(summary_output_path, index=False)
-        logger.success(f"Alle experiment samenvattingen opgeslagen naar {summary_output_path}")
+        final_summary_df.to_parquet(final_summary_output_path, index=False)
+        logger.success(f"Finale samenvatting van alle experimenten opgeslagen naar {final_summary_output_path}")
     except Exception as e:
-        logger.error(f"Fout bij het opslaan van de samenvatting van alle experimenten: {e}")
+        logger.error(f"Fout bij het opslaan van de finale samenvatting van alle experimenten: {e}")
 
     logger.info("\n--- Einde Experiment ---")
 
@@ -466,7 +569,7 @@ if __name__ == "__main__":
         logger.info(f"Gebruik van test data uit configuratiebestand: '{final_test_data_path}'.")
     
     try:
-        run_experiment(config_file_path, num_features_actual, num_classes_actual, RUN_ID, final_train_data_paths, final_test_data_path)
+        run_experiment(config_file_path, num_features_actual, num_classes_actual, RUN_ID, final_train_data_paths, final_test_data_path, RUNS_BASE_dir, LOG_BASE_DIR)
         logger.info("Hoofdscript succesvol voltooid.")
     except Exception as e:
         logger.critical(f"Een kritieke fout is opgetreden in het hoofdscript: {e}", exc_info=True)

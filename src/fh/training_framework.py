@@ -599,6 +599,10 @@ class Trainer:
                 should_save = False
                 early_epochs_threshold = int(epochs * 0.1)
 
+                # Bereken deze vlaggen altijd aan het begin van de save-logica voor consistentie
+                current_is_generalizing = (test_loss < train_loss)
+                current_is_acceptable_rel_diff = (relatief_verschil_loss <= ACCEPTABLE_REL_LOSS_DIFF_THRESHOLD)
+
                 if epoch == 1:
                     logger.debug(f"Epoch {epoch}: First epoch, model will always be saved. Setting should_save = True.")
                     should_save = True
@@ -611,9 +615,6 @@ class Trainer:
                         logger.debug(f"Epoch {epoch}: Early epoch, recall did not improve. Not saving.")
                 else:
                     # Na de eerste 10% epochs, gebruik de complexe criteria
-                    current_is_generalizing = (test_loss < train_loss)
-                    current_is_acceptable_rel_diff = (relatief_verschil_loss <= ACCEPTABLE_REL_LOSS_DIFF_THRESHOLD)
-
                     best_is_generalizing = self.best_model_generalizes
                     best_is_acceptable_rel_diff = (self.best_relative_loss_difference_for_save <= ACCEPTABLE_REL_LOSS_DIFF_THRESHOLD)
 
@@ -684,7 +685,7 @@ class Trainer:
                             "best_loss_difference_abs": loss_difference_abs,
                             "best_loss_difference_rel_perc": relatief_verschil_loss,
                             "best_epoch": epoch,
-                            "best_learning_rate": optimizer.param_groups[0]['lr'] # Voeg de leerfrequentie van de beste epoch toe
+                            "best_learning_rate": optimizer.param_groups[0]['lr'] 
                         }
                     except Exception as e:
                         logger.error(f"Failed to save best model for {experiment_name} to {best_model_path}. Error: {e}")
