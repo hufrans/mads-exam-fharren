@@ -443,7 +443,7 @@ class Trainer:
         criterion: nn.Module = nn.CrossEntropyLoss(weight=self.class_weights) 
         
         optimizer_name = self.settings["training"]["optimizer"]
-        learning_rate = self.settings["training"]["learning_rate"]
+        learning_rate = self.settings["training"]["learning_rate"] # Initial learning rate
         weight_decay = self.settings["training"].get("weight_decay", 0.0)
         
         try:
@@ -480,7 +480,6 @@ class Trainer:
         epochs: int = self.settings["training"]["epochs"]
         
         # Initialiseer de best-metrics voor het opslaan van het model
-        # best_relative_loss_difference_for_save wordt nu geïnitialiseerd in de __init__
         best_recall: float = float('-inf')
         best_accuracy_for_recall: float = float('-inf') 
 
@@ -547,7 +546,8 @@ class Trainer:
                     'run_precision': precision_value,
                     'run_f1': f1_value, 
                     'duration_epoch_seconds': epoch_duration,
-                    'learning_rate': optimizer.param_groups[0]['lr'],
+                    'learning_rate_initial': learning_rate, # Toevoegen van de initiële leerfrequentie
+                    'learning_rate': optimizer.param_groups[0]['lr'], # Huidige learning rate
                     'train_samples': train_samples,
                     'test_samples': test_samples,   
                     **{f'class_{i}_weight': self.class_weights[i].item() for i in range(self.class_count)},
@@ -597,26 +597,31 @@ class Trainer:
 
                 # --- Save the best model based on the new criteria ---
                 should_save = False
+                early_epochs_threshold = int(epochs * 0.1)
 
-                # Altijd het model opslaan voor de eerste epoch om een basislijn te garanderen
                 if epoch == 1:
-                    logger.debug(f"Epoch {epoch}: Eerste epoch, model wordt altijd opgeslagen. Setting should_save = True.")
+                    logger.debug(f"Epoch {epoch}: First epoch, model will always be saved. Setting should_save = True.")
                     should_save = True
+                elif epoch <= early_epochs_threshold:
+                    # In de resterende 10% van de epochs (epoch 2 t/m early_epochs_threshold), opslaan als recall verbetert.
+                    if recall_value > best_recall:
+                        logger.debug(f"Epoch {epoch}: Early epoch ({epoch}/{early_epochs_threshold}), current recall ({recall_value:.4f}) > best recall ({best_recall:.4f}). Setting should_save = True.")
+                        should_save = True
+                    else:
+                        logger.debug(f"Epoch {epoch}: Early epoch, recall did not improve. Not saving.")
                 else:
+                    # Na de eerste 10% epochs, gebruik de complexe criteria
                     current_is_generalizing = (test_loss < train_loss)
                     current_is_acceptable_rel_diff = (relatief_verschil_loss <= ACCEPTABLE_REL_LOSS_DIFF_THRESHOLD)
 
-                    # Deze vlaggen voor het 'beste model' worden bijgewerkt als we een nieuw beste model opslaan
                     best_is_generalizing = self.best_model_generalizes
                     best_is_acceptable_rel_diff = (self.best_relative_loss_difference_for_save <= ACCEPTABLE_REL_LOSS_DIFF_THRESHOLD)
-
 
                     logger.debug(f"Epoch {epoch} Best Model Check: Current Generalizing={current_is_generalizing}, Best Generalizing={best_is_generalizing}")
                     logger.debug(f"Epoch {epoch} Best Model Check: Current RelDiff Acceptable={current_is_acceptable_rel_diff}, Best RelDiff Acceptable={best_is_acceptable_rel_diff}")
                     logger.debug(f"Epoch {epoch} Best Model Check: Current RelDiff={relatief_verschil_loss:.2f}, Best RelDiff={self.best_relative_loss_difference_for_save:.2f}")
                     logger.debug(f"Epoch {epoch} Best Model Check: Current Recall={recall_value:.4f}, Best Recall={best_recall:.4f}")
                     logger.debug(f"Epoch {epoch} Best Model Check: Current Accuracy={accuracy_value:.4f}, Best Accuracy={best_accuracy_for_recall:.4f}")
-
 
                     # Prioriteit 1: Generalisatie (test_loss < train_loss)
                     if current_is_generalizing and not best_is_generalizing:
@@ -639,13 +644,13 @@ class Trainer:
                                 # Prioriteit 4: Hoogste Recall
                                 if recall_value > best_recall:
                                     logger.debug(f"Epoch {epoch}: Current Recall {recall_value:.4f} > Best Recall {best_recall:.4f}. Setting should_save = True.")
-                                    should_save = True
+                                    should_save = True 
                                 elif recall_value == best_recall:
                                     logger.debug(f"Epoch {epoch}: Current Recall == Best Recall. Proceeding to Accuracy check.")
                                     # Prioriteit 5: Hoogste Nauwkeurigheid
                                     if accuracy_value > best_accuracy_for_recall:
                                         logger.debug(f"Epoch {epoch}: Current Accuracy {accuracy_value:.4f} > Best Accuracy {best_accuracy_for_recall:.4f}. Setting should_save = True.")
-                                        should_save = True
+                                        should_save = True 
                                     else:
                                         logger.debug(f"Epoch {epoch}: Current Accuracy {accuracy_value:.4f} <= Best Accuracy {best_accuracy_for_recall:.4f}. Not saving.")
                                 else: # recall_value < best_recall
@@ -678,7 +683,8 @@ class Trainer:
                             "best_f1": f1_value,
                             "best_loss_difference_abs": loss_difference_abs,
                             "best_loss_difference_rel_perc": relatief_verschil_loss,
-                            "best_epoch": epoch
+                            "best_epoch": epoch,
+                            "best_learning_rate": optimizer.param_groups[0]['lr'] # Voeg de leerfrequentie van de beste epoch toe
                         }
                     except Exception as e:
                         logger.error(f"Failed to save best model for {experiment_name} to {best_model_path}. Error: {e}")
