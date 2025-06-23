@@ -422,7 +422,7 @@ class Trainer:
             logger.debug(f"Model-specifieke configuratie voor '{model_name}': {_model_config}")
         except Exception as e:
             logger.critical(f"Failed to initialize model '{model_name}' for experiment '{experiment_name}': {e}", exc_info=True)
-            if self._log_handler_ids: # Deze check is nu veiliger, omdat _log_handler_ids altijd bestaat
+            if self._log_handler_ids: 
                 handler_to_remove = self._log_handler_ids.pop()
                 try:
                     logger.remove(handler_to_remove)
@@ -479,6 +479,8 @@ class Trainer:
 
         epochs: int = self.settings["training"]["epochs"]
         
+        # Initialiseer de best-metrics voor het opslaan van het model
+        # best_relative_loss_difference_for_save wordt nu geïnitialiseerd in de __init__
         best_recall: float = float('-inf')
         best_accuracy_for_recall: float = float('-inf') 
 
@@ -596,59 +598,64 @@ class Trainer:
                 # --- Save the best model based on the new criteria ---
                 should_save = False
 
-                current_is_generalizing = (test_loss < train_loss)
-                current_is_acceptable_rel_diff = (relatief_verschil_loss <= ACCEPTABLE_REL_LOSS_DIFF_THRESHOLD)
-
-                # Deze vlaggen voor het 'beste model' worden bijgewerkt als we een nieuw beste model opslaan
-                best_is_generalizing = self.best_model_generalizes
-                best_is_acceptable_rel_diff = (self.best_relative_loss_difference_for_save <= ACCEPTABLE_REL_LOSS_DIFF_THRESHOLD)
-
-
-                logger.debug(f"Epoch {epoch} Best Model Check: Current Generalizing={current_is_generalizing}, Best Generalizing={best_is_generalizing}")
-                logger.debug(f"Epoch {epoch} Best Model Check: Current RelDiff Acceptable={current_is_acceptable_rel_diff}, Best RelDiff Acceptable={best_is_acceptable_rel_diff}")
-                logger.debug(f"Epoch {epoch} Best Model Check: Current RelDiff={relatief_verschil_loss:.2f}, Best RelDiff={self.best_relative_loss_difference_for_save:.2f}")
-                logger.debug(f"Epoch {epoch} Best Model Check: Current Recall={recall_value:.4f}, Best Recall={best_recall:.4f}")
-                logger.debug(f"Epoch {epoch} Best Model Check: Current Accuracy={accuracy_value:.4f}, Best Accuracy={best_accuracy_for_recall:.4f}")
-
-
-                # Prioriteit 1: Generalisatie (test_loss < train_loss)
-                if current_is_generalizing and not best_is_generalizing:
-                    logger.debug(f"Epoch {epoch}: Current model generalizes, but best does not. Setting should_save = True.")
+                # Altijd het model opslaan voor de eerste epoch om een basislijn te garanderen
+                if epoch == 1:
+                    logger.debug(f"Epoch {epoch}: Eerste epoch, model wordt altijd opgeslagen. Setting should_save = True.")
                     should_save = True
-                elif current_is_generalizing == best_is_generalizing: # Beide generaliseren OF beide generaliseren niet
-                    logger.debug(f"Epoch {epoch}: Both current and best models have same generalization status. Proceeding to RelDiff check.")
-                    # Prioriteit 2: Relatief Verliesverschil <= 5%
-                    if current_is_acceptable_rel_diff and not best_is_acceptable_rel_diff:
-                        logger.debug(f"Epoch {epoch}: Current model has acceptable RelDiff, but best does not. Setting should_save = True.")
+                else:
+                    current_is_generalizing = (test_loss < train_loss)
+                    current_is_acceptable_rel_diff = (relatief_verschil_loss <= ACCEPTABLE_REL_LOSS_DIFF_THRESHOLD)
+
+                    # Deze vlaggen voor het 'beste model' worden bijgewerkt als we een nieuw beste model opslaan
+                    best_is_generalizing = self.best_model_generalizes
+                    best_is_acceptable_rel_diff = (self.best_relative_loss_difference_for_save <= ACCEPTABLE_REL_LOSS_DIFF_THRESHOLD)
+
+
+                    logger.debug(f"Epoch {epoch} Best Model Check: Current Generalizing={current_is_generalizing}, Best Generalizing={best_is_generalizing}")
+                    logger.debug(f"Epoch {epoch} Best Model Check: Current RelDiff Acceptable={current_is_acceptable_rel_diff}, Best RelDiff Acceptable={best_is_acceptable_rel_diff}")
+                    logger.debug(f"Epoch {epoch} Best Model Check: Current RelDiff={relatief_verschil_loss:.2f}, Best RelDiff={self.best_relative_loss_difference_for_save:.2f}")
+                    logger.debug(f"Epoch {epoch} Best Model Check: Current Recall={recall_value:.4f}, Best Recall={best_recall:.4f}")
+                    logger.debug(f"Epoch {epoch} Best Model Check: Current Accuracy={accuracy_value:.4f}, Best Accuracy={best_accuracy_for_recall:.4f}")
+
+
+                    # Prioriteit 1: Generalisatie (test_loss < train_loss)
+                    if current_is_generalizing and not best_is_generalizing:
+                        logger.debug(f"Epoch {epoch}: Current model generalizes, but best does not. Setting should_save = True.")
                         should_save = True
-                    elif current_is_acceptable_rel_diff == best_is_acceptable_rel_diff: # Beide acceptabel OF beide niet acceptabel
-                        logger.debug(f"Epoch {epoch}: Both current and best models have same RelDiff acceptability. Proceeding to smallest RelDiff.")
-                        # Prioriteit 3: Kleinste Relatieve Verliesverschil
-                        if relatief_verschil_loss < self.best_relative_loss_difference_for_save:
-                            logger.debug(f"Epoch {epoch}: Current RelDiff {relatief_verschil_loss:.2f} < Best RelDiff {self.best_relative_loss_difference_for_save:.2f}. Setting should_save = True.")
+                    elif current_is_generalizing == best_is_generalizing: # Beide generaliseren OF beide generaliseren niet
+                        logger.debug(f"Epoch {epoch}: Both current and best models have same generalization status. Proceeding to RelDiff check.")
+                        # Prioriteit 2: Relatief Verliesverschil <= 5%
+                        if current_is_acceptable_rel_diff and not best_is_acceptable_rel_diff:
+                            logger.debug(f"Epoch {epoch}: Current model has acceptable RelDiff, but best does not. Setting should_save = True.")
                             should_save = True
-                        elif relatief_verschil_loss == self.best_relative_loss_difference_for_save:
-                            logger.debug(f"Epoch {epoch}: Current RelDiff == Best RelDiff. Proceeding to Recall check.")
-                            # Prioriteit 4: Hoogste Recall
-                            if recall_value > best_recall:
-                                logger.debug(f"Epoch {epoch}: Current Recall {recall_value:.4f} > Best Recall {best_recall:.4f}. Setting should_save = True.")
+                        elif current_is_acceptable_rel_diff == best_is_acceptable_rel_diff: # Beide acceptabel OF beide niet acceptabel
+                            logger.debug(f"Epoch {epoch}: Both current and best models have same RelDiff acceptability. Proceeding to smallest RelDiff.")
+                            # Prioriteit 3: Kleinste Relatieve Verliesverschil
+                            if relatief_verschil_loss < self.best_relative_loss_difference_for_save:
+                                logger.debug(f"Epoch {epoch}: Current RelDiff {relatief_verschil_loss:.2f} < Best RelDiff {self.best_relative_loss_difference_for_save:.2f}. Setting should_save = True.")
                                 should_save = True
-                            elif recall_value == best_recall:
-                                logger.debug(f"Epoch {epoch}: Current Recall == Best Recall. Proceeding to Accuracy check.")
-                                # Prioriteit 5: Hoogste Nauwkeurigheid
-                                if accuracy_value > best_accuracy_for_recall:
-                                    logger.debug(f"Epoch {epoch}: Current Accuracy {accuracy_value:.4f} > Best Accuracy {best_accuracy_for_recall:.4f}. Setting should_save = True.")
+                            elif relatief_verschil_loss == self.best_relative_loss_difference_for_save:
+                                logger.debug(f"Epoch {epoch}: Current RelDiff == Best RelDiff. Proceeding to Recall check.")
+                                # Prioriteit 4: Hoogste Recall
+                                if recall_value > best_recall:
+                                    logger.debug(f"Epoch {epoch}: Current Recall {recall_value:.4f} > Best Recall {best_recall:.4f}. Setting should_save = True.")
                                     should_save = True
-                                else:
-                                    logger.debug(f"Epoch {epoch}: Current Accuracy {accuracy_value:.4f} <= Best Accuracy {best_accuracy_for_recall:.4f}. Not saving.")
-                            else: # recall_value < best_recall
-                                logger.debug(f"Epoch {epoch}: Current Recall {recall_value:.4f} < Best Recall {best_recall:.4f}. Not saving.")
-                        else: # relatief_verschil_loss > self.best_relative_loss_difference_for_save
-                            logger.debug(f"Epoch {epoch}: Current RelDiff {relatief_verschil_loss:.2f} > Best RelDiff {self.best_relative_loss_difference_for_save:.2f}. Not saving.")
-                    else: # current_is_acceptable_rel_diff is False and best_is_acceptable_rel_diff is True
-                        logger.debug(f"Epoch {epoch}: Current model is not acceptable RelDiff, but best is. Not saving.")
-                else: # current_is_generalizing is False and best_is_generalizing is True
-                    logger.debug(f"Epoch {epoch}: Current model does not generalize, but best does. Not saving.")
+                                elif recall_value == best_recall:
+                                    logger.debug(f"Epoch {epoch}: Current Recall == Best Recall. Proceeding to Accuracy check.")
+                                    # Prioriteit 5: Hoogste Nauwkeurigheid
+                                    if accuracy_value > best_accuracy_for_recall:
+                                        logger.debug(f"Epoch {epoch}: Current Accuracy {accuracy_value:.4f} > Best Accuracy {best_accuracy_for_recall:.4f}. Setting should_save = True.")
+                                        should_save = True
+                                    else:
+                                        logger.debug(f"Epoch {epoch}: Current Accuracy {accuracy_value:.4f} <= Best Accuracy {best_accuracy_for_recall:.4f}. Not saving.")
+                                else: # recall_value < best_recall
+                                    logger.debug(f"Epoch {epoch}: Current Recall {recall_value:.4f} < Best Recall {best_recall:.4f}. Not saving.")
+                            else: # relatief_verschil_loss > self.best_relative_loss_difference_for_save
+                                logger.debug(f"Epoch {epoch}: Current RelDiff {relatief_verschil_loss:.2f} > Best RelDiff {self.best_relative_loss_difference_for_save:.2f}. Not saving.")
+                        else: # current_is_acceptable_rel_diff is False and best_is_acceptable_rel_diff is True
+                            logger.debug(f"Epoch {epoch}: Current model is not acceptable RelDiff, but best is. Not saving.")
+                    else: # current_is_generalizing is False and best_is_generalizing is True
+                        logger.debug(f"Epoch {epoch}: Current model does not generalize, but best does. Not saving.")
 
 
                 if should_save:
