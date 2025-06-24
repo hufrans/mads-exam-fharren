@@ -13,19 +13,21 @@ scheduler_factor = 0.1 # Factor waarmee de learning rate wordt verminderd door d
 scheduler_patience = 3 # Aantal epochs zonder verbetering voordat de learning rate wordt aangepast
 log_dir = "runs"       # Directory waar trainingslogs en modelartefacten worden opgeslagen
 
-early_stopping_patience  = 15                  # Aantal epochs om te wachten zonder verbetering van testloss
-early_stopping_min_delta = 0.001               # Minimale verbetering in testloss om als 'verbetering' te tellen
-use_scheduler            = true                # Zet deze op 'true' om de scheduler in te schakelen
-scheduler_type           = "ReduceLROnPlateau" # Of "StepLR", afhankelijk van je voorkeur
-weight_decay             = 0.0001              # Voorbeeld van weight decay (L2 regularisatie)
+early_stopping_patience = 20         # Aantal epochs om te wachten zonder verbetering van testloss
+early_stopping_min_delta = 0.001     # Minimale verbetering in testloss om als 'verbetering' te tellen
+use_scheduler = true                 # Zet deze op 'true' om de scheduler in te schakelen
+scheduler_type = "ReduceLROnPlateau" # Of "StepLR", afhankelijk van je voorkeur
+weight_decay = 0.0005                # Voorbeeld van weight decay (L2 regularisatie)
 
-[training.scheduler_kwargs] # Nieuwe sectie voor scheduler argumenten
-mode = "min"  # Voor ReduceLROnPlateau: 'min' voor monitoring van verlies, 'max' voor monitoring van metrics (bijv. accuracy)
-factor = 0.1  # De factor waarmee de leerfrequentie wordt verminderd (nieuwe_lr = oude_lr * factor)
-patience = 5  # Aantal epochs zonder verbetering voordat de leerfrequentie wordt verminderd
+[training.scheduler_kwargs] 
+mode = "min" # Voor ReduceLROnPlateau: 'min' voor monitoring van verlies, 'max' voor monitoring van metrics (bijv. accuracy)
+factor = 0.1 # De factor waarmee de leerfrequentie wordt verminderd (nieuwe_lr = oude_lr * factor)
+patience = 5 # Aantal epochs zonder verbetering voordat de leerfrequentie wordt verminderd
 
 # --- Model Specifieke Parameters ---
 # Let op: de 'input_size_after_flattening' voor de CNN wordt dynamisch berekend in main.py.
+# De parameters in deze secties dienen als standaardwaarden.
+# De 'hyper_params_list' in main.py overschrijft deze voor specifieke experimentruns.
 
 [model_params.baseline]
 input_size = 187 # Input grootte van het baseline model (aantal features)
@@ -39,7 +41,7 @@ output_size = 5         # Output grootte van het CNN model (aantal klassen)
 conv_filters = [32, 64] # Lijst van het aantal filters in elke convolutionele laag
 kernel_size = 3         # Grootte van de convolutionele kernel
 use_dropout = true      # Boolean om aan te geven of dropout gebruikt moet worden
-dropout_rate = 0.5      # Dropout rate indien use_dropout = true
+dropout_rate = 0.4      # Dropout rate indien use_dropout = true
 
 [model_params.gru]
 input_size = 187  # Input grootte van het GRU model (aantal features per tijdstap)
@@ -49,12 +51,12 @@ output_size = 5   # Output grootte van het GRU model (aantal klassen)
 dropout = 0.2     # Dropout rate toegepast op de output van elke GRU-laag (behalve de laatste)
 
 [model_params.cnn_se_skip]
-input_channels = 1            # Aantal input kanalen (1 voor 1D numerieke features)
-hidden_size = 64              # Grootte van de volledig verbonden (dense) verborgen laag na de laatste conv block
-num_layers = 2                # Aantal herhalende CNN-SE-Skip blokken
-output_size = 5               # Output grootte van het model (aantal klassen)
-conv_filters_per_block = 32   # Aantal filters in elke convolutionele laag binnen een blok
-kernel_size_per_block = 3     # Grootte van de convolutionele kernel binnen een blok
-use_dropout = true            # Boolean om aan te geven of dropout gebruikt moet worden
-dropout_rate = 0.3            # Dropout rate indien use_dropout = true
-reduction_ratio = 8           # Reductiefactor voor het Squeeze-and-Excitation blok
+input_channels = 1          # Aantal input kanalen (1 voor 1D numerieke features)
+hidden_size = 64            # Grootte van de volledig verbonden (dense) verborgen laag na de laatste conv block
+num_layers = 2              # Aantal herhalende CNN-SE-Skip blokken
+output_size = 5             # Output grootte van het model (aantal klassen)
+conv_filters_per_block = 32 # Aantal filters in elke convolutionele laag binnen een blok
+kernel_size_per_block = 3   # Grootte van de convolutionele kernel binnen een blok
+use_dropout = true          # Boolean om aan te geven of dropout gebruikt moet worden
+dropout_rate = 0.3          # Dropout rate indien use_dropout = true
+reduction_ratio = 8         # Reductiefactor voor het Squeeze-and-Excitation blok
