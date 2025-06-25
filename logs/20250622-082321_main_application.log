@@ -1,0 +1,15 @@
+2025-06-22 08:23:21.309 | INFO     | __main__:<module>:46 - Start van het hoofdscript. Algemene logs worden opgeslagen in '/home/azureuser/mads-exam-fharren/src/fh/../../logs/20250622-082321_main_application.log'.
+2025-06-22 08:23:21.361 | INFO     | src.fh.utils:load_config:15 - Attempting to load configuration from: /home/azureuser/mads-exam-fharren/src/fh/../../config.toml
+2025-06-22 08:23:21.364 | SUCCESS  | src.fh.utils:load_config:18 - Configuration successfully loaded from: /home/azureuser/mads-exam-fharren/src/fh/../../config.toml
+2025-06-22 08:23:21.364 | INFO     | __main__:<module>:277 - Configuratie geladen vanuit /home/azureuser/mads-exam-fharren/src/fh/../../config.toml.
+2025-06-22 08:23:21.365 | INFO     | __main__:<module>:288 - Zorgen dat de data directory bestaat: /home/azureuser/mads-exam-fharren/src/fh/../../data
+2025-06-22 08:23:21.365 | INFO     | __main__:<module>:328 - --- STANDAARD MODUS: GEBRUIK ECHTE DATA ---
+2025-06-22 08:23:21.365 | INFO     | __main__:<module>:332 - Gebruik van data uit configuratiebestand: '/home/azureuser/mads-exam-fharren/src/fh/../../data/heart_big_train.parq' en '/home/azureuser/mads-exam-fharren/src/fh/../../data/heart_big_test.parq'.
+2025-06-22 08:23:21.365 | INFO     | __main__:run_experiment:68 - Start van het experiment met configuratiebestand: /home/azureuser/mads-exam-fharren/src/fh/../../config.toml
+2025-06-22 08:23:21.365 | INFO     | src.fh.utils:load_config:15 - Attempting to load configuration from: /home/azureuser/mads-exam-fharren/src/fh/../../config.toml
+2025-06-22 08:23:21.367 | SUCCESS  | src.fh.utils:load_config:18 - Configuration successfully loaded from: /home/azureuser/mads-exam-fharren/src/fh/../../config.toml
+2025-06-22 08:23:21.368 | INFO     | __main__:run_experiment:72 - Configuratiebestand succesvol geladen.
+2025-06-22 08:23:21.368 | INFO     | __main__:run_experiment:79 - Start data laden...
+2025-06-22 08:23:21.368 | INFO     | __main__:run_experiment:86 - Vastgestelde feature count: 187, class count: 5
+2025-06-22 08:23:21.368 | INFO     | __main__:run_experiment:115 - Laden van data van /home/azureuser/mads-exam-fharren/src/fh/../../data/heart_big_train.parq en /home/azureuser/mads-exam-fharren/src/fh/../../data/heart_big_test.parq...
+2025-06-22 08:23:21.631 | ERROR    | __main__:run_experiment:144 - Fout bij het aanmaken van data loaders: The 'classes' parameter of compute_class_weight must be an instance of 'numpy.ndarray'. Got [np.float64(0.0), np.float64(1.0), np.float64(2.0), np.float64(3.0), np.float64(4.0)] instead.

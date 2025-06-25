@@ -1,0 +1,6 @@
+2025-06-22 09:24:41.219 | INFO     | __main__:<module>:48 - Start van het hoofdscript. Algemene logs worden opgeslagen in '/home/azureuser/mads-exam-fharren/src/fh/../../logs/20250622-092441_main_application.log'.
+2025-06-22 09:24:41.258 | INFO     | src.fh.utils:load_config:15 - Attempting to load configuration from: /home/azureuser/mads-exam-fharren/src/fh/../../config.toml
+2025-06-22 09:24:41.260 | SUCCESS  | src.fh.utils:load_config:18 - Configuration successfully loaded from: /home/azureuser/mads-exam-fharren/src/fh/../../config.toml
+2025-06-22 09:24:41.260 | INFO     | __main__:<module>:265 - Configuratie geladen vanuit /home/azureuser/mads-exam-fharren/src/fh/../../config.toml.
+2025-06-22 09:24:41.260 | INFO     | __main__:<module>:275 - Zorgen dat de data directory bestaat: /home/azureuser/mads-exam-fharren/src/fh/../../data
+2025-06-22 09:24:41.261 | INFO     | __main__:<module>:329 - --- STANDAARD MODUS: GEBRUIK ECHTE DATA ---

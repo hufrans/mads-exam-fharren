@@ -1,0 +1,135 @@
+2025-06-22 07:03:37.374 | INFO     | __main__:<module>:45 - Start van het hoofdscript. Algemene logs worden opgeslagen in '/home/azureuser/mads-exam-fharren/src/fh/../../logs/20250622-070337_main_application.log'.
+2025-06-22 07:03:38.103 | INFO     | src.fh.utils:load_config:15 - Attempting to load configuration from: /home/azureuser/mads-exam-fharren/src/fh/../../config.toml
+2025-06-22 07:03:38.105 | SUCCESS  | src.fh.utils:load_config:18 - Configuration successfully loaded from: /home/azureuser/mads-exam-fharren/src/fh/../../config.toml
+2025-06-22 07:03:38.105 | INFO     | __main__:<module>:253 - Configuratie geladen vanuit /home/azureuser/mads-exam-fharren/src/fh/../../config.toml.
+2025-06-22 07:03:38.106 | INFO     | __main__:<module>:265 - Zorgen dat de data directory bestaat: /home/azureuser/mads-exam-fharren/src/fh/../../data
+2025-06-22 07:03:38.106 | INFO     | __main__:<module>:301 - --- STANDAARD MODUS: GEBRUIK ECHTE DATA ---
+2025-06-22 07:03:38.106 | INFO     | __main__:<module>:302 - Gebruik van data uit configuratiebestand: 'data/heart_big_train.parq' en 'data/heart_big_test.parq'.
+2025-06-22 07:03:38.106 | INFO     | __main__:run_experiment:65 - Start van het experiment met configuratiebestand: /home/azureuser/mads-exam-fharren/src/fh/../../config.toml
+2025-06-22 07:03:38.107 | INFO     | src.fh.utils:load_config:15 - Attempting to load configuration from: /home/azureuser/mads-exam-fharren/src/fh/../../config.toml
+2025-06-22 07:03:38.109 | SUCCESS  | src.fh.utils:load_config:18 - Configuration successfully loaded from: /home/azureuser/mads-exam-fharren/src/fh/../../config.toml
+2025-06-22 07:03:38.109 | INFO     | __main__:run_experiment:69 - Configuratiebestand succesvol geladen.
+2025-06-22 07:03:38.109 | INFO     | __main__:run_experiment:76 - Start data laden...
+2025-06-22 07:03:38.110 | INFO     | __main__:run_experiment:88 - Vastgestelde feature count: 192, class count: 5
+2025-06-22 07:03:38.110 | WARNING  | __main__:run_experiment:98 - Baseline model input_size (187) komt niet overeen met het werkelijke aantal features (192). Aangepast.
+2025-06-22 07:03:38.110 | WARNING  | __main__:run_experiment:112 - GRU model input_size (187) komt niet overeen met het werkelijke aantal features (192). Aangepast.
+2025-06-22 07:03:38.111 | INFO     | __main__:run_experiment:115 - Laden van data van /home/azureuser/mads-exam-fharren/src/fh/../../data/heart_big_train.parq en /home/azureuser/mads-exam-fharren/src/fh/../../data/heart_big_test.parq...
+2025-06-22 07:03:38.111 | INFO     | src.fh.data_loader:get_data_loaders:85 - Creating data loaders with batch_size=32.
+2025-06-22 07:03:38.111 | INFO     | src.fh.data_loader:__init__:20 - Initializing CustomDataset from: /home/azureuser/mads-exam-fharren/src/fh/../../data/heart_big_train.parq
+2025-06-22 07:03:38.153 | SUCCESS  | src.fh.data_loader:__init__:24 - Data successfully loaded from /home/azureuser/mads-exam-fharren/src/fh/../../data/heart_big_train.parq. Found 100 samples.
+2025-06-22 07:03:38.155 | INFO     | src.fh.data_loader:__init__:20 - Initializing CustomDataset from: /home/azureuser/mads-exam-fharren/src/fh/../../data/heart_big_test.parq
+2025-06-22 07:03:38.171 | SUCCESS  | src.fh.data_loader:__init__:24 - Data successfully loaded from /home/azureuser/mads-exam-fharren/src/fh/../../data/heart_big_test.parq. Found 50 samples.
+2025-06-22 07:03:38.173 | SUCCESS  | src.fh.data_loader:get_data_loaders:105 - Successfully created train loader with 100 samples and test loader with 50 samples.
+2025-06-22 07:03:38.173 | SUCCESS  | __main__:run_experiment:125 - Data loaders succesvol aangemaakt.
+2025-06-22 07:03:38.173 | INFO     | __main__:run_experiment:131 - Initialiseren van de Trainer...
+2025-06-22 07:03:38.184 | INFO     | src.fh.training_framework:__init__:90 - Initializing Trainer. Using device: cpu
+2025-06-22 07:03:38.184 | INFO     | src.fh.training_framework:__init__:91 - Logging and outputs for this run will be stored in: /home/azureuser/mads-exam-fharren/src/fh/../../logs/20250622-070337_run_logs
+2025-06-22 07:03:38.185 | INFO     | __main__:run_experiment:138 - Trainer succesvol geïnitialiseerd.
+2025-06-22 07:03:38.185 | INFO     | __main__:run_experiment:141 - 
+--- Start Training Baseline Model ---
+2025-06-22 07:03:38.186 | INFO     | src.fh.training_framework:run_training:327 - Starting training run for model: baseline_model, experiment: Baseline
+2025-06-22 07:03:38.186 | INFO     | src.fh.model_selector:get_model:27 - Model selector: aanmaken van model 'baseline_model' met config: {'input_size': 192, 'output_size': 5}
+2025-06-22 07:03:38.186 | INFO     | src.fh.models.baseline_model:__init__:19 - Initializing BaselineModel...
+2025-06-22 07:03:38.190 | INFO     | src.fh.models.baseline_model:__init__:38 - BaselineModel initialized with input_size=192, hidden_size=64, output_size=5.
+2025-06-22 07:03:38.192 | INFO     | src.fh.training_framework:run_training:370 - Model 'baseline_model' van experiment 'Baseline' geïnitialiseerd en verplaatst naar cpu.
+2025-06-22 07:03:39.731 | INFO     | src.fh.training_framework:run_training:407 - Scheduler is disabled in configuration.
+2025-06-22 07:03:39.768 | INFO     | src.fh.training_framework:run_training:445 - Experiment: Baseline, Epoch:  1/10, Train Loss: 1.6209, Test Loss: 1.6063, Accuracy: 0.2000, Recall: 0.2000, Precision: 0.0511, F1: 0.0814, Duration: 0.04s, Current LR: 0.001000
+2025-06-22 07:03:39.805 | INFO     | src.fh.training_framework:run_training:445 - Experiment: Baseline, Epoch:  2/10, Train Loss: 1.5912, Test Loss: 1.6085, Accuracy: 0.1600, Recall: 0.1600, Precision: 0.0766, F1: 0.1000, Duration: 0.03s, Current LR: 0.001000
+2025-06-22 07:03:39.845 | INFO     | src.fh.training_framework:run_training:445 - Experiment: Baseline, Epoch:  3/10, Train Loss: 1.5814, Test Loss: 1.6128, Accuracy: 0.2000, Recall: 0.2000, Precision: 0.0943, F1: 0.1045, Duration: 0.03s, Current LR: 0.001000
+2025-06-22 07:03:39.886 | INFO     | src.fh.training_framework:run_training:445 - Experiment: Baseline, Epoch:  4/10, Train Loss: 1.5718, Test Loss: 1.6121, Accuracy: 0.1200, Recall: 0.1200, Precision: 0.0565, F1: 0.0759, Duration: 0.03s, Current LR: 0.001000
+2025-06-22 07:03:39.924 | INFO     | src.fh.training_framework:run_training:445 - Experiment: Baseline, Epoch:  5/10, Train Loss: 1.5622, Test Loss: 1.6070, Accuracy: 0.1600, Recall: 0.1600, Precision: 0.0427, F1: 0.0674, Duration: 0.03s, Current LR: 0.001000
+2025-06-22 07:03:39.966 | INFO     | src.fh.training_framework:run_training:445 - Experiment: Baseline, Epoch:  6/10, Train Loss: 1.5557, Test Loss: 1.6030, Accuracy: 0.2200, Recall: 0.2200, Precision: 0.0550, F1: 0.0880, Duration: 0.03s, Current LR: 0.001000
+2025-06-22 07:03:40.008 | INFO     | src.fh.training_framework:run_training:445 - Experiment: Baseline, Epoch:  7/10, Train Loss: 1.5460, Test Loss: 1.6004, Accuracy: 0.3000, Recall: 0.3000, Precision: 0.1392, F1: 0.1891, Duration: 0.03s, Current LR: 0.001000
+2025-06-22 07:03:40.050 | INFO     | src.fh.training_framework:run_training:445 - Experiment: Baseline, Epoch:  8/10, Train Loss: 1.5393, Test Loss: 1.6016, Accuracy: 0.2200, Recall: 0.2200, Precision: 0.1100, F1: 0.1100, Duration: 0.03s, Current LR: 0.001000
+2025-06-22 07:03:40.108 | INFO     | src.fh.training_framework:run_training:445 - Experiment: Baseline, Epoch:  9/10, Train Loss: 1.5319, Test Loss: 1.6037, Accuracy: 0.2200, Recall: 0.2200, Precision: 0.0504, F1: 0.0820, Duration: 0.04s, Current LR: 0.001000
+2025-06-22 07:03:40.152 | INFO     | src.fh.training_framework:run_training:445 - Experiment: Baseline, Epoch: 10/10, Train Loss: 1.5271, Test Loss: 1.6071, Accuracy: 0.2200, Recall: 0.2200, Precision: 0.0504, F1: 0.0820, Duration: 0.03s, Current LR: 0.001000
+2025-06-22 07:03:40.163 | INFO     | src.fh.training_framework:run_training:521 - Training for model Baseline finished. Total duration: 0:00:01.976584
+2025-06-22 07:03:40.164 | INFO     | __main__:run_experiment:151 - Baseline model training voltooid.
+2025-06-22 07:03:40.165 | INFO     | __main__:run_experiment:154 - 
+--- Start Training CNN Model (Hyperparameter Tuning) ---
+2025-06-22 07:03:40.165 | INFO     | __main__:run_experiment:168 - 
+--- Uitvoeren CNN Experiment 1/2 ---
+2025-06-22 07:03:40.165 | INFO     | __main__:run_experiment:183 - Berekende CNN input_size_after_flattening voor lineaire laag: 1536
+2025-06-22 07:03:40.165 | INFO     | src.fh.training_framework:run_training:327 - Starting training run for model: cnn_model, experiment: CNN_Experiment_1
+2025-06-22 07:03:40.166 | INFO     | src.fh.model_selector:get_model:27 - Model selector: aanmaken van model 'cnn_model' met config: {'input_channels': 1, 'hidden_size': 32, 'num_layers': 2, 'output_size': 5, 'conv_filters': [16, 32], 'kernel_size': 3, 'use_dropout': False, 'dropout_rate': 0.5, 'input_size_after_flattening': 1536}
+2025-06-22 07:03:40.166 | INFO     | src.fh.models.cnn_model:__init__:21 - Initializing CNNModel...
+2025-06-22 07:03:40.170 | INFO     | src.fh.models.cnn_model:__init__:77 - CNNModel initialized. Total parameters: 50981
+2025-06-22 07:03:40.171 | INFO     | src.fh.training_framework:run_training:370 - Model 'cnn_model' van experiment 'CNN_Experiment_1' geïnitialiseerd en verplaatst naar cpu.
+2025-06-22 07:03:40.172 | INFO     | src.fh.training_framework:run_training:407 - Scheduler is disabled in configuration.
+2025-06-22 07:03:40.228 | INFO     | src.fh.training_framework:run_training:445 - Experiment: CNN_Experiment_1, Epoch:  1/10, Train Loss: 1.6231, Test Loss: 1.6130, Accuracy: 0.2200, Recall: 0.2200, Precision: 0.1168, F1: 0.1259, Duration: 0.06s, Current LR: 0.001000
+2025-06-22 07:03:40.273 | INFO     | src.fh.training_framework:run_training:445 - Experiment: CNN_Experiment_1, Epoch:  2/10, Train Loss: 1.6088, Test Loss: 1.6100, Accuracy: 0.2200, Recall: 0.2200, Precision: 0.0484, F1: 0.0793, Duration: 0.04s, Current LR: 0.001000
+2025-06-22 07:03:40.326 | INFO     | src.fh.training_framework:run_training:445 - Experiment: CNN_Experiment_1, Epoch:  3/10, Train Loss: 1.6093, Test Loss: 1.6107, Accuracy: 0.2200, Recall: 0.2200, Precision: 0.0484, F1: 0.0793, Duration: 0.04s, Current LR: 0.001000
+2025-06-22 07:03:40.382 | INFO     | src.fh.training_framework:run_training:445 - Experiment: CNN_Experiment_1, Epoch:  4/10, Train Loss: 1.6071, Test Loss: 1.6122, Accuracy: 0.2200, Recall: 0.2200, Precision: 0.0484, F1: 0.0793, Duration: 0.04s, Current LR: 0.001000
+2025-06-22 07:03:40.435 | INFO     | src.fh.training_framework:run_training:445 - Experiment: CNN_Experiment_1, Epoch:  5/10, Train Loss: 1.6012, Test Loss: 1.6084, Accuracy: 0.2200, Recall: 0.2200, Precision: 0.0871, F1: 0.1248, Duration: 0.04s, Current LR: 0.001000
+2025-06-22 07:03:40.494 | INFO     | src.fh.training_framework:run_training:445 - Experiment: CNN_Experiment_1, Epoch:  6/10, Train Loss: 1.5947, Test Loss: 1.6075, Accuracy: 0.2200, Recall: 0.2200, Precision: 0.0484, F1: 0.0793, Duration: 0.05s, Current LR: 0.001000
+2025-06-22 07:03:40.549 | INFO     | src.fh.training_framework:run_training:445 - Experiment: CNN_Experiment_1, Epoch:  7/10, Train Loss: 1.5932, Test Loss: 1.6100, Accuracy: 0.2200, Recall: 0.2200, Precision: 0.0484, F1: 0.0793, Duration: 0.04s, Current LR: 0.001000
+2025-06-22 07:03:40.596 | INFO     | src.fh.training_framework:run_training:445 - Experiment: CNN_Experiment_1, Epoch:  8/10, Train Loss: 1.5919, Test Loss: 1.6127, Accuracy: 0.2200, Recall: 0.2200, Precision: 0.0484, F1: 0.0793, Duration: 0.04s, Current LR: 0.001000
+2025-06-22 07:03:40.642 | INFO     | src.fh.training_framework:run_training:445 - Experiment: CNN_Experiment_1, Epoch:  9/10, Train Loss: 1.5929, Test Loss: 1.6140, Accuracy: 0.2200, Recall: 0.2200, Precision: 0.0484, F1: 0.0793, Duration: 0.03s, Current LR: 0.001000
+2025-06-22 07:03:40.699 | INFO     | src.fh.training_framework:run_training:445 - Experiment: CNN_Experiment_1, Epoch: 10/10, Train Loss: 1.5919, Test Loss: 1.6130, Accuracy: 0.2200, Recall: 0.2200, Precision: 0.0484, F1: 0.0793, Duration: 0.04s, Current LR: 0.001000
+2025-06-22 07:03:40.709 | INFO     | src.fh.training_framework:run_training:521 - Training for model CNN_Experiment_1 finished. Total duration: 0:00:00.543719
+2025-06-22 07:03:40.711 | INFO     | __main__:run_experiment:168 - 
+--- Uitvoeren CNN Experiment 2/2 ---
+2025-06-22 07:03:40.711 | INFO     | __main__:run_experiment:183 - Berekende CNN input_size_after_flattening voor lineaire laag: 3072
+2025-06-22 07:03:40.711 | INFO     | src.fh.training_framework:run_training:327 - Starting training run for model: cnn_model, experiment: CNN_Experiment_2
+2025-06-22 07:03:40.711 | INFO     | src.fh.model_selector:get_model:27 - Model selector: aanmaken van model 'cnn_model' met config: {'input_channels': 1, 'hidden_size': 64, 'num_layers': 2, 'output_size': 5, 'conv_filters': [32, 64], 'kernel_size': 5, 'use_dropout': True, 'dropout_rate': 0.3, 'input_size_after_flattening': 3072}
+2025-06-22 07:03:40.712 | INFO     | src.fh.models.cnn_model:__init__:21 - Initializing CNNModel...
+2025-06-22 07:03:40.716 | INFO     | src.fh.models.cnn_model:__init__:77 - CNNModel initialized. Total parameters: 207493
+2025-06-22 07:03:40.717 | INFO     | src.fh.training_framework:run_training:370 - Model 'cnn_model' van experiment 'CNN_Experiment_2' geïnitialiseerd en verplaatst naar cpu.
+2025-06-22 07:03:40.718 | INFO     | src.fh.training_framework:run_training:407 - Scheduler is disabled in configuration.
+2025-06-22 07:03:40.791 | INFO     | src.fh.training_framework:run_training:445 - Experiment: CNN_Experiment_2, Epoch:  1/10, Train Loss: 1.6263, Test Loss: 1.5979, Accuracy: 0.2400, Recall: 0.2400, Precision: 0.0576, F1: 0.0929, Duration: 0.07s, Current LR: 0.001000
+2025-06-22 07:03:40.867 | INFO     | src.fh.training_framework:run_training:445 - Experiment: CNN_Experiment_2, Epoch:  2/10, Train Loss: 1.6154, Test Loss: 1.6001, Accuracy: 0.2400, Recall: 0.2400, Precision: 0.0576, F1: 0.0929, Duration: 0.07s, Current LR: 0.001000
+2025-06-22 07:03:40.931 | INFO     | src.fh.training_framework:run_training:445 - Experiment: CNN_Experiment_2, Epoch:  3/10, Train Loss: 1.6050, Test Loss: 1.6077, Accuracy: 0.2400, Recall: 0.2400, Precision: 0.0576, F1: 0.0929, Duration: 0.05s, Current LR: 0.001000
+2025-06-22 07:03:40.995 | INFO     | src.fh.training_framework:run_training:445 - Experiment: CNN_Experiment_2, Epoch:  4/10, Train Loss: 1.6009, Test Loss: 1.6111, Accuracy: 0.1800, Recall: 0.1800, Precision: 0.0865, F1: 0.1040, Duration: 0.05s, Current LR: 0.001000
+2025-06-22 07:03:41.079 | INFO     | src.fh.training_framework:run_training:445 - Experiment: CNN_Experiment_2, Epoch:  5/10, Train Loss: 1.6032, Test Loss: 1.6082, Accuracy: 0.1600, Recall: 0.1600, Precision: 0.0632, F1: 0.0893, Duration: 0.07s, Current LR: 0.001000
+2025-06-22 07:03:41.144 | INFO     | src.fh.training_framework:run_training:445 - Experiment: CNN_Experiment_2, Epoch:  6/10, Train Loss: 1.5821, Test Loss: 1.6054, Accuracy: 0.2400, Recall: 0.2400, Precision: 0.0576, F1: 0.0929, Duration: 0.05s, Current LR: 0.001000
+2025-06-22 07:03:41.218 | INFO     | src.fh.training_framework:run_training:445 - Experiment: CNN_Experiment_2, Epoch:  7/10, Train Loss: 1.5823, Test Loss: 1.6022, Accuracy: 0.2400, Recall: 0.2400, Precision: 0.0588, F1: 0.0944, Duration: 0.06s, Current LR: 0.001000
+2025-06-22 07:03:41.292 | INFO     | src.fh.training_framework:run_training:445 - Experiment: CNN_Experiment_2, Epoch:  8/10, Train Loss: 1.5789, Test Loss: 1.6114, Accuracy: 0.1800, Recall: 0.1800, Precision: 0.0717, F1: 0.0943, Duration: 0.06s, Current LR: 0.001000
+2025-06-22 07:03:41.350 | INFO     | src.fh.training_framework:run_training:445 - Experiment: CNN_Experiment_2, Epoch:  9/10, Train Loss: 1.5741, Test Loss: 1.6104, Accuracy: 0.1400, Recall: 0.1400, Precision: 0.0600, F1: 0.0778, Duration: 0.05s, Current LR: 0.001000
+2025-06-22 07:03:41.415 | INFO     | src.fh.training_framework:run_training:445 - Experiment: CNN_Experiment_2, Epoch: 10/10, Train Loss: 1.5616, Test Loss: 1.6120, Accuracy: 0.1800, Recall: 0.1800, Precision: 0.0712, F1: 0.1020, Duration: 0.05s, Current LR: 0.001000
+2025-06-22 07:03:41.426 | INFO     | src.fh.training_framework:run_training:521 - Training for model CNN_Experiment_2 finished. Total duration: 0:00:00.714834
+2025-06-22 07:03:41.427 | INFO     | __main__:run_experiment:193 - CNN model training voltooid.
+2025-06-22 07:03:41.428 | INFO     | __main__:run_experiment:196 - 
+--- Start Training GRU Model (Hyperparameter Tuning) ---
+2025-06-22 07:03:41.428 | INFO     | __main__:run_experiment:210 - 
+--- Uitvoeren GRU Experiment 1/2 ---
+2025-06-22 07:03:41.428 | INFO     | src.fh.training_framework:run_training:327 - Starting training run for model: gru_model, experiment: GRU_Experiment_1
+2025-06-22 07:03:41.429 | INFO     | src.fh.model_selector:get_model:27 - Model selector: aanmaken van model 'gru_model' met config: {'input_size': 192, 'hidden_size': 64, 'num_layers': 1, 'output_size': 5, 'dropout': 0.0}
+2025-06-22 07:03:41.429 | INFO     | src.fh.models.gru_model:__init__:20 - Initializing GRUModel...
+2025-06-22 07:03:41.431 | INFO     | src.fh.models.gru_model:__init__:64 - GRUModel initialized. Total parameters: 49861
+2025-06-22 07:03:41.432 | INFO     | src.fh.training_framework:run_training:370 - Model 'gru_model' van experiment 'GRU_Experiment_1' geïnitialiseerd en verplaatst naar cpu.
+2025-06-22 07:03:41.432 | INFO     | src.fh.training_framework:run_training:407 - Scheduler is disabled in configuration.
+2025-06-22 07:03:41.458 | INFO     | src.fh.training_framework:run_training:445 - Experiment: GRU_Experiment_1, Epoch:  1/10, Train Loss: 1.6151, Test Loss: 1.5946, Accuracy: 0.2400, Recall: 0.2400, Precision: 0.1240, F1: 0.1562, Duration: 0.02s, Current LR: 0.001000
+2025-06-22 07:03:41.488 | INFO     | src.fh.training_framework:run_training:445 - Experiment: GRU_Experiment_1, Epoch:  2/10, Train Loss: 1.5869, Test Loss: 1.5950, Accuracy: 0.2200, Recall: 0.2200, Precision: 0.0930, F1: 0.1286, Duration: 0.02s, Current LR: 0.001000
+2025-06-22 07:03:41.526 | INFO     | src.fh.training_framework:run_training:445 - Experiment: GRU_Experiment_1, Epoch:  3/10, Train Loss: 1.5865, Test Loss: 1.5982, Accuracy: 0.2200, Recall: 0.2200, Precision: 0.0922, F1: 0.1248, Duration: 0.03s, Current LR: 0.001000
+2025-06-22 07:03:41.566 | INFO     | src.fh.training_framework:run_training:445 - Experiment: GRU_Experiment_1, Epoch:  4/10, Train Loss: 1.5810, Test Loss: 1.5980, Accuracy: 0.2000, Recall: 0.2000, Precision: 0.1074, F1: 0.1325, Duration: 0.03s, Current LR: 0.001000
+2025-06-22 07:03:41.604 | INFO     | src.fh.training_framework:run_training:445 - Experiment: GRU_Experiment_1, Epoch:  5/10, Train Loss: 1.5655, Test Loss: 1.6002, Accuracy: 0.2800, Recall: 0.2800, Precision: 0.2414, F1: 0.2165, Duration: 0.03s, Current LR: 0.001000
+2025-06-22 07:03:41.640 | INFO     | src.fh.training_framework:run_training:445 - Experiment: GRU_Experiment_1, Epoch:  6/10, Train Loss: 1.5500, Test Loss: 1.6050, Accuracy: 0.2200, Recall: 0.2200, Precision: 0.0538, F1: 0.0864, Duration: 0.03s, Current LR: 0.001000
+2025-06-22 07:03:41.676 | INFO     | src.fh.training_framework:run_training:445 - Experiment: GRU_Experiment_1, Epoch:  7/10, Train Loss: 1.5403, Test Loss: 1.6066, Accuracy: 0.2600, Recall: 0.2600, Precision: 0.1738, F1: 0.1963, Duration: 0.03s, Current LR: 0.001000
+2025-06-22 07:03:41.711 | INFO     | src.fh.training_framework:run_training:445 - Experiment: GRU_Experiment_1, Epoch:  8/10, Train Loss: 1.5308, Test Loss: 1.6093, Accuracy: 0.1800, Recall: 0.1800, Precision: 0.1049, F1: 0.1306, Duration: 0.02s, Current LR: 0.001000
+2025-06-22 07:03:41.744 | INFO     | src.fh.training_framework:run_training:445 - Experiment: GRU_Experiment_1, Epoch:  9/10, Train Loss: 1.5239, Test Loss: 1.6148, Accuracy: 0.2400, Recall: 0.2400, Precision: 0.0845, F1: 0.1227, Duration: 0.02s, Current LR: 0.001000
+2025-06-22 07:03:41.781 | INFO     | src.fh.training_framework:run_training:445 - Experiment: GRU_Experiment_1, Epoch: 10/10, Train Loss: 1.5151, Test Loss: 1.6110, Accuracy: 0.2400, Recall: 0.2400, Precision: 0.0929, F1: 0.1218, Duration: 0.03s, Current LR: 0.001000
+2025-06-22 07:03:41.791 | INFO     | src.fh.training_framework:run_training:521 - Training for model GRU_Experiment_1 finished. Total duration: 0:00:00.362912
+2025-06-22 07:03:41.793 | INFO     | __main__:run_experiment:210 - 
+--- Uitvoeren GRU Experiment 2/2 ---
+2025-06-22 07:03:41.794 | INFO     | src.fh.training_framework:run_training:327 - Starting training run for model: gru_model, experiment: GRU_Experiment_2
+2025-06-22 07:03:41.794 | INFO     | src.fh.model_selector:get_model:27 - Model selector: aanmaken van model 'gru_model' met config: {'input_size': 192, 'hidden_size': 128, 'num_layers': 2, 'output_size': 5, 'dropout': 0.2}
+2025-06-22 07:03:41.795 | INFO     | src.fh.models.gru_model:__init__:20 - Initializing GRUModel...
+2025-06-22 07:03:41.798 | INFO     | src.fh.models.gru_model:__init__:64 - GRUModel initialized. Total parameters: 223365
+2025-06-22 07:03:41.800 | INFO     | src.fh.training_framework:run_training:370 - Model 'gru_model' van experiment 'GRU_Experiment_2' geïnitialiseerd en verplaatst naar cpu.
+2025-06-22 07:03:41.800 | INFO     | src.fh.training_framework:run_training:407 - Scheduler is disabled in configuration.
+2025-06-22 07:03:41.842 | INFO     | src.fh.training_framework:run_training:445 - Experiment: GRU_Experiment_2, Epoch:  1/10, Train Loss: 1.6124, Test Loss: 1.6008, Accuracy: 0.2600, Recall: 0.2600, Precision: 0.0927, F1: 0.1272, Duration: 0.04s, Current LR: 0.001000
+2025-06-22 07:03:41.891 | INFO     | src.fh.training_framework:run_training:445 - Experiment: GRU_Experiment_2, Epoch:  2/10, Train Loss: 1.5990, Test Loss: 1.5948, Accuracy: 0.2600, Recall: 0.2600, Precision: 0.2800, F1: 0.1327, Duration: 0.04s, Current LR: 0.001000
+2025-06-22 07:03:41.943 | INFO     | src.fh.training_framework:run_training:445 - Experiment: GRU_Experiment_2, Epoch:  3/10, Train Loss: 1.5895, Test Loss: 1.5936, Accuracy: 0.2400, Recall: 0.2400, Precision: 0.0576, F1: 0.0929, Duration: 0.04s, Current LR: 0.001000
+2025-06-22 07:03:41.995 | INFO     | src.fh.training_framework:run_training:445 - Experiment: GRU_Experiment_2, Epoch:  4/10, Train Loss: 1.5780, Test Loss: 1.5948, Accuracy: 0.2400, Recall: 0.2400, Precision: 0.0576, F1: 0.0929, Duration: 0.04s, Current LR: 0.001000
+2025-06-22 07:03:42.044 | INFO     | src.fh.training_framework:run_training:445 - Experiment: GRU_Experiment_2, Epoch:  5/10, Train Loss: 1.5760, Test Loss: 1.5966, Accuracy: 0.2400, Recall: 0.2400, Precision: 0.0576, F1: 0.0929, Duration: 0.04s, Current LR: 0.001000
+2025-06-22 07:03:42.098 | INFO     | src.fh.training_framework:run_training:445 - Experiment: GRU_Experiment_2, Epoch:  6/10, Train Loss: 1.5633, Test Loss: 1.5957, Accuracy: 0.2400, Recall: 0.2400, Precision: 0.0576, F1: 0.0929, Duration: 0.04s, Current LR: 0.001000
+2025-06-22 07:03:42.142 | INFO     | src.fh.training_framework:run_training:445 - Experiment: GRU_Experiment_2, Epoch:  7/10, Train Loss: 1.5601, Test Loss: 1.5952, Accuracy: 0.2400, Recall: 0.2400, Precision: 0.1553, F1: 0.1883, Duration: 0.03s, Current LR: 0.001000
+2025-06-22 07:03:42.183 | INFO     | src.fh.training_framework:run_training:445 - Experiment: GRU_Experiment_2, Epoch:  8/10, Train Loss: 1.5395, Test Loss: 1.5980, Accuracy: 0.2200, Recall: 0.2200, Precision: 0.1132, F1: 0.1336, Duration: 0.03s, Current LR: 0.001000
+2025-06-22 07:03:42.226 | INFO     | src.fh.training_framework:run_training:445 - Experiment: GRU_Experiment_2, Epoch:  9/10, Train Loss: 1.5304, Test Loss: 1.6050, Accuracy: 0.1800, Recall: 0.1800, Precision: 0.1160, F1: 0.1017, Duration: 0.03s, Current LR: 0.001000
+2025-06-22 07:03:42.268 | INFO     | src.fh.training_framework:run_training:445 - Experiment: GRU_Experiment_2, Epoch: 10/10, Train Loss: 1.5239, Test Loss: 1.6105, Accuracy: 0.2400, Recall: 0.2400, Precision: 0.1492, F1: 0.1670, Duration: 0.03s, Current LR: 0.001000
+2025-06-22 07:03:42.278 | INFO     | src.fh.training_framework:run_training:521 - Training for model GRU_Experiment_2 finished. Total duration: 0:00:00.484182
+2025-06-22 07:03:42.279 | INFO     | __main__:run_experiment:220 - GRU model training voltooid.
+2025-06-22 07:03:42.286 | SUCCESS  | __main__:run_experiment:230 - Alle experiment samenvattingen opgeslagen naar /home/azureuser/mads-exam-fharren/src/fh/../../runs/20250622-070337_all_model_summary.parquet
+2025-06-22 07:03:42.287 | INFO     | __main__:run_experiment:234 - 
+--- Einde Experiment ---
+2025-06-22 07:03:42.287 | INFO     | __main__:<module>:307 - Hoofdscript succesvol voltooid.

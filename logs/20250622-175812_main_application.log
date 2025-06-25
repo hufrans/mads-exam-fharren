@@ -1,0 +1,39 @@
+2025-06-22 17:58:12.202 | INFO     | __main__:<module>:48 - Start van het hoofdscript. Algemene logs worden opgeslagen in '/home/azureuser/mads-exam-fharren/src/fh/../../logs/20250622-175812_main_application.log'.
+2025-06-22 17:58:12.241 | INFO     | src.fh.utils:load_config:15 - Attempting to load configuration from: /home/azureuser/mads-exam-fharren/src/fh/../../config.toml
+2025-06-22 17:58:12.244 | SUCCESS  | src.fh.utils:load_config:18 - Configuration successfully loaded from: /home/azureuser/mads-exam-fharren/src/fh/../../config.toml
+2025-06-22 17:58:12.244 | DEBUG    | src.fh.utils:load_config:19 - Loaded config keys: ['data', 'training', 'model_params']
+2025-06-22 17:58:12.244 | INFO     | __main__:<module>:291 - Configuratie geladen vanuit /home/azureuser/mads-exam-fharren/src/fh/../../config.toml.
+2025-06-22 17:58:12.244 | INFO     | __main__:<module>:301 - Zorgen dat de data directory bestaat: /home/azureuser/mads-exam-fharren/src/fh/../../data
+2025-06-22 17:58:12.245 | INFO     | __main__:<module>:307 - --- DUMMY DATA MODUS GEACTIVEERD ---
+2025-06-22 17:58:12.245 | INFO     | __main__:<module>:308 - Dummy data parameters: features=187, classes=5
+2025-06-22 17:58:12.245 | INFO     | __main__:<module>:309 - Dummy data wordt aangemaakt voor demonstratie. Dit zal de configuratie overschrijven met dummy paden.
+2025-06-22 17:58:12.245 | DEBUG    | __main__:<module>:325 - Dummy training data pad 1: /home/azureuser/mads-exam-fharren/src/fh/../../data/heart_big_train.parq
+2025-06-22 17:58:12.245 | DEBUG    | __main__:<module>:326 - Dummy training data pad 2: /home/azureuser/mads-exam-fharren/src/fh/../../data/heart_big_train_synthetic.parquet
+2025-06-22 17:58:12.245 | DEBUG    | __main__:<module>:327 - Dummy test data pad: /home/azureuser/mads-exam-fharren/src/fh/../../data/heart_big_test.parq
+2025-06-22 17:58:12.417 | SUCCESS  | __main__:<module>:350 - Dummy data aangemaakt als Parquet in '/home/azureuser/mads-exam-fharren/src/fh/../../data/heart_big_train.parq', '/home/azureuser/mads-exam-fharren/src/fh/../../data/heart_big_train_synthetic.parquet' en '/home/azureuser/mads-exam-fharren/src/fh/../../data/heart_big_test.parq'
+2025-06-22 17:58:12.418 | INFO     | __main__:run_experiment:70 - Start van het experiment met configuratiebestand: /home/azureuser/mads-exam-fharren/src/fh/../../config.toml
+2025-06-22 17:58:12.418 | INFO     | src.fh.utils:load_config:15 - Attempting to load configuration from: /home/azureuser/mads-exam-fharren/src/fh/../../config.toml
+2025-06-22 17:58:12.421 | SUCCESS  | src.fh.utils:load_config:18 - Configuration successfully loaded from: /home/azureuser/mads-exam-fharren/src/fh/../../config.toml
+2025-06-22 17:58:12.421 | DEBUG    | src.fh.utils:load_config:19 - Loaded config keys: ['data', 'training', 'model_params']
+2025-06-22 17:58:12.421 | INFO     | __main__:run_experiment:74 - Configuratiebestand succesvol geladen.
+2025-06-22 17:58:12.422 | DEBUG    | __main__:run_experiment:75 - Geladen scheduler_kwargs uit config: {'mode': 'min', 'factor': 0.1, 'patience': 5}
+2025-06-22 17:58:12.422 | INFO     | __main__:run_experiment:84 - 
+--- Start experimenten voor trainingsbestand: heart_big_train.parq (1/2) ---
+2025-06-22 17:58:12.422 | DEBUG    | __main__:run_experiment:88 - Trainingsdata pad: /home/azureuser/mads-exam-fharren/src/fh/../../data/heart_big_train.parq
+2025-06-22 17:58:12.423 | DEBUG    | __main__:run_experiment:89 - Testdata pad: /home/azureuser/mads-exam-fharren/src/fh/../../data/heart_big_test.parq
+2025-06-22 17:58:12.423 | INFO     | __main__:run_experiment:91 - Vastgestelde feature count: 187, class count: 5
+2025-06-22 17:58:12.423 | INFO     | __main__:run_experiment:98 - Laden van data van /home/azureuser/mads-exam-fharren/src/fh/../../data/heart_big_train.parq en /home/azureuser/mads-exam-fharren/src/fh/../../data/heart_big_test.parq...
+2025-06-22 17:58:12.423 | INFO     | src.fh.data_loader:get_data_loaders:93 - Start aanmaken data loaders. Training bestand: /home/azureuser/mads-exam-fharren/src/fh/../../data/heart_big_train.parq, Test bestand: /home/azureuser/mads-exam-fharren/src/fh/../../data/heart_big_test.parq
+2025-06-22 17:58:12.452 | INFO     | src.fh.data_loader:get_data_loaders:98 - Succesvol trainingsbestand '/home/azureuser/mads-exam-fharren/src/fh/../../data/heart_big_train.parq' geladen (100 rijen).
+2025-06-22 17:58:12.467 | INFO     | src.fh.data_loader:get_data_loaders:109 - Succesvol testbestand '/home/azureuser/mads-exam-fharren/src/fh/../../data/heart_big_test.parq' geladen (50 rijen).
+2025-06-22 17:58:12.470 | INFO     | src.fh.data_loader:get_data_loaders:132 - StandardScaler getraind op trainingsdata.
+2025-06-22 17:58:12.471 | DEBUG    | src.fh.data_loader:__init__:26 - Dataset geïnitialiseerd met DataFrame. Aantal rijen: 100
+2025-06-22 17:58:12.472 | DEBUG    | src.fh.data_loader:__init__:46 - Scaler wordt toegepast op features.
+2025-06-22 17:58:12.474 | DEBUG    | src.fh.data_loader:__init__:26 - Dataset geïnitialiseerd met DataFrame. Aantal rijen: 50
+2025-06-22 17:58:12.475 | DEBUG    | src.fh.data_loader:__init__:46 - Scaler wordt toegepast op features.
+2025-06-22 17:58:12.476 | INFO     | src.fh.data_loader:get_data_loaders:141 - Datasets succesvol aangemaakt.
+2025-06-22 17:58:12.476 | INFO     | src.fh.data_loader:get_data_loaders:149 - DataLoaders succesvol aangemaakt.
+2025-06-22 17:58:12.477 | SUCCESS  | __main__:run_experiment:108 - Data loaders succesvol aangemaakt.
+2025-06-22 17:58:12.478 | INFO     | __main__:run_experiment:118 - Berekende klasse-gewichten voor heart_big_train.parq: [0.25, 2.857142925262451, 5.0, 5.0, 4.0]
+2025-06-22 17:58:12.479 | INFO     | __main__:run_experiment:132 - Initialiseren van de Trainer...
+2025-06-22 17:58:12.488 | CRITICAL | __main__:<module>:377 - Een kritieke fout is opgetreden in het hoofdscript: 'Trainer' object has no attribute '_log_handler_ids'

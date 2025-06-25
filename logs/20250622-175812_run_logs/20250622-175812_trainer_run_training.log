@@ -1,0 +1,1 @@
+2025-06-22 17:58:12.488 | CRITICAL | __main__:<module>:377 - Een kritieke fout is opgetreden in het hoofdscript: 'Trainer' object has no attribute '_log_handler_ids'

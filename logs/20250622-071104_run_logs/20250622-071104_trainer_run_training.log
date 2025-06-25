@@ -1,0 +1,325 @@
+2025-06-22 07:11:05.100 | INFO     | src.fh.training_framework:__init__:96 - Initializing Trainer. Using device: cpu
+2025-06-22 07:11:05.101 | INFO     | src.fh.training_framework:__init__:97 - Logging and outputs for this run will be stored in: /home/azureuser/mads-exam-fharren/src/fh/../../logs/20250622-071104_run_logs
+2025-06-22 07:11:05.101 | DEBUG    | src.fh.training_framework:__init__:98 - Best model path template: /home/azureuser/mads-exam-fharren/src/fh/../../logs/20250622-071104_run_logs/20250622-071104_{model_name}_best_model.pth
+2025-06-22 07:11:05.101 | DEBUG    | src.fh.training_framework:__init__:99 - Results path template: /home/azureuser/mads-exam-fharren/src/fh/../../logs/20250622-071104_run_logs/20250622-071104_{model_name}_results.parquet
+2025-06-22 07:11:05.101 | INFO     | __main__:run_experiment:145 - Trainer succesvol geïnitialiseerd.
+2025-06-22 07:11:05.102 | INFO     | __main__:run_experiment:148 - 
+--- Start Training Baseline Model ---
+2025-06-22 07:11:05.102 | INFO     | src.fh.training_framework:run_training:333 - Starting training run for model: baseline_model, experiment: Baseline
+2025-06-22 07:11:05.102 | DEBUG    | src.fh.training_framework:run_training:350 - Voorbereiding model 'baseline_model' met feature_count=192, class_count=5, model_config={'input_size': 192, 'output_size': 5}
+2025-06-22 07:11:05.103 | INFO     | src.fh.model_selector:get_model:27 - Model selector: aanmaken van model 'baseline_model' met config: {'input_size': 192, 'output_size': 5}
+2025-06-22 07:11:05.103 | INFO     | src.fh.models.baseline_model:__init__:19 - Initializing BaselineModel...
+2025-06-22 07:11:05.107 | INFO     | src.fh.models.baseline_model:__init__:38 - BaselineModel initialized with input_size=192, hidden_size=64, output_size=5.
+2025-06-22 07:11:05.107 | DEBUG    | src.fh.models.baseline_model:__init__:39 - Model layers: fc1=Linear(in_features=192, out_features=64, bias=True), relu=ReLU(), fc2=Linear(in_features=64, out_features=5, bias=True)
+2025-06-22 07:11:05.108 | INFO     | src.fh.training_framework:run_training:376 - Model 'baseline_model' van experiment 'Baseline' geïnitialiseerd en verplaatst naar cpu.
+2025-06-22 07:11:05.109 | DEBUG    | src.fh.training_framework:run_training:377 - Model architectuur: 
+BaselineModel(
+  (fc1): Linear(in_features=192, out_features=64, bias=True)
+  (relu): ReLU()
+  (fc2): Linear(in_features=64, out_features=5, bias=True)
+)
+2025-06-22 07:11:05.109 | DEBUG    | src.fh.training_framework:run_training:378 - Model-specifieke configuratie voor 'baseline_model': {'input_size': 192, 'output_size': 5}
+2025-06-22 07:11:05.109 | DEBUG    | src.fh.training_framework:_get_optimizer:117 - Attempting to get optimizer: Adam with learning rate: 0.001, weight_decay: 0.0
+2025-06-22 07:11:06.699 | DEBUG    | src.fh.training_framework:_get_optimizer:120 - Adam optimizer created.
+2025-06-22 07:11:06.700 | INFO     | src.fh.training_framework:run_training:413 - Scheduler is disabled in configuration.
+2025-06-22 07:11:06.700 | DEBUG    | src.fh.training_framework:run_training:425 - Model checkpoint will be saved to: /home/azureuser/mads-exam-fharren/src/fh/../../logs/20250622-071104_run_logs/20250622-071104_Baseline_best_model.pth
+2025-06-22 07:11:06.700 | DEBUG    | src.fh.training_framework:run_training:426 - Results will be saved to: /home/azureuser/mads-exam-fharren/src/fh/../../logs/20250622-071104_run_logs/20250622-071104_Baseline_results.parquet
+2025-06-22 07:11:06.704 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([32, 192])
+2025-06-22 07:11:06.705 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([32, 64])
+2025-06-22 07:11:06.705 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([32, 64])
+2025-06-22 07:11:06.706 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([32, 5])
+2025-06-22 07:11:06.711 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([32, 192])
+2025-06-22 07:11:06.711 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([32, 64])
+2025-06-22 07:11:06.712 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([32, 64])
+2025-06-22 07:11:06.712 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([32, 5])
+2025-06-22 07:11:06.715 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([32, 192])
+2025-06-22 07:11:06.715 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([32, 64])
+2025-06-22 07:11:06.716 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([32, 64])
+2025-06-22 07:11:06.716 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([32, 5])
+2025-06-22 07:11:06.718 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([4, 192])
+2025-06-22 07:11:06.718 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([4, 64])
+2025-06-22 07:11:06.718 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([4, 64])
+2025-06-22 07:11:06.719 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([4, 5])
+2025-06-22 07:11:06.721 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([32, 192])
+2025-06-22 07:11:06.722 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([32, 64])
+2025-06-22 07:11:06.722 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([32, 64])
+2025-06-22 07:11:06.722 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([32, 5])
+2025-06-22 07:11:06.724 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([18, 192])
+2025-06-22 07:11:06.724 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([18, 64])
+2025-06-22 07:11:06.724 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([18, 64])
+2025-06-22 07:11:06.725 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([18, 5])
+2025-06-22 07:11:06.737 | DEBUG    | src.fh.training_framework:_calculate_metrics:200 - Calculated weighted recall, precision, and f1-score (unique targets > 1).
+2025-06-22 07:11:06.738 | DEBUG    | src.fh.training_framework:_calculate_metrics:208 - Calculated metrics: Accuracy=0.3000, Recall=0.3000, Precision=0.3891, F1=0.2354.
+2025-06-22 07:11:06.739 | INFO     | src.fh.training_framework:run_training:451 - Experiment: Baseline, Epoch:  1/10, Train Loss: 1.6234, Test Loss: 1.5858, Accuracy: 0.3000, Recall: 0.3000, Precision: 0.3891, F1: 0.2354, Duration: 0.04s, Current LR: 0.001000
+2025-06-22 07:11:06.741 | DEBUG    | src.fh.training_framework:run_training:491 - Created new DataFrame for epoch 1 results for Baseline.
+2025-06-22 07:11:06.750 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([32, 192])
+2025-06-22 07:11:06.750 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([32, 64])
+2025-06-22 07:11:06.751 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([32, 64])
+2025-06-22 07:11:06.751 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([32, 5])
+2025-06-22 07:11:06.754 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([32, 192])
+2025-06-22 07:11:06.754 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([32, 64])
+2025-06-22 07:11:06.754 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([32, 64])
+2025-06-22 07:11:06.755 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([32, 5])
+2025-06-22 07:11:06.758 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([32, 192])
+2025-06-22 07:11:06.759 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([32, 64])
+2025-06-22 07:11:06.759 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([32, 64])
+2025-06-22 07:11:06.759 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([32, 5])
+2025-06-22 07:11:06.762 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([4, 192])
+2025-06-22 07:11:06.762 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([4, 64])
+2025-06-22 07:11:06.763 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([4, 64])
+2025-06-22 07:11:06.763 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([4, 5])
+2025-06-22 07:11:06.767 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([32, 192])
+2025-06-22 07:11:06.767 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([32, 64])
+2025-06-22 07:11:06.768 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([32, 64])
+2025-06-22 07:11:06.768 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([32, 5])
+2025-06-22 07:11:06.769 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([18, 192])
+2025-06-22 07:11:06.770 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([18, 64])
+2025-06-22 07:11:06.770 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([18, 64])
+2025-06-22 07:11:06.770 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([18, 5])
+2025-06-22 07:11:06.781 | DEBUG    | src.fh.training_framework:_calculate_metrics:200 - Calculated weighted recall, precision, and f1-score (unique targets > 1).
+2025-06-22 07:11:06.782 | DEBUG    | src.fh.training_framework:_calculate_metrics:208 - Calculated metrics: Accuracy=0.2600, Recall=0.2600, Precision=0.1997, F1=0.1664.
+2025-06-22 07:11:06.783 | INFO     | src.fh.training_framework:run_training:451 - Experiment: Baseline, Epoch:  2/10, Train Loss: 1.5961, Test Loss: 1.5936, Accuracy: 0.2600, Recall: 0.2600, Precision: 0.1997, F1: 0.1664, Duration: 0.03s, Current LR: 0.001000
+2025-06-22 07:11:06.784 | DEBUG    | src.fh.training_framework:run_training:475 - Backed up current results from /home/azureuser/mads-exam-fharren/src/fh/../../logs/20250622-071104_run_logs/20250622-071104_Baseline_results.parquet to /home/azureuser/mads-exam-fharren/src/fh/../../logs/20250622-071104_run_logs/20250622-071104_Baseline_results.parquet.bak.
+2025-06-22 07:11:06.790 | DEBUG    | src.fh.training_framework:run_training:485 - Appended epoch 2 data to existing DataFrame for Baseline.
+2025-06-22 07:11:06.795 | DEBUG    | src.fh.training_framework:run_training:518 - Current test loss 1.5936 not better than best 1.5858. Model not saved.
+2025-06-22 07:11:06.796 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([32, 192])
+2025-06-22 07:11:06.797 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([32, 64])
+2025-06-22 07:11:06.797 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([32, 64])
+2025-06-22 07:11:06.798 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([32, 5])
+2025-06-22 07:11:06.800 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([32, 192])
+2025-06-22 07:11:06.800 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([32, 64])
+2025-06-22 07:11:06.801 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([32, 64])
+2025-06-22 07:11:06.801 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([32, 5])
+2025-06-22 07:11:06.803 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([32, 192])
+2025-06-22 07:11:06.804 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([32, 64])
+2025-06-22 07:11:06.804 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([32, 64])
+2025-06-22 07:11:06.804 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([32, 5])
+2025-06-22 07:11:06.807 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([4, 192])
+2025-06-22 07:11:06.807 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([4, 64])
+2025-06-22 07:11:06.808 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([4, 64])
+2025-06-22 07:11:06.808 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([4, 5])
+2025-06-22 07:11:06.810 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([32, 192])
+2025-06-22 07:11:06.811 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([32, 64])
+2025-06-22 07:11:06.811 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([32, 64])
+2025-06-22 07:11:06.811 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([32, 5])
+2025-06-22 07:11:06.812 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([18, 192])
+2025-06-22 07:11:06.813 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([18, 64])
+2025-06-22 07:11:06.813 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([18, 64])
+2025-06-22 07:11:06.813 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([18, 5])
+2025-06-22 07:11:06.823 | DEBUG    | src.fh.training_framework:_calculate_metrics:200 - Calculated weighted recall, precision, and f1-score (unique targets > 1).
+2025-06-22 07:11:06.824 | DEBUG    | src.fh.training_framework:_calculate_metrics:208 - Calculated metrics: Accuracy=0.2200, Recall=0.2200, Precision=0.0484, F1=0.0793.
+2025-06-22 07:11:06.825 | INFO     | src.fh.training_framework:run_training:451 - Experiment: Baseline, Epoch:  3/10, Train Loss: 1.5922, Test Loss: 1.6036, Accuracy: 0.2200, Recall: 0.2200, Precision: 0.0484, F1: 0.0793, Duration: 0.03s, Current LR: 0.001000
+2025-06-22 07:11:06.826 | DEBUG    | src.fh.training_framework:run_training:475 - Backed up current results from /home/azureuser/mads-exam-fharren/src/fh/../../logs/20250622-071104_run_logs/20250622-071104_Baseline_results.parquet to /home/azureuser/mads-exam-fharren/src/fh/../../logs/20250622-071104_run_logs/20250622-071104_Baseline_results.parquet.bak.
+2025-06-22 07:11:06.831 | DEBUG    | src.fh.training_framework:run_training:485 - Appended epoch 3 data to existing DataFrame for Baseline.
+2025-06-22 07:11:06.835 | DEBUG    | src.fh.training_framework:run_training:518 - Current test loss 1.6036 not better than best 1.5858. Model not saved.
+2025-06-22 07:11:06.836 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([32, 192])
+2025-06-22 07:11:06.837 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([32, 64])
+2025-06-22 07:11:06.838 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([32, 64])
+2025-06-22 07:11:06.839 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([32, 5])
+2025-06-22 07:11:06.841 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([32, 192])
+2025-06-22 07:11:06.841 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([32, 64])
+2025-06-22 07:11:06.842 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([32, 64])
+2025-06-22 07:11:06.842 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([32, 5])
+2025-06-22 07:11:06.844 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([32, 192])
+2025-06-22 07:11:06.845 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([32, 64])
+2025-06-22 07:11:06.845 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([32, 64])
+2025-06-22 07:11:06.846 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([32, 5])
+2025-06-22 07:11:06.847 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([4, 192])
+2025-06-22 07:11:06.848 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([4, 64])
+2025-06-22 07:11:06.848 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([4, 64])
+2025-06-22 07:11:06.848 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([4, 5])
+2025-06-22 07:11:06.850 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([32, 192])
+2025-06-22 07:11:06.851 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([32, 64])
+2025-06-22 07:11:06.851 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([32, 64])
+2025-06-22 07:11:06.851 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([32, 5])
+2025-06-22 07:11:06.852 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([18, 192])
+2025-06-22 07:11:06.853 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([18, 64])
+2025-06-22 07:11:06.854 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([18, 64])
+2025-06-22 07:11:06.854 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([18, 5])
+2025-06-22 07:11:06.868 | DEBUG    | src.fh.training_framework:_calculate_metrics:200 - Calculated weighted recall, precision, and f1-score (unique targets > 1).
+2025-06-22 07:11:06.869 | DEBUG    | src.fh.training_framework:_calculate_metrics:208 - Calculated metrics: Accuracy=0.2200, Recall=0.2200, Precision=0.0484, F1=0.0793.
+2025-06-22 07:11:06.870 | INFO     | src.fh.training_framework:run_training:451 - Experiment: Baseline, Epoch:  4/10, Train Loss: 1.5841, Test Loss: 1.6049, Accuracy: 0.2200, Recall: 0.2200, Precision: 0.0484, F1: 0.0793, Duration: 0.03s, Current LR: 0.001000
+2025-06-22 07:11:06.871 | DEBUG    | src.fh.training_framework:run_training:475 - Backed up current results from /home/azureuser/mads-exam-fharren/src/fh/../../logs/20250622-071104_run_logs/20250622-071104_Baseline_results.parquet to /home/azureuser/mads-exam-fharren/src/fh/../../logs/20250622-071104_run_logs/20250622-071104_Baseline_results.parquet.bak.
+2025-06-22 07:11:06.876 | DEBUG    | src.fh.training_framework:run_training:485 - Appended epoch 4 data to existing DataFrame for Baseline.
+2025-06-22 07:11:06.881 | DEBUG    | src.fh.training_framework:run_training:518 - Current test loss 1.6049 not better than best 1.5858. Model not saved.
+2025-06-22 07:11:06.883 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([32, 192])
+2025-06-22 07:11:06.883 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([32, 64])
+2025-06-22 07:11:06.883 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([32, 64])
+2025-06-22 07:11:06.884 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([32, 5])
+2025-06-22 07:11:06.887 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([32, 192])
+2025-06-22 07:11:06.887 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([32, 64])
+2025-06-22 07:11:06.887 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([32, 64])
+2025-06-22 07:11:06.888 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([32, 5])
+2025-06-22 07:11:06.891 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([32, 192])
+2025-06-22 07:11:06.891 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([32, 64])
+2025-06-22 07:11:06.891 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([32, 64])
+2025-06-22 07:11:06.892 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([32, 5])
+2025-06-22 07:11:06.894 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([4, 192])
+2025-06-22 07:11:06.894 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([4, 64])
+2025-06-22 07:11:06.894 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([4, 64])
+2025-06-22 07:11:06.895 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([4, 5])
+2025-06-22 07:11:06.897 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([32, 192])
+2025-06-22 07:11:06.898 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([32, 64])
+2025-06-22 07:11:06.898 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([32, 64])
+2025-06-22 07:11:06.898 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([32, 5])
+2025-06-22 07:11:06.900 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([18, 192])
+2025-06-22 07:11:06.900 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([18, 64])
+2025-06-22 07:11:06.900 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([18, 64])
+2025-06-22 07:11:06.901 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([18, 5])
+2025-06-22 07:11:06.911 | DEBUG    | src.fh.training_framework:_calculate_metrics:200 - Calculated weighted recall, precision, and f1-score (unique targets > 1).
+2025-06-22 07:11:06.912 | DEBUG    | src.fh.training_framework:_calculate_metrics:208 - Calculated metrics: Accuracy=0.2400, Recall=0.2400, Precision=0.1315, F1=0.1154.
+2025-06-22 07:11:06.912 | INFO     | src.fh.training_framework:run_training:451 - Experiment: Baseline, Epoch:  5/10, Train Loss: 1.5777, Test Loss: 1.6023, Accuracy: 0.2400, Recall: 0.2400, Precision: 0.1315, F1: 0.1154, Duration: 0.03s, Current LR: 0.001000
+2025-06-22 07:11:06.913 | DEBUG    | src.fh.training_framework:run_training:475 - Backed up current results from /home/azureuser/mads-exam-fharren/src/fh/../../logs/20250622-071104_run_logs/20250622-071104_Baseline_results.parquet to /home/azureuser/mads-exam-fharren/src/fh/../../logs/20250622-071104_run_logs/20250622-071104_Baseline_results.parquet.bak.
+2025-06-22 07:11:06.919 | DEBUG    | src.fh.training_framework:run_training:485 - Appended epoch 5 data to existing DataFrame for Baseline.
+2025-06-22 07:11:06.923 | DEBUG    | src.fh.training_framework:run_training:518 - Current test loss 1.6023 not better than best 1.5858. Model not saved.
+2025-06-22 07:11:06.924 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([32, 192])
+2025-06-22 07:11:06.925 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([32, 64])
+2025-06-22 07:11:06.925 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([32, 64])
+2025-06-22 07:11:06.925 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([32, 5])
+2025-06-22 07:11:06.928 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([32, 192])
+2025-06-22 07:11:06.928 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([32, 64])
+2025-06-22 07:11:06.928 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([32, 64])
+2025-06-22 07:11:06.929 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([32, 5])
+2025-06-22 07:11:06.931 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([32, 192])
+2025-06-22 07:11:06.931 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([32, 64])
+2025-06-22 07:11:06.932 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([32, 64])
+2025-06-22 07:11:06.932 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([32, 5])
+2025-06-22 07:11:06.934 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([4, 192])
+2025-06-22 07:11:06.934 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([4, 64])
+2025-06-22 07:11:06.934 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([4, 64])
+2025-06-22 07:11:06.935 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([4, 5])
+2025-06-22 07:11:06.937 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([32, 192])
+2025-06-22 07:11:06.938 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([32, 64])
+2025-06-22 07:11:06.938 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([32, 64])
+2025-06-22 07:11:06.938 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([32, 5])
+2025-06-22 07:11:06.939 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([18, 192])
+2025-06-22 07:11:06.940 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([18, 64])
+2025-06-22 07:11:06.940 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([18, 64])
+2025-06-22 07:11:06.940 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([18, 5])
+2025-06-22 07:11:06.950 | DEBUG    | src.fh.training_framework:_calculate_metrics:200 - Calculated weighted recall, precision, and f1-score (unique targets > 1).
+2025-06-22 07:11:06.951 | DEBUG    | src.fh.training_framework:_calculate_metrics:208 - Calculated metrics: Accuracy=0.2600, Recall=0.2600, Precision=0.1498, F1=0.1429.
+2025-06-22 07:11:06.951 | INFO     | src.fh.training_framework:run_training:451 - Experiment: Baseline, Epoch:  6/10, Train Loss: 1.5626, Test Loss: 1.5954, Accuracy: 0.2600, Recall: 0.2600, Precision: 0.1498, F1: 0.1429, Duration: 0.03s, Current LR: 0.001000
+2025-06-22 07:11:06.953 | DEBUG    | src.fh.training_framework:run_training:475 - Backed up current results from /home/azureuser/mads-exam-fharren/src/fh/../../logs/20250622-071104_run_logs/20250622-071104_Baseline_results.parquet to /home/azureuser/mads-exam-fharren/src/fh/../../logs/20250622-071104_run_logs/20250622-071104_Baseline_results.parquet.bak.
+2025-06-22 07:11:06.959 | DEBUG    | src.fh.training_framework:run_training:485 - Appended epoch 6 data to existing DataFrame for Baseline.
+2025-06-22 07:11:06.963 | DEBUG    | src.fh.training_framework:run_training:518 - Current test loss 1.5954 not better than best 1.5858. Model not saved.
+2025-06-22 07:11:06.965 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([32, 192])
+2025-06-22 07:11:06.965 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([32, 64])
+2025-06-22 07:11:06.966 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([32, 64])
+2025-06-22 07:11:06.966 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([32, 5])
+2025-06-22 07:11:06.969 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([32, 192])
+2025-06-22 07:11:06.969 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([32, 64])
+2025-06-22 07:11:06.969 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([32, 64])
+2025-06-22 07:11:06.970 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([32, 5])
+2025-06-22 07:11:06.972 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([32, 192])
+2025-06-22 07:11:06.972 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([32, 64])
+2025-06-22 07:11:06.972 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([32, 64])
+2025-06-22 07:11:06.973 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([32, 5])
+2025-06-22 07:11:06.974 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([4, 192])
+2025-06-22 07:11:06.975 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([4, 64])
+2025-06-22 07:11:06.975 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([4, 64])
+2025-06-22 07:11:06.976 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([4, 5])
+2025-06-22 07:11:06.978 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([32, 192])
+2025-06-22 07:11:06.978 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([32, 64])
+2025-06-22 07:11:06.979 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([32, 64])
+2025-06-22 07:11:06.979 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([32, 5])
+2025-06-22 07:11:06.980 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([18, 192])
+2025-06-22 07:11:06.981 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([18, 64])
+2025-06-22 07:11:06.981 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([18, 64])
+2025-06-22 07:11:06.981 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([18, 5])
+2025-06-22 07:11:06.991 | DEBUG    | src.fh.training_framework:_calculate_metrics:200 - Calculated weighted recall, precision, and f1-score (unique targets > 1).
+2025-06-22 07:11:06.992 | DEBUG    | src.fh.training_framework:_calculate_metrics:208 - Calculated metrics: Accuracy=0.2600, Recall=0.2600, Precision=0.1498, F1=0.1429.
+2025-06-22 07:11:06.992 | INFO     | src.fh.training_framework:run_training:451 - Experiment: Baseline, Epoch:  7/10, Train Loss: 1.5509, Test Loss: 1.5904, Accuracy: 0.2600, Recall: 0.2600, Precision: 0.1498, F1: 0.1429, Duration: 0.03s, Current LR: 0.001000
+2025-06-22 07:11:06.994 | DEBUG    | src.fh.training_framework:run_training:475 - Backed up current results from /home/azureuser/mads-exam-fharren/src/fh/../../logs/20250622-071104_run_logs/20250622-071104_Baseline_results.parquet to /home/azureuser/mads-exam-fharren/src/fh/../../logs/20250622-071104_run_logs/20250622-071104_Baseline_results.parquet.bak.
+2025-06-22 07:11:06.999 | DEBUG    | src.fh.training_framework:run_training:485 - Appended epoch 7 data to existing DataFrame for Baseline.
+2025-06-22 07:11:07.003 | DEBUG    | src.fh.training_framework:run_training:518 - Current test loss 1.5904 not better than best 1.5858. Model not saved.
+2025-06-22 07:11:07.006 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([32, 192])
+2025-06-22 07:11:07.006 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([32, 64])
+2025-06-22 07:11:07.007 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([32, 64])
+2025-06-22 07:11:07.008 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([32, 5])
+2025-06-22 07:11:07.012 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([32, 192])
+2025-06-22 07:11:07.013 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([32, 64])
+2025-06-22 07:11:07.013 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([32, 64])
+2025-06-22 07:11:07.014 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([32, 5])
+2025-06-22 07:11:07.016 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([32, 192])
+2025-06-22 07:11:07.017 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([32, 64])
+2025-06-22 07:11:07.017 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([32, 64])
+2025-06-22 07:11:07.018 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([32, 5])
+2025-06-22 07:11:07.019 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([4, 192])
+2025-06-22 07:11:07.020 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([4, 64])
+2025-06-22 07:11:07.020 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([4, 64])
+2025-06-22 07:11:07.020 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([4, 5])
+2025-06-22 07:11:07.023 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([32, 192])
+2025-06-22 07:11:07.023 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([32, 64])
+2025-06-22 07:11:07.023 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([32, 64])
+2025-06-22 07:11:07.024 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([32, 5])
+2025-06-22 07:11:07.025 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([18, 192])
+2025-06-22 07:11:07.025 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([18, 64])
+2025-06-22 07:11:07.026 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([18, 64])
+2025-06-22 07:11:07.026 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([18, 5])
+2025-06-22 07:11:07.036 | DEBUG    | src.fh.training_framework:_calculate_metrics:200 - Calculated weighted recall, precision, and f1-score (unique targets > 1).
+2025-06-22 07:11:07.037 | DEBUG    | src.fh.training_framework:_calculate_metrics:208 - Calculated metrics: Accuracy=0.3200, Recall=0.3200, Precision=0.2946, F1=0.2690.
+2025-06-22 07:11:07.038 | INFO     | src.fh.training_framework:run_training:451 - Experiment: Baseline, Epoch:  8/10, Train Loss: 1.5388, Test Loss: 1.5843, Accuracy: 0.3200, Recall: 0.3200, Precision: 0.2946, F1: 0.2690, Duration: 0.03s, Current LR: 0.001000
+2025-06-22 07:11:07.039 | DEBUG    | src.fh.training_framework:run_training:475 - Backed up current results from /home/azureuser/mads-exam-fharren/src/fh/../../logs/20250622-071104_run_logs/20250622-071104_Baseline_results.parquet to /home/azureuser/mads-exam-fharren/src/fh/../../logs/20250622-071104_run_logs/20250622-071104_Baseline_results.parquet.bak.
+2025-06-22 07:11:07.045 | DEBUG    | src.fh.training_framework:run_training:485 - Appended epoch 8 data to existing DataFrame for Baseline.
+2025-06-22 07:11:07.052 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([32, 192])
+2025-06-22 07:11:07.052 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([32, 64])
+2025-06-22 07:11:07.053 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([32, 64])
+2025-06-22 07:11:07.053 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([32, 5])
+2025-06-22 07:11:07.055 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([32, 192])
+2025-06-22 07:11:07.056 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([32, 64])
+2025-06-22 07:11:07.056 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([32, 64])
+2025-06-22 07:11:07.056 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([32, 5])
+2025-06-22 07:11:07.059 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([32, 192])
+2025-06-22 07:11:07.060 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([32, 64])
+2025-06-22 07:11:07.060 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([32, 64])
+2025-06-22 07:11:07.061 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([32, 5])
+2025-06-22 07:11:07.062 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([4, 192])
+2025-06-22 07:11:07.063 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([4, 64])
+2025-06-22 07:11:07.063 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([4, 64])
+2025-06-22 07:11:07.064 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([4, 5])
+2025-06-22 07:11:07.066 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([32, 192])
+2025-06-22 07:11:07.066 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([32, 64])
+2025-06-22 07:11:07.066 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([32, 64])
+2025-06-22 07:11:07.067 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([32, 5])
+2025-06-22 07:11:07.068 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([18, 192])
+2025-06-22 07:11:07.068 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([18, 64])
+2025-06-22 07:11:07.069 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([18, 64])
+2025-06-22 07:11:07.069 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([18, 5])
+2025-06-22 07:11:07.079 | DEBUG    | src.fh.training_framework:_calculate_metrics:200 - Calculated weighted recall, precision, and f1-score (unique targets > 1).
+2025-06-22 07:11:07.080 | DEBUG    | src.fh.training_framework:_calculate_metrics:208 - Calculated metrics: Accuracy=0.2400, Recall=0.2400, Precision=0.2173, F1=0.1979.
+2025-06-22 07:11:07.080 | INFO     | src.fh.training_framework:run_training:451 - Experiment: Baseline, Epoch:  9/10, Train Loss: 1.5292, Test Loss: 1.5857, Accuracy: 0.2400, Recall: 0.2400, Precision: 0.2173, F1: 0.1979, Duration: 0.03s, Current LR: 0.001000
+2025-06-22 07:11:07.083 | DEBUG    | src.fh.training_framework:run_training:475 - Backed up current results from /home/azureuser/mads-exam-fharren/src/fh/../../logs/20250622-071104_run_logs/20250622-071104_Baseline_results.parquet to /home/azureuser/mads-exam-fharren/src/fh/../../logs/20250622-071104_run_logs/20250622-071104_Baseline_results.parquet.bak.
+2025-06-22 07:11:07.088 | DEBUG    | src.fh.training_framework:run_training:485 - Appended epoch 9 data to existing DataFrame for Baseline.
+2025-06-22 07:11:07.093 | DEBUG    | src.fh.training_framework:run_training:518 - Current test loss 1.5857 not better than best 1.5843. Model not saved.
+2025-06-22 07:11:07.095 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([32, 192])
+2025-06-22 07:11:07.095 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([32, 64])
+2025-06-22 07:11:07.095 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([32, 64])
+2025-06-22 07:11:07.096 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([32, 5])
+2025-06-22 07:11:07.098 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([32, 192])
+2025-06-22 07:11:07.099 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([32, 64])
+2025-06-22 07:11:07.099 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([32, 64])
+2025-06-22 07:11:07.100 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([32, 5])
+2025-06-22 07:11:07.102 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([32, 192])
+2025-06-22 07:11:07.102 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([32, 64])
+2025-06-22 07:11:07.103 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([32, 64])
+2025-06-22 07:11:07.103 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([32, 5])
+2025-06-22 07:11:07.105 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([4, 192])
+2025-06-22 07:11:07.105 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([4, 64])
+2025-06-22 07:11:07.106 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([4, 64])
+2025-06-22 07:11:07.106 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([4, 5])
+2025-06-22 07:11:07.109 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([32, 192])
+2025-06-22 07:11:07.109 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([32, 64])
+2025-06-22 07:11:07.109 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([32, 64])
+2025-06-22 07:11:07.110 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([32, 5])
+2025-06-22 07:11:07.111 | DEBUG    | src.fh.models.baseline_model:forward:55 - BaselineModel - Input tensor shape: torch.Size([18, 192])
+2025-06-22 07:11:07.111 | DEBUG    | src.fh.models.baseline_model:forward:57 - BaselineModel - After fc1 shape: torch.Size([18, 64])
+2025-06-22 07:11:07.112 | DEBUG    | src.fh.models.baseline_model:forward:59 - BaselineModel - After ReLU shape: torch.Size([18, 64])
+2025-06-22 07:11:07.112 | DEBUG    | src.fh.models.baseline_model:forward:61 - BaselineModel - After fc2 (output) shape: torch.Size([18, 5])
+2025-06-22 07:11:07.122 | DEBUG    | src.fh.training_framework:_calculate_metrics:200 - Calculated weighted recall, precision, and f1-score (unique targets > 1).
+2025-06-22 07:11:07.123 | DEBUG    | src.fh.training_framework:_calculate_metrics:208 - Calculated metrics: Accuracy=0.2000, Recall=0.2000, Precision=0.0980, F1=0.0988.
+2025-06-22 07:11:07.124 | INFO     | src.fh.training_framework:run_training:451 - Experiment: Baseline, Epoch: 10/10, Train Loss: 1.5195, Test Loss: 1.5915, Accuracy: 0.2000, Recall: 0.2000, Precision: 0.0980, F1: 0.0988, Duration: 0.03s, Current LR: 0.001000
+2025-06-22 07:11:07.126 | DEBUG    | src.fh.training_framework:run_training:475 - Backed up current results from /home/azureuser/mads-exam-fharren/src/fh/../../logs/20250622-071104_run_logs/20250622-071104_Baseline_results.parquet to /home/azureuser/mads-exam-fharren/src/fh/../../logs/20250622-071104_run_logs/20250622-071104_Baseline_results.parquet.bak.
+2025-06-22 07:11:07.131 | DEBUG    | src.fh.training_framework:run_training:485 - Appended epoch 10 data to existing DataFrame for Baseline.
+2025-06-22 07:11:07.134 | DEBUG    | src.fh.training_framework:run_training:518 - Current test loss 1.5915 not better than best 1.5843. Model not saved.
+2025-06-22 07:11:07.134 | INFO     | src.fh.training_framework:run_training:527 - Training for model Baseline finished. Total duration: 0:00:02.032356
+2025-06-22 07:11:07.135 | DEBUG    | src.fh.training_framework:run_training:549 - Final summary results for Baseline: {'run_id': '20250622-071104', 'start_time': '2025-06-22T07:11:05.102613', 'end_time': '2025-06-22T07:11:07.134969', 'duration': '0:00:02.032356', 'model_type': 'baseline_model', 'experiment_name': 'Baseline', 'epochs_run': 10, 'optimizer': 'Adam', 'learning_rate_initial': 0.001, 'weight_decay': 0.0, 'scheduler_type': 'None', 'scheduler_factor': None, 'scheduler_patience': None, 'train_data_file': 'heart_big_train.parq', 'test_data_file': 'heart_big_test.parq', 'best_test_loss': 1.5842712211608887, 'best_accuracy': 0.32, 'best_recall': 0.32, 'best_precision': 0.29456410256410254, 'best_f1': 0.26895752895752895, 'best_epoch': 8, 'model_specific_config': {'input_size': 192, 'output_size': 5}}

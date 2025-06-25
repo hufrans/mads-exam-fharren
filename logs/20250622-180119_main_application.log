@@ -1,0 +1,597 @@
+2025-06-22 18:01:19.434 | INFO     | __main__:<module>:48 - Start van het hoofdscript. Algemene logs worden opgeslagen in '/home/azureuser/mads-exam-fharren/src/fh/../../logs/20250622-180119_main_application.log'.
+2025-06-22 18:01:19.490 | INFO     | src.fh.utils:load_config:15 - Attempting to load configuration from: /home/azureuser/mads-exam-fharren/src/fh/../../config.toml
+2025-06-22 18:01:19.492 | SUCCESS  | src.fh.utils:load_config:18 - Configuration successfully loaded from: /home/azureuser/mads-exam-fharren/src/fh/../../config.toml
+2025-06-22 18:01:19.493 | DEBUG    | src.fh.utils:load_config:19 - Loaded config keys: ['data', 'training', 'model_params']
+2025-06-22 18:01:19.493 | INFO     | __main__:<module>:291 - Configuratie geladen vanuit /home/azureuser/mads-exam-fharren/src/fh/../../config.toml.
+2025-06-22 18:01:19.493 | INFO     | __main__:<module>:301 - Zorgen dat de data directory bestaat: /home/azureuser/mads-exam-fharren/src/fh/../../data
+2025-06-22 18:01:19.493 | INFO     | __main__:<module>:307 - --- DUMMY DATA MODUS GEACTIVEERD ---
+2025-06-22 18:01:19.494 | INFO     | __main__:<module>:308 - Dummy data parameters: features=187, classes=5
+2025-06-22 18:01:19.494 | INFO     | __main__:<module>:309 - Dummy data wordt aangemaakt voor demonstratie. Dit zal de configuratie overschrijven met dummy paden.
+2025-06-22 18:01:19.494 | DEBUG    | __main__:<module>:325 - Dummy training data pad 1: /home/azureuser/mads-exam-fharren/src/fh/../../data/heart_big_train.parq
+2025-06-22 18:01:19.494 | DEBUG    | __main__:<module>:326 - Dummy training data pad 2: /home/azureuser/mads-exam-fharren/src/fh/../../data/heart_big_train_synthetic.parquet
+2025-06-22 18:01:19.494 | DEBUG    | __main__:<module>:327 - Dummy test data pad: /home/azureuser/mads-exam-fharren/src/fh/../../data/heart_big_test.parq
+2025-06-22 18:01:19.603 | SUCCESS  | __main__:<module>:350 - Dummy data aangemaakt als Parquet in '/home/azureuser/mads-exam-fharren/src/fh/../../data/heart_big_train.parq', '/home/azureuser/mads-exam-fharren/src/fh/../../data/heart_big_train_synthetic.parquet' en '/home/azureuser/mads-exam-fharren/src/fh/../../data/heart_big_test.parq'
+2025-06-22 18:01:19.604 | INFO     | __main__:run_experiment:70 - Start van het experiment met configuratiebestand: /home/azureuser/mads-exam-fharren/src/fh/../../config.toml
+2025-06-22 18:01:19.604 | INFO     | src.fh.utils:load_config:15 - Attempting to load configuration from: /home/azureuser/mads-exam-fharren/src/fh/../../config.toml
+2025-06-22 18:01:19.609 | SUCCESS  | src.fh.utils:load_config:18 - Configuration successfully loaded from: /home/azureuser/mads-exam-fharren/src/fh/../../config.toml
+2025-06-22 18:01:19.609 | DEBUG    | src.fh.utils:load_config:19 - Loaded config keys: ['data', 'training', 'model_params']
+2025-06-22 18:01:19.609 | INFO     | __main__:run_experiment:74 - Configuratiebestand succesvol geladen.
+2025-06-22 18:01:19.610 | DEBUG    | __main__:run_experiment:75 - Geladen scheduler_kwargs uit config: {'mode': 'min', 'factor': 0.1, 'patience': 5}
+2025-06-22 18:01:19.610 | INFO     | __main__:run_experiment:84 - 
+--- Start experimenten voor trainingsbestand: heart_big_train.parq (1/2) ---
+2025-06-22 18:01:19.610 | DEBUG    | __main__:run_experiment:88 - Trainingsdata pad: /home/azureuser/mads-exam-fharren/src/fh/../../data/heart_big_train.parq
+2025-06-22 18:01:19.610 | DEBUG    | __main__:run_experiment:89 - Testdata pad: /home/azureuser/mads-exam-fharren/src/fh/../../data/heart_big_test.parq
+2025-06-22 18:01:19.610 | INFO     | __main__:run_experiment:91 - Vastgestelde feature count: 187, class count: 5
+2025-06-22 18:01:19.610 | INFO     | __main__:run_experiment:98 - Laden van data van /home/azureuser/mads-exam-fharren/src/fh/../../data/heart_big_train.parq en /home/azureuser/mads-exam-fharren/src/fh/../../data/heart_big_test.parq...
+2025-06-22 18:01:19.611 | INFO     | src.fh.data_loader:get_data_loaders:93 - Start aanmaken data loaders. Training bestand: /home/azureuser/mads-exam-fharren/src/fh/../../data/heart_big_train.parq, Test bestand: /home/azureuser/mads-exam-fharren/src/fh/../../data/heart_big_test.parq
+2025-06-22 18:01:19.642 | INFO     | src.fh.data_loader:get_data_loaders:98 - Succesvol trainingsbestand '/home/azureuser/mads-exam-fharren/src/fh/../../data/heart_big_train.parq' geladen (100 rijen).
+2025-06-22 18:01:19.658 | INFO     | src.fh.data_loader:get_data_loaders:109 - Succesvol testbestand '/home/azureuser/mads-exam-fharren/src/fh/../../data/heart_big_test.parq' geladen (50 rijen).
+2025-06-22 18:01:19.661 | INFO     | src.fh.data_loader:get_data_loaders:132 - StandardScaler getraind op trainingsdata.
+2025-06-22 18:01:19.661 | DEBUG    | src.fh.data_loader:__init__:26 - Dataset geïnitialiseerd met DataFrame. Aantal rijen: 100
+2025-06-22 18:01:19.662 | DEBUG    | src.fh.data_loader:__init__:46 - Scaler wordt toegepast op features.
+2025-06-22 18:01:19.664 | DEBUG    | src.fh.data_loader:__init__:26 - Dataset geïnitialiseerd met DataFrame. Aantal rijen: 50
+2025-06-22 18:01:19.665 | DEBUG    | src.fh.data_loader:__init__:46 - Scaler wordt toegepast op features.
+2025-06-22 18:01:19.666 | INFO     | src.fh.data_loader:get_data_loaders:141 - Datasets succesvol aangemaakt.
+2025-06-22 18:01:19.666 | INFO     | src.fh.data_loader:get_data_loaders:149 - DataLoaders succesvol aangemaakt.
+2025-06-22 18:01:19.667 | SUCCESS  | __main__:run_experiment:108 - Data loaders succesvol aangemaakt.
+2025-06-22 18:01:19.669 | INFO     | __main__:run_experiment:118 - Berekende klasse-gewichten voor heart_big_train.parq: [0.25, 5.0, 3.3333332538604736, 2.5, 10.0]
+2025-06-22 18:01:19.669 | INFO     | __main__:run_experiment:132 - Initialiseren van de Trainer...
+2025-06-22 18:01:19.678 | INFO     | src.fh.training_framework:__init__:94 - Initializing Trainer. Using device: cpu
+2025-06-22 18:01:19.678 | INFO     | src.fh.training_framework:__init__:95 - Logging and outputs for this run will be stored in: /home/azureuser/mads-exam-fharren/src/fh/../../logs/20250622-180119_run_logs
+2025-06-22 18:01:19.679 | DEBUG    | src.fh.training_framework:__init__:96 - Best model path template: /home/azureuser/mads-exam-fharren/src/fh/../../logs/20250622-180119_run_logs/20250622-180119_{model_name}_best_model.pth
+2025-06-22 18:01:19.679 | DEBUG    | src.fh.training_framework:__init__:97 - Results path template: /home/azureuser/mads-exam-fharren/src/fh/../../logs/20250622-180119_run_logs/20250622-180119_{model_name}_results.parquet
+2025-06-22 18:01:19.679 | INFO     | __main__:run_experiment:139 - Trainer succesvol geïnitialiseerd.
+2025-06-22 18:01:19.679 | INFO     | __main__:run_experiment:142 - 
+--- Start Training Baseline Model ---
+2025-06-22 18:01:19.680 | INFO     | src.fh.training_framework:run_training:333 - Starting training run for model: baseline_model, experiment: Baseline_heart_big_train
+2025-06-22 18:01:19.680 | DEBUG    | src.fh.training_framework:run_training:374 - Voorbereiding model 'baseline_model' met feature_count=187, class_count=5, model_config={'input_size': 187, 'output_size': 5}
+2025-06-22 18:01:19.680 | INFO     | src.fh.model_selector:get_model:26 - Model selector: aanmaken van model 'baseline_model' met config: {'input_size': 187, 'output_size': 5}
+2025-06-22 18:01:19.680 | INFO     | src.fh.models.baseline_model:__init__:19 - Initializing BaselineModel...
+2025-06-22 18:01:19.684 | INFO     | src.fh.models.baseline_model:__init__:38 - BaselineModel initialized with input_size=187, hidden_size=64, output_size=5.
+2025-06-22 18:01:19.685 | DEBUG    | src.fh.models.baseline_model:__init__:39 - Model layers: fc1=Linear(in_features=187, out_features=64, bias=True), relu=ReLU(), fc2=Linear(in_features=64, out_features=5, bias=True)
+2025-06-22 18:01:19.686 | INFO     | src.fh.training_framework:run_training:420 - Model 'baseline_model' van experiment 'Baseline_heart_big_train' geïnitialiseerd en verplaatst naar cpu.
+2025-06-22 18:01:19.687 | DEBUG    | src.fh.training_framework:run_training:421 - Model architectuur: 
+BaselineModel(
+  (fc1): Linear(in_features=187, out_features=64, bias=True)
+  (relu): ReLU()
+  (fc2): Linear(in_features=64, out_features=5, bias=True)
+)
+2025-06-22 18:01:19.687 | DEBUG    | src.fh.training_framework:run_training:422 - Model-specifieke configuratie voor 'baseline_model': {'input_size': 187, 'output_size': 5}
+2025-06-22 18:01:19.688 | DEBUG    | src.fh.training_framework:_get_optimizer:125 - Attempting to get optimizer: Adam with learning rate: 0.001, weight_decay: 0.0
+2025-06-22 18:01:21.254 | DEBUG    | src.fh.training_framework:_get_optimizer:128 - Adam optimizer created.
+2025-06-22 18:01:21.255 | DEBUG    | src.fh.training_framework:_get_scheduler:153 - Attempting to get scheduler: ReduceLROnPlateau with kwargs: {'mode': 'min', 'factor': 0.1, 'patience': 5}
+2025-06-22 18:01:21.255 | ERROR    | src.fh.training_framework:run_training:468 - Fout bij het initialiseren van de scheduler voor Baseline_heart_big_train: ReduceLROnPlateau.__init__() got an unexpected keyword argument 'verbose'
+2025-06-22 18:01:21.256 | INFO     | __main__:run_experiment:156 - Baseline model training voltooid voor heart_big_train.parq.
+2025-06-22 18:01:21.257 | INFO     | __main__:run_experiment:159 - 
+--- Start Training CNN Model (Hyperparameter Tuning) ---
+2025-06-22 18:01:21.257 | INFO     | __main__:run_experiment:171 - 
+--- Uitvoeren CNN Experiment 1/2 voor heart_big_train.parq ---
+2025-06-22 18:01:21.257 | INFO     | __main__:run_experiment:184 - Berekende CNN input_size_after_flattening voor lineaire laag: 1472
+2025-06-22 18:01:21.258 | INFO     | src.fh.training_framework:run_training:333 - Starting training run for model: cnn_model, experiment: CNN_Experiment_1_heart_big_train
+2025-06-22 18:01:21.258 | DEBUG    | src.fh.training_framework:run_training:374 - Voorbereiding model 'cnn_model' met feature_count=187, class_count=5, model_config={'input_channels': 1, 'hidden_size': 32, 'num_layers': 2, 'output_size': 5, 'conv_filters': [16, 32], 'kernel_size': 3, 'use_dropout': False, 'dropout_rate': 0.5, 'num_features': 187, 'input_size_after_flattening': 1472}
+2025-06-22 18:01:21.258 | INFO     | src.fh.model_selector:get_model:26 - Model selector: aanmaken van model 'cnn_model' met config: {'input_channels': 1, 'hidden_size': 32, 'num_layers': 2, 'output_size': 5, 'conv_filters': [16, 32], 'kernel_size': 3, 'use_dropout': False, 'dropout_rate': 0.5, 'num_features': 187, 'input_size_after_flattening': 1472}
+2025-06-22 18:01:21.258 | INFO     | src.fh.models.cnn_model:__init__:21 - Initializing CNNModel...
+2025-06-22 18:01:21.259 | DEBUG    | src.fh.models.cnn_model:__init__:54 - CNNModel config: input_channels=1, output_size=5, conv_filters=[16, 32], kernel_size=3, hidden_size=32, use_dropout=False
+2025-06-22 18:01:21.262 | DEBUG    | src.fh.models.cnn_model:__init__:63 - Added Conv1d layer 1: in_channels=1, out_channels=16, kernel_size=3
+2025-06-22 18:01:21.264 | DEBUG    | src.fh.models.cnn_model:__init__:63 - Added Conv1d layer 2: in_channels=16, out_channels=32, kernel_size=3
+2025-06-22 18:01:21.265 | DEBUG    | src.fh.models.cnn_model:__init__:66 - Convolutional layers built.
+2025-06-22 18:01:21.266 | INFO     | src.fh.models.cnn_model:__init__:77 - CNNModel initialized. Total parameters: 48933
+2025-06-22 18:01:21.268 | INFO     | src.fh.training_framework:run_training:420 - Model 'cnn_model' van experiment 'CNN_Experiment_1_heart_big_train' geïnitialiseerd en verplaatst naar cpu.
+2025-06-22 18:01:21.268 | DEBUG    | src.fh.training_framework:run_training:421 - Model architectuur: 
+CNNModel(
+  (conv_layers): Sequential(
+    (0): Conv1d(1, 16, kernel_size=(3,), stride=(1,), padding=same)
+    (1): ReLU()
+    (2): MaxPool1d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+    (3): Conv1d(16, 32, kernel_size=(3,), stride=(1,), padding=same)
+    (4): ReLU()
+    (5): MaxPool1d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  )
+  (fc1): Linear(in_features=1472, out_features=32, bias=True)
+  (relu): ReLU()
+  (fc2): Linear(in_features=32, out_features=5, bias=True)
+)
+2025-06-22 18:01:21.268 | DEBUG    | src.fh.training_framework:run_training:422 - Model-specifieke configuratie voor 'cnn_model': {'input_channels': 1, 'hidden_size': 32, 'num_layers': 2, 'output_size': 5, 'conv_filters': [16, 32], 'kernel_size': 3, 'use_dropout': False, 'dropout_rate': 0.5, 'num_features': 187, 'input_size_after_flattening': 1472}
+2025-06-22 18:01:21.269 | DEBUG    | src.fh.training_framework:_get_optimizer:125 - Attempting to get optimizer: Adam with learning rate: 0.001, weight_decay: 0.0
+2025-06-22 18:01:21.269 | DEBUG    | src.fh.training_framework:_get_optimizer:128 - Adam optimizer created.
+2025-06-22 18:01:21.269 | DEBUG    | src.fh.training_framework:_get_scheduler:153 - Attempting to get scheduler: ReduceLROnPlateau with kwargs: {'mode': 'min', 'factor': 0.1, 'patience': 5}
+2025-06-22 18:01:21.270 | ERROR    | src.fh.training_framework:run_training:468 - Fout bij het initialiseren van de scheduler voor CNN_Experiment_1_heart_big_train: ReduceLROnPlateau.__init__() got an unexpected keyword argument 'verbose'
+2025-06-22 18:01:21.272 | INFO     | __main__:run_experiment:171 - 
+--- Uitvoeren CNN Experiment 2/2 voor heart_big_train.parq ---
+2025-06-22 18:01:21.272 | INFO     | __main__:run_experiment:184 - Berekende CNN input_size_after_flattening voor lineaire laag: 2944
+2025-06-22 18:01:21.272 | INFO     | src.fh.training_framework:run_training:333 - Starting training run for model: cnn_model, experiment: CNN_Experiment_2_heart_big_train
+2025-06-22 18:01:21.273 | DEBUG    | src.fh.training_framework:run_training:374 - Voorbereiding model 'cnn_model' met feature_count=187, class_count=5, model_config={'input_channels': 1, 'hidden_size': 64, 'num_layers': 2, 'output_size': 5, 'conv_filters': [32, 64], 'kernel_size': 5, 'use_dropout': True, 'dropout_rate': 0.3, 'num_features': 187, 'input_size_after_flattening': 2944}
+2025-06-22 18:01:21.273 | INFO     | src.fh.model_selector:get_model:26 - Model selector: aanmaken van model 'cnn_model' met config: {'input_channels': 1, 'hidden_size': 64, 'num_layers': 2, 'output_size': 5, 'conv_filters': [32, 64], 'kernel_size': 5, 'use_dropout': True, 'dropout_rate': 0.3, 'num_features': 187, 'input_size_after_flattening': 2944}
+2025-06-22 18:01:21.273 | INFO     | src.fh.models.cnn_model:__init__:21 - Initializing CNNModel...
+2025-06-22 18:01:21.273 | DEBUG    | src.fh.models.cnn_model:__init__:54 - CNNModel config: input_channels=1, output_size=5, conv_filters=[32, 64], kernel_size=5, hidden_size=64, use_dropout=True
+2025-06-22 18:01:21.274 | DEBUG    | src.fh.models.cnn_model:__init__:63 - Added Conv1d layer 1: in_channels=1, out_channels=32, kernel_size=5
+2025-06-22 18:01:21.276 | DEBUG    | src.fh.models.cnn_model:__init__:63 - Added Conv1d layer 2: in_channels=32, out_channels=64, kernel_size=5
+2025-06-22 18:01:21.277 | DEBUG    | src.fh.models.cnn_model:__init__:66 - Convolutional layers built.
+2025-06-22 18:01:21.280 | DEBUG    | src.fh.models.cnn_model:__init__:74 - Dropout layer added with rate: 0.3
+2025-06-22 18:01:21.280 | INFO     | src.fh.models.cnn_model:__init__:77 - CNNModel initialized. Total parameters: 199301
+2025-06-22 18:01:21.282 | INFO     | src.fh.training_framework:run_training:420 - Model 'cnn_model' van experiment 'CNN_Experiment_2_heart_big_train' geïnitialiseerd en verplaatst naar cpu.
+2025-06-22 18:01:21.282 | DEBUG    | src.fh.training_framework:run_training:421 - Model architectuur: 
+CNNModel(
+  (conv_layers): Sequential(
+    (0): Conv1d(1, 32, kernel_size=(5,), stride=(1,), padding=same)
+    (1): ReLU()
+    (2): MaxPool1d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+    (3): Conv1d(32, 64, kernel_size=(5,), stride=(1,), padding=same)
+    (4): ReLU()
+    (5): MaxPool1d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  )
+  (fc1): Linear(in_features=2944, out_features=64, bias=True)
+  (relu): ReLU()
+  (dropout): Dropout(p=0.3, inplace=False)
+  (fc2): Linear(in_features=64, out_features=5, bias=True)
+)
+2025-06-22 18:01:21.282 | DEBUG    | src.fh.training_framework:run_training:422 - Model-specifieke configuratie voor 'cnn_model': {'input_channels': 1, 'hidden_size': 64, 'num_layers': 2, 'output_size': 5, 'conv_filters': [32, 64], 'kernel_size': 5, 'use_dropout': True, 'dropout_rate': 0.3, 'num_features': 187, 'input_size_after_flattening': 2944}
+2025-06-22 18:01:21.283 | DEBUG    | src.fh.training_framework:_get_optimizer:125 - Attempting to get optimizer: Adam with learning rate: 0.001, weight_decay: 0.0
+2025-06-22 18:01:21.283 | DEBUG    | src.fh.training_framework:_get_optimizer:128 - Adam optimizer created.
+2025-06-22 18:01:21.283 | DEBUG    | src.fh.training_framework:_get_scheduler:153 - Attempting to get scheduler: ReduceLROnPlateau with kwargs: {'mode': 'min', 'factor': 0.1, 'patience': 5}
+2025-06-22 18:01:21.284 | ERROR    | src.fh.training_framework:run_training:468 - Fout bij het initialiseren van de scheduler voor CNN_Experiment_2_heart_big_train: ReduceLROnPlateau.__init__() got an unexpected keyword argument 'verbose'
+2025-06-22 18:01:21.285 | INFO     | __main__:run_experiment:194 - CNN model training voltooid voor heart_big_train.parq.
+2025-06-22 18:01:21.285 | INFO     | __main__:run_experiment:198 - 
+--- Start Training CNN_SE_Skip Model (Hyperparameter Tuning) ---
+2025-06-22 18:01:21.286 | INFO     | __main__:run_experiment:210 - 
+--- Uitvoeren CNN_SE_Skip Experiment 1/2 voor heart_big_train.parq ---
+2025-06-22 18:01:21.286 | INFO     | __main__:run_experiment:225 - Berekende CNN_SE_Skip input_size_after_flattening voor lineaire laag: 1472
+2025-06-22 18:01:21.286 | INFO     | src.fh.training_framework:run_training:333 - Starting training run for model: cnn_se_skip_model, experiment: CNN_SE_Skip_Experiment_1_heart_big_train
+2025-06-22 18:01:21.286 | DEBUG    | src.fh.training_framework:run_training:374 - Voorbereiding model 'cnn_se_skip_model' met feature_count=187, class_count=5, model_config={'input_channels': 1, 'hidden_size': 64, 'num_layers': 2, 'output_size': 5, 'conv_filters_per_block': 32, 'kernel_size_per_block': 3, 'use_dropout': False, 'dropout_rate': 0.3, 'reduction_ratio': 8, 'num_features': 187, 'input_size_after_flattening': 1472}
+2025-06-22 18:01:21.287 | INFO     | src.fh.model_selector:get_model:26 - Model selector: aanmaken van model 'cnn_se_skip_model' met config: {'input_channels': 1, 'hidden_size': 64, 'num_layers': 2, 'output_size': 5, 'conv_filters_per_block': 32, 'kernel_size_per_block': 3, 'use_dropout': False, 'dropout_rate': 0.3, 'reduction_ratio': 8, 'num_features': 187, 'input_size_after_flattening': 1472}
+2025-06-22 18:01:21.300 | INFO     | src.fh.training_framework:run_training:420 - Model 'cnn_se_skip_model' van experiment 'CNN_SE_Skip_Experiment_1_heart_big_train' geïnitialiseerd en verplaatst naar cpu.
+2025-06-22 18:01:21.301 | DEBUG    | src.fh.training_framework:run_training:421 - Model architectuur: 
+CNNSESkipModel(
+  (features): Sequential(
+    (0): CNNSESkipBlock(
+      (conv): Conv1d(1, 32, kernel_size=(3,), stride=(1,), padding=(1,))
+      (relu): ReLU(inplace=True)
+      (pool): MaxPool1d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (se): SqueezeExcitation(
+        (avg_pool): AdaptiveAvgPool1d(output_size=1)
+        (fc): Sequential(
+          (0): Linear(in_features=32, out_features=4, bias=False)
+          (1): ReLU(inplace=True)
+          (2): Linear(in_features=4, out_features=32, bias=False)
+          (3): Sigmoid()
+        )
+      )
+      (skip_conv): Conv1d(1, 32, kernel_size=(1,), stride=(1,))
+    )
+    (1): CNNSESkipBlock(
+      (conv): Conv1d(32, 32, kernel_size=(3,), stride=(1,), padding=(1,))
+      (relu): ReLU(inplace=True)
+      (pool): MaxPool1d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (se): SqueezeExcitation(
+        (avg_pool): AdaptiveAvgPool1d(output_size=1)
+        (fc): Sequential(
+          (0): Linear(in_features=32, out_features=4, bias=False)
+          (1): ReLU(inplace=True)
+          (2): Linear(in_features=4, out_features=32, bias=False)
+          (3): Sigmoid()
+        )
+      )
+      (skip_conv): Identity()
+    )
+  )
+  (classifier): Sequential(
+    (0): Linear(in_features=1472, out_features=64, bias=True)
+    (1): ReLU()
+    (2): Identity()
+    (3): Linear(in_features=64, out_features=5, bias=True)
+  )
+  (softmax): Softmax(dim=1)
+)
+2025-06-22 18:01:21.301 | DEBUG    | src.fh.training_framework:run_training:422 - Model-specifieke configuratie voor 'cnn_se_skip_model': {'input_channels': 1, 'hidden_size': 64, 'num_layers': 2, 'output_size': 5, 'conv_filters_per_block': 32, 'kernel_size_per_block': 3, 'use_dropout': False, 'dropout_rate': 0.3, 'reduction_ratio': 8, 'num_features': 187, 'input_size_after_flattening': 1472}
+2025-06-22 18:01:21.302 | DEBUG    | src.fh.training_framework:_get_optimizer:125 - Attempting to get optimizer: Adam with learning rate: 0.001, weight_decay: 0.0
+2025-06-22 18:01:21.302 | DEBUG    | src.fh.training_framework:_get_optimizer:128 - Adam optimizer created.
+2025-06-22 18:01:21.302 | DEBUG    | src.fh.training_framework:_get_scheduler:153 - Attempting to get scheduler: ReduceLROnPlateau with kwargs: {'mode': 'min', 'factor': 0.1, 'patience': 5}
+2025-06-22 18:01:21.303 | ERROR    | src.fh.training_framework:run_training:468 - Fout bij het initialiseren van de scheduler voor CNN_SE_Skip_Experiment_1_heart_big_train: ReduceLROnPlateau.__init__() got an unexpected keyword argument 'verbose'
+2025-06-22 18:01:21.304 | INFO     | __main__:run_experiment:210 - 
+--- Uitvoeren CNN_SE_Skip Experiment 2/2 voor heart_big_train.parq ---
+2025-06-22 18:01:21.304 | INFO     | __main__:run_experiment:225 - Berekende CNN_SE_Skip input_size_after_flattening voor lineaire laag: 1472
+2025-06-22 18:01:21.304 | INFO     | src.fh.training_framework:run_training:333 - Starting training run for model: cnn_se_skip_model, experiment: CNN_SE_Skip_Experiment_2_heart_big_train
+2025-06-22 18:01:21.305 | DEBUG    | src.fh.training_framework:run_training:374 - Voorbereiding model 'cnn_se_skip_model' met feature_count=187, class_count=5, model_config={'input_channels': 1, 'hidden_size': 128, 'num_layers': 3, 'output_size': 5, 'conv_filters_per_block': 64, 'kernel_size_per_block': 5, 'use_dropout': True, 'dropout_rate': 0.4, 'reduction_ratio': 16, 'num_features': 187, 'input_size_after_flattening': 1472}
+2025-06-22 18:01:21.305 | INFO     | src.fh.model_selector:get_model:26 - Model selector: aanmaken van model 'cnn_se_skip_model' met config: {'input_channels': 1, 'hidden_size': 128, 'num_layers': 3, 'output_size': 5, 'conv_filters_per_block': 64, 'kernel_size_per_block': 5, 'use_dropout': True, 'dropout_rate': 0.4, 'reduction_ratio': 16, 'num_features': 187, 'input_size_after_flattening': 1472}
+2025-06-22 18:01:21.314 | INFO     | src.fh.training_framework:run_training:420 - Model 'cnn_se_skip_model' van experiment 'CNN_SE_Skip_Experiment_2_heart_big_train' geïnitialiseerd en verplaatst naar cpu.
+2025-06-22 18:01:21.316 | DEBUG    | src.fh.training_framework:run_training:421 - Model architectuur: 
+CNNSESkipModel(
+  (features): Sequential(
+    (0): CNNSESkipBlock(
+      (conv): Conv1d(1, 64, kernel_size=(5,), stride=(1,), padding=(2,))
+      (relu): ReLU(inplace=True)
+      (pool): MaxPool1d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (se): SqueezeExcitation(
+        (avg_pool): AdaptiveAvgPool1d(output_size=1)
+        (fc): Sequential(
+          (0): Linear(in_features=64, out_features=4, bias=False)
+          (1): ReLU(inplace=True)
+          (2): Linear(in_features=4, out_features=64, bias=False)
+          (3): Sigmoid()
+        )
+      )
+      (skip_conv): Conv1d(1, 64, kernel_size=(1,), stride=(1,))
+    )
+    (1): Dropout(p=0.4, inplace=False)
+    (2): CNNSESkipBlock(
+      (conv): Conv1d(64, 64, kernel_size=(5,), stride=(1,), padding=(2,))
+      (relu): ReLU(inplace=True)
+      (pool): MaxPool1d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (se): SqueezeExcitation(
+        (avg_pool): AdaptiveAvgPool1d(output_size=1)
+        (fc): Sequential(
+          (0): Linear(in_features=64, out_features=4, bias=False)
+          (1): ReLU(inplace=True)
+          (2): Linear(in_features=4, out_features=64, bias=False)
+          (3): Sigmoid()
+        )
+      )
+      (skip_conv): Identity()
+    )
+    (3): Dropout(p=0.4, inplace=False)
+    (4): CNNSESkipBlock(
+      (conv): Conv1d(64, 64, kernel_size=(5,), stride=(1,), padding=(2,))
+      (relu): ReLU(inplace=True)
+      (pool): MaxPool1d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (se): SqueezeExcitation(
+        (avg_pool): AdaptiveAvgPool1d(output_size=1)
+        (fc): Sequential(
+          (0): Linear(in_features=64, out_features=4, bias=False)
+          (1): ReLU(inplace=True)
+          (2): Linear(in_features=4, out_features=64, bias=False)
+          (3): Sigmoid()
+        )
+      )
+      (skip_conv): Identity()
+    )
+    (5): Dropout(p=0.4, inplace=False)
+  )
+  (classifier): Sequential(
+    (0): Linear(in_features=1472, out_features=128, bias=True)
+    (1): ReLU()
+    (2): Dropout(p=0.4, inplace=False)
+    (3): Linear(in_features=128, out_features=5, bias=True)
+  )
+  (softmax): Softmax(dim=1)
+)
+2025-06-22 18:01:21.316 | DEBUG    | src.fh.training_framework:run_training:422 - Model-specifieke configuratie voor 'cnn_se_skip_model': {'input_channels': 1, 'hidden_size': 128, 'num_layers': 3, 'output_size': 5, 'conv_filters_per_block': 64, 'kernel_size_per_block': 5, 'use_dropout': True, 'dropout_rate': 0.4, 'reduction_ratio': 16, 'num_features': 187, 'input_size_after_flattening': 1472}
+2025-06-22 18:01:21.316 | DEBUG    | src.fh.training_framework:_get_optimizer:125 - Attempting to get optimizer: Adam with learning rate: 0.001, weight_decay: 0.0
+2025-06-22 18:01:21.317 | DEBUG    | src.fh.training_framework:_get_optimizer:128 - Adam optimizer created.
+2025-06-22 18:01:21.317 | DEBUG    | src.fh.training_framework:_get_scheduler:153 - Attempting to get scheduler: ReduceLROnPlateau with kwargs: {'mode': 'min', 'factor': 0.1, 'patience': 5}
+2025-06-22 18:01:21.317 | ERROR    | src.fh.training_framework:run_training:468 - Fout bij het initialiseren van de scheduler voor CNN_SE_Skip_Experiment_2_heart_big_train: ReduceLROnPlateau.__init__() got an unexpected keyword argument 'verbose'
+2025-06-22 18:01:21.320 | INFO     | __main__:run_experiment:235 - CNN_SE_Skip model training voltooid voor heart_big_train.parq.
+2025-06-22 18:01:21.321 | INFO     | __main__:run_experiment:241 - 
+--- Start Training GRU Model (Hyperparameter Tuning) ---
+2025-06-22 18:01:21.321 | INFO     | __main__:run_experiment:252 - 
+--- Uitvoeren GRU Experiment 1/2 voor heart_big_train.parq ---
+2025-06-22 18:01:21.322 | INFO     | src.fh.training_framework:run_training:333 - Starting training run for model: gru_model, experiment: GRU_Experiment_1_heart_big_train
+2025-06-22 18:01:21.322 | DEBUG    | src.fh.training_framework:run_training:374 - Voorbereiding model 'gru_model' met feature_count=187, class_count=5, model_config={'input_size': 187, 'hidden_size': 64, 'num_layers': 1, 'output_size': 5, 'dropout': 0.0}
+2025-06-22 18:01:21.322 | INFO     | src.fh.model_selector:get_model:26 - Model selector: aanmaken van model 'gru_model' met config: {'input_size': 187, 'hidden_size': 64, 'num_layers': 1, 'output_size': 5, 'dropout': 0.0}
+2025-06-22 18:01:21.322 | INFO     | src.fh.models.gru_model:__init__:20 - Initializing GRUModel...
+2025-06-22 18:01:21.327 | DEBUG    | src.fh.models.gru_model:__init__:59 - GRU layer initialized: input_size=187, hidden_size=64, num_layers=1, dropout=0.0
+2025-06-22 18:01:21.328 | DEBUG    | src.fh.models.gru_model:__init__:62 - Fully connected layer initialized: in_features=64, out_features=5
+2025-06-22 18:01:21.329 | INFO     | src.fh.models.gru_model:__init__:64 - GRUModel initialized. Total parameters: 48901
+2025-06-22 18:01:21.331 | INFO     | src.fh.training_framework:run_training:420 - Model 'gru_model' van experiment 'GRU_Experiment_1_heart_big_train' geïnitialiseerd en verplaatst naar cpu.
+2025-06-22 18:01:21.331 | DEBUG    | src.fh.training_framework:run_training:421 - Model architectuur: 
+GRUModel(
+  (gru): GRU(187, 64, batch_first=True)
+  (fc): Linear(in_features=64, out_features=5, bias=True)
+)
+2025-06-22 18:01:21.332 | DEBUG    | src.fh.training_framework:run_training:422 - Model-specifieke configuratie voor 'gru_model': {'input_size': 187, 'hidden_size': 64, 'num_layers': 1, 'output_size': 5, 'dropout': 0.0}
+2025-06-22 18:01:21.332 | DEBUG    | src.fh.training_framework:_get_optimizer:125 - Attempting to get optimizer: Adam with learning rate: 0.001, weight_decay: 0.0
+2025-06-22 18:01:21.332 | DEBUG    | src.fh.training_framework:_get_optimizer:128 - Adam optimizer created.
+2025-06-22 18:01:21.333 | DEBUG    | src.fh.training_framework:_get_scheduler:153 - Attempting to get scheduler: ReduceLROnPlateau with kwargs: {'mode': 'min', 'factor': 0.1, 'patience': 5}
+2025-06-22 18:01:21.333 | ERROR    | src.fh.training_framework:run_training:468 - Fout bij het initialiseren van de scheduler voor GRU_Experiment_1_heart_big_train: ReduceLROnPlateau.__init__() got an unexpected keyword argument 'verbose'
+2025-06-22 18:01:21.334 | INFO     | __main__:run_experiment:252 - 
+--- Uitvoeren GRU Experiment 2/2 voor heart_big_train.parq ---
+2025-06-22 18:01:21.334 | INFO     | src.fh.training_framework:run_training:333 - Starting training run for model: gru_model, experiment: GRU_Experiment_2_heart_big_train
+2025-06-22 18:01:21.335 | DEBUG    | src.fh.training_framework:run_training:374 - Voorbereiding model 'gru_model' met feature_count=187, class_count=5, model_config={'input_size': 187, 'hidden_size': 128, 'num_layers': 2, 'output_size': 5, 'dropout': 0.2}
+2025-06-22 18:01:21.335 | INFO     | src.fh.model_selector:get_model:26 - Model selector: aanmaken van model 'gru_model' met config: {'input_size': 187, 'hidden_size': 128, 'num_layers': 2, 'output_size': 5, 'dropout': 0.2}
+2025-06-22 18:01:21.335 | INFO     | src.fh.models.gru_model:__init__:20 - Initializing GRUModel...
+2025-06-22 18:01:21.336 | DEBUG    | src.fh.models.gru_model:__init__:50 - GRU dropout rate set to 0.2 for 2 layers.
+2025-06-22 18:01:21.341 | DEBUG    | src.fh.models.gru_model:__init__:59 - GRU layer initialized: input_size=187, hidden_size=128, num_layers=2, dropout=0.2
+2025-06-22 18:01:21.342 | DEBUG    | src.fh.models.gru_model:__init__:62 - Fully connected layer initialized: in_features=128, out_features=5
+2025-06-22 18:01:21.343 | INFO     | src.fh.models.gru_model:__init__:64 - GRUModel initialized. Total parameters: 221445
+2025-06-22 18:01:21.344 | INFO     | src.fh.training_framework:run_training:420 - Model 'gru_model' van experiment 'GRU_Experiment_2_heart_big_train' geïnitialiseerd en verplaatst naar cpu.
+2025-06-22 18:01:21.345 | DEBUG    | src.fh.training_framework:run_training:421 - Model architectuur: 
+GRUModel(
+  (gru): GRU(187, 128, num_layers=2, batch_first=True, dropout=0.2)
+  (fc): Linear(in_features=128, out_features=5, bias=True)
+)
+2025-06-22 18:01:21.345 | DEBUG    | src.fh.training_framework:run_training:422 - Model-specifieke configuratie voor 'gru_model': {'input_size': 187, 'hidden_size': 128, 'num_layers': 2, 'output_size': 5, 'dropout': 0.2}
+2025-06-22 18:01:21.345 | DEBUG    | src.fh.training_framework:_get_optimizer:125 - Attempting to get optimizer: Adam with learning rate: 0.001, weight_decay: 0.0
+2025-06-22 18:01:21.345 | DEBUG    | src.fh.training_framework:_get_optimizer:128 - Adam optimizer created.
+2025-06-22 18:01:21.346 | DEBUG    | src.fh.training_framework:_get_scheduler:153 - Attempting to get scheduler: ReduceLROnPlateau with kwargs: {'mode': 'min', 'factor': 0.1, 'patience': 5}
+2025-06-22 18:01:21.346 | ERROR    | src.fh.training_framework:run_training:468 - Fout bij het initialiseren van de scheduler voor GRU_Experiment_2_heart_big_train: ReduceLROnPlateau.__init__() got an unexpected keyword argument 'verbose'
+2025-06-22 18:01:21.347 | INFO     | __main__:run_experiment:262 - GRU model training voltooid voor heart_big_train.parq.
+2025-06-22 18:01:21.347 | INFO     | __main__:run_experiment:84 - 
+--- Start experimenten voor trainingsbestand: heart_big_train_synthetic.parquet (2/2) ---
+2025-06-22 18:01:21.347 | DEBUG    | __main__:run_experiment:88 - Trainingsdata pad: /home/azureuser/mads-exam-fharren/src/fh/../../data/heart_big_train_synthetic.parquet
+2025-06-22 18:01:21.348 | DEBUG    | __main__:run_experiment:89 - Testdata pad: /home/azureuser/mads-exam-fharren/src/fh/../../data/heart_big_test.parq
+2025-06-22 18:01:21.348 | INFO     | __main__:run_experiment:91 - Vastgestelde feature count: 187, class count: 5
+2025-06-22 18:01:21.348 | INFO     | __main__:run_experiment:98 - Laden van data van /home/azureuser/mads-exam-fharren/src/fh/../../data/heart_big_train_synthetic.parquet en /home/azureuser/mads-exam-fharren/src/fh/../../data/heart_big_test.parq...
+2025-06-22 18:01:21.348 | INFO     | src.fh.data_loader:get_data_loaders:93 - Start aanmaken data loaders. Training bestand: /home/azureuser/mads-exam-fharren/src/fh/../../data/heart_big_train_synthetic.parquet, Test bestand: /home/azureuser/mads-exam-fharren/src/fh/../../data/heart_big_test.parq
+2025-06-22 18:01:21.368 | INFO     | src.fh.data_loader:get_data_loaders:98 - Succesvol trainingsbestand '/home/azureuser/mads-exam-fharren/src/fh/../../data/heart_big_train_synthetic.parquet' geladen (120 rijen).
+2025-06-22 18:01:21.383 | INFO     | src.fh.data_loader:get_data_loaders:109 - Succesvol testbestand '/home/azureuser/mads-exam-fharren/src/fh/../../data/heart_big_test.parq' geladen (50 rijen).
+2025-06-22 18:01:21.386 | INFO     | src.fh.data_loader:get_data_loaders:132 - StandardScaler getraind op trainingsdata.
+2025-06-22 18:01:21.386 | DEBUG    | src.fh.data_loader:__init__:26 - Dataset geïnitialiseerd met DataFrame. Aantal rijen: 120
+2025-06-22 18:01:21.388 | DEBUG    | src.fh.data_loader:__init__:46 - Scaler wordt toegepast op features.
+2025-06-22 18:01:21.390 | DEBUG    | src.fh.data_loader:__init__:26 - Dataset geïnitialiseerd met DataFrame. Aantal rijen: 50
+2025-06-22 18:01:21.391 | DEBUG    | src.fh.data_loader:__init__:46 - Scaler wordt toegepast op features.
+2025-06-22 18:01:21.392 | INFO     | src.fh.data_loader:get_data_loaders:141 - Datasets succesvol aangemaakt.
+2025-06-22 18:01:21.393 | INFO     | src.fh.data_loader:get_data_loaders:149 - DataLoaders succesvol aangemaakt.
+2025-06-22 18:01:21.394 | SUCCESS  | __main__:run_experiment:108 - Data loaders succesvol aangemaakt.
+2025-06-22 18:01:21.397 | INFO     | __main__:run_experiment:118 - Berekende klasse-gewichten voor heart_big_train_synthetic.parquet: [1.04347825050354, 0.9599999785423279, 1.263157844543457, 0.774193525314331, 1.0909091234207153]
+2025-06-22 18:01:21.398 | INFO     | __main__:run_experiment:132 - Initialiseren van de Trainer...
+2025-06-22 18:01:21.409 | INFO     | src.fh.training_framework:__init__:94 - Initializing Trainer. Using device: cpu
+2025-06-22 18:01:21.409 | INFO     | src.fh.training_framework:__init__:95 - Logging and outputs for this run will be stored in: /home/azureuser/mads-exam-fharren/src/fh/../../logs/20250622-180119_run_logs
+2025-06-22 18:01:21.410 | DEBUG    | src.fh.training_framework:__init__:96 - Best model path template: /home/azureuser/mads-exam-fharren/src/fh/../../logs/20250622-180119_run_logs/20250622-180119_{model_name}_best_model.pth
+2025-06-22 18:01:21.410 | DEBUG    | src.fh.training_framework:__init__:97 - Results path template: /home/azureuser/mads-exam-fharren/src/fh/../../logs/20250622-180119_run_logs/20250622-180119_{model_name}_results.parquet
+2025-06-22 18:01:21.411 | INFO     | __main__:run_experiment:139 - Trainer succesvol geïnitialiseerd.
+2025-06-22 18:01:21.411 | INFO     | __main__:run_experiment:142 - 
+--- Start Training Baseline Model ---
+2025-06-22 18:01:21.411 | INFO     | src.fh.training_framework:run_training:333 - Starting training run for model: baseline_model, experiment: Baseline_heart_big_train_synthetic
+2025-06-22 18:01:21.412 | DEBUG    | src.fh.training_framework:run_training:374 - Voorbereiding model 'baseline_model' met feature_count=187, class_count=5, model_config={'input_size': 187, 'output_size': 5}
+2025-06-22 18:01:21.412 | INFO     | src.fh.model_selector:get_model:26 - Model selector: aanmaken van model 'baseline_model' met config: {'input_size': 187, 'output_size': 5}
+2025-06-22 18:01:21.413 | INFO     | src.fh.models.baseline_model:__init__:19 - Initializing BaselineModel...
+2025-06-22 18:01:21.417 | INFO     | src.fh.models.baseline_model:__init__:38 - BaselineModel initialized with input_size=187, hidden_size=64, output_size=5.
+2025-06-22 18:01:21.418 | DEBUG    | src.fh.models.baseline_model:__init__:39 - Model layers: fc1=Linear(in_features=187, out_features=64, bias=True), relu=ReLU(), fc2=Linear(in_features=64, out_features=5, bias=True)
+2025-06-22 18:01:21.418 | INFO     | src.fh.training_framework:run_training:420 - Model 'baseline_model' van experiment 'Baseline_heart_big_train_synthetic' geïnitialiseerd en verplaatst naar cpu.
+2025-06-22 18:01:21.419 | DEBUG    | src.fh.training_framework:run_training:421 - Model architectuur: 
+BaselineModel(
+  (fc1): Linear(in_features=187, out_features=64, bias=True)
+  (relu): ReLU()
+  (fc2): Linear(in_features=64, out_features=5, bias=True)
+)
+2025-06-22 18:01:21.419 | DEBUG    | src.fh.training_framework:run_training:422 - Model-specifieke configuratie voor 'baseline_model': {'input_size': 187, 'output_size': 5}
+2025-06-22 18:01:21.420 | DEBUG    | src.fh.training_framework:_get_optimizer:125 - Attempting to get optimizer: Adam with learning rate: 0.001, weight_decay: 0.0
+2025-06-22 18:01:21.420 | DEBUG    | src.fh.training_framework:_get_optimizer:128 - Adam optimizer created.
+2025-06-22 18:01:21.420 | DEBUG    | src.fh.training_framework:_get_scheduler:153 - Attempting to get scheduler: ReduceLROnPlateau with kwargs: {'mode': 'min', 'factor': 0.1, 'patience': 5}
+2025-06-22 18:01:21.421 | ERROR    | src.fh.training_framework:run_training:468 - Fout bij het initialiseren van de scheduler voor Baseline_heart_big_train_synthetic: ReduceLROnPlateau.__init__() got an unexpected keyword argument 'verbose'
+2025-06-22 18:01:21.422 | INFO     | __main__:run_experiment:156 - Baseline model training voltooid voor heart_big_train_synthetic.parquet.
+2025-06-22 18:01:21.422 | INFO     | __main__:run_experiment:159 - 
+--- Start Training CNN Model (Hyperparameter Tuning) ---
+2025-06-22 18:01:21.423 | INFO     | __main__:run_experiment:171 - 
+--- Uitvoeren CNN Experiment 1/2 voor heart_big_train_synthetic.parquet ---
+2025-06-22 18:01:21.423 | INFO     | __main__:run_experiment:184 - Berekende CNN input_size_after_flattening voor lineaire laag: 1472
+2025-06-22 18:01:21.423 | INFO     | src.fh.training_framework:run_training:333 - Starting training run for model: cnn_model, experiment: CNN_Experiment_1_heart_big_train_synthetic
+2025-06-22 18:01:21.424 | DEBUG    | src.fh.training_framework:run_training:374 - Voorbereiding model 'cnn_model' met feature_count=187, class_count=5, model_config={'input_channels': 1, 'hidden_size': 32, 'num_layers': 2, 'output_size': 5, 'conv_filters': [16, 32], 'kernel_size': 3, 'use_dropout': False, 'dropout_rate': 0.5, 'num_features': 187, 'input_size_after_flattening': 1472}
+2025-06-22 18:01:21.424 | INFO     | src.fh.model_selector:get_model:26 - Model selector: aanmaken van model 'cnn_model' met config: {'input_channels': 1, 'hidden_size': 32, 'num_layers': 2, 'output_size': 5, 'conv_filters': [16, 32], 'kernel_size': 3, 'use_dropout': False, 'dropout_rate': 0.5, 'num_features': 187, 'input_size_after_flattening': 1472}
+2025-06-22 18:01:21.424 | INFO     | src.fh.models.cnn_model:__init__:21 - Initializing CNNModel...
+2025-06-22 18:01:21.425 | DEBUG    | src.fh.models.cnn_model:__init__:54 - CNNModel config: input_channels=1, output_size=5, conv_filters=[16, 32], kernel_size=3, hidden_size=32, use_dropout=False
+2025-06-22 18:01:21.427 | DEBUG    | src.fh.models.cnn_model:__init__:63 - Added Conv1d layer 1: in_channels=1, out_channels=16, kernel_size=3
+2025-06-22 18:01:21.429 | DEBUG    | src.fh.models.cnn_model:__init__:63 - Added Conv1d layer 2: in_channels=16, out_channels=32, kernel_size=3
+2025-06-22 18:01:21.429 | DEBUG    | src.fh.models.cnn_model:__init__:66 - Convolutional layers built.
+2025-06-22 18:01:21.433 | INFO     | src.fh.models.cnn_model:__init__:77 - CNNModel initialized. Total parameters: 48933
+2025-06-22 18:01:21.435 | INFO     | src.fh.training_framework:run_training:420 - Model 'cnn_model' van experiment 'CNN_Experiment_1_heart_big_train_synthetic' geïnitialiseerd en verplaatst naar cpu.
+2025-06-22 18:01:21.435 | DEBUG    | src.fh.training_framework:run_training:421 - Model architectuur: 
+CNNModel(
+  (conv_layers): Sequential(
+    (0): Conv1d(1, 16, kernel_size=(3,), stride=(1,), padding=same)
+    (1): ReLU()
+    (2): MaxPool1d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+    (3): Conv1d(16, 32, kernel_size=(3,), stride=(1,), padding=same)
+    (4): ReLU()
+    (5): MaxPool1d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  )
+  (fc1): Linear(in_features=1472, out_features=32, bias=True)
+  (relu): ReLU()
+  (fc2): Linear(in_features=32, out_features=5, bias=True)
+)
+2025-06-22 18:01:21.436 | DEBUG    | src.fh.training_framework:run_training:422 - Model-specifieke configuratie voor 'cnn_model': {'input_channels': 1, 'hidden_size': 32, 'num_layers': 2, 'output_size': 5, 'conv_filters': [16, 32], 'kernel_size': 3, 'use_dropout': False, 'dropout_rate': 0.5, 'num_features': 187, 'input_size_after_flattening': 1472}
+2025-06-22 18:01:21.436 | DEBUG    | src.fh.training_framework:_get_optimizer:125 - Attempting to get optimizer: Adam with learning rate: 0.001, weight_decay: 0.0
+2025-06-22 18:01:21.437 | DEBUG    | src.fh.training_framework:_get_optimizer:128 - Adam optimizer created.
+2025-06-22 18:01:21.437 | DEBUG    | src.fh.training_framework:_get_scheduler:153 - Attempting to get scheduler: ReduceLROnPlateau with kwargs: {'mode': 'min', 'factor': 0.1, 'patience': 5}
+2025-06-22 18:01:21.437 | ERROR    | src.fh.training_framework:run_training:468 - Fout bij het initialiseren van de scheduler voor CNN_Experiment_1_heart_big_train_synthetic: ReduceLROnPlateau.__init__() got an unexpected keyword argument 'verbose'
+2025-06-22 18:01:21.441 | INFO     | __main__:run_experiment:171 - 
+--- Uitvoeren CNN Experiment 2/2 voor heart_big_train_synthetic.parquet ---
+2025-06-22 18:01:21.441 | INFO     | __main__:run_experiment:184 - Berekende CNN input_size_after_flattening voor lineaire laag: 2944
+2025-06-22 18:01:21.441 | INFO     | src.fh.training_framework:run_training:333 - Starting training run for model: cnn_model, experiment: CNN_Experiment_2_heart_big_train_synthetic
+2025-06-22 18:01:21.442 | DEBUG    | src.fh.training_framework:run_training:374 - Voorbereiding model 'cnn_model' met feature_count=187, class_count=5, model_config={'input_channels': 1, 'hidden_size': 64, 'num_layers': 2, 'output_size': 5, 'conv_filters': [32, 64], 'kernel_size': 5, 'use_dropout': True, 'dropout_rate': 0.3, 'num_features': 187, 'input_size_after_flattening': 2944}
+2025-06-22 18:01:21.442 | INFO     | src.fh.model_selector:get_model:26 - Model selector: aanmaken van model 'cnn_model' met config: {'input_channels': 1, 'hidden_size': 64, 'num_layers': 2, 'output_size': 5, 'conv_filters': [32, 64], 'kernel_size': 5, 'use_dropout': True, 'dropout_rate': 0.3, 'num_features': 187, 'input_size_after_flattening': 2944}
+2025-06-22 18:01:21.442 | INFO     | src.fh.models.cnn_model:__init__:21 - Initializing CNNModel...
+2025-06-22 18:01:21.443 | DEBUG    | src.fh.models.cnn_model:__init__:54 - CNNModel config: input_channels=1, output_size=5, conv_filters=[32, 64], kernel_size=5, hidden_size=64, use_dropout=True
+2025-06-22 18:01:21.445 | DEBUG    | src.fh.models.cnn_model:__init__:63 - Added Conv1d layer 1: in_channels=1, out_channels=32, kernel_size=5
+2025-06-22 18:01:21.446 | DEBUG    | src.fh.models.cnn_model:__init__:63 - Added Conv1d layer 2: in_channels=32, out_channels=64, kernel_size=5
+2025-06-22 18:01:21.447 | DEBUG    | src.fh.models.cnn_model:__init__:66 - Convolutional layers built.
+2025-06-22 18:01:21.451 | DEBUG    | src.fh.models.cnn_model:__init__:74 - Dropout layer added with rate: 0.3
+2025-06-22 18:01:21.453 | INFO     | src.fh.models.cnn_model:__init__:77 - CNNModel initialized. Total parameters: 199301
+2025-06-22 18:01:21.455 | INFO     | src.fh.training_framework:run_training:420 - Model 'cnn_model' van experiment 'CNN_Experiment_2_heart_big_train_synthetic' geïnitialiseerd en verplaatst naar cpu.
+2025-06-22 18:01:21.456 | DEBUG    | src.fh.training_framework:run_training:421 - Model architectuur: 
+CNNModel(
+  (conv_layers): Sequential(
+    (0): Conv1d(1, 32, kernel_size=(5,), stride=(1,), padding=same)
+    (1): ReLU()
+    (2): MaxPool1d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+    (3): Conv1d(32, 64, kernel_size=(5,), stride=(1,), padding=same)
+    (4): ReLU()
+    (5): MaxPool1d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  )
+  (fc1): Linear(in_features=2944, out_features=64, bias=True)
+  (relu): ReLU()
+  (dropout): Dropout(p=0.3, inplace=False)
+  (fc2): Linear(in_features=64, out_features=5, bias=True)
+)
+2025-06-22 18:01:21.456 | DEBUG    | src.fh.training_framework:run_training:422 - Model-specifieke configuratie voor 'cnn_model': {'input_channels': 1, 'hidden_size': 64, 'num_layers': 2, 'output_size': 5, 'conv_filters': [32, 64], 'kernel_size': 5, 'use_dropout': True, 'dropout_rate': 0.3, 'num_features': 187, 'input_size_after_flattening': 2944}
+2025-06-22 18:01:21.457 | DEBUG    | src.fh.training_framework:_get_optimizer:125 - Attempting to get optimizer: Adam with learning rate: 0.001, weight_decay: 0.0
+2025-06-22 18:01:21.457 | DEBUG    | src.fh.training_framework:_get_optimizer:128 - Adam optimizer created.
+2025-06-22 18:01:21.457 | DEBUG    | src.fh.training_framework:_get_scheduler:153 - Attempting to get scheduler: ReduceLROnPlateau with kwargs: {'mode': 'min', 'factor': 0.1, 'patience': 5}
+2025-06-22 18:01:21.458 | ERROR    | src.fh.training_framework:run_training:468 - Fout bij het initialiseren van de scheduler voor CNN_Experiment_2_heart_big_train_synthetic: ReduceLROnPlateau.__init__() got an unexpected keyword argument 'verbose'
+2025-06-22 18:01:21.460 | INFO     | __main__:run_experiment:194 - CNN model training voltooid voor heart_big_train_synthetic.parquet.
+2025-06-22 18:01:21.460 | INFO     | __main__:run_experiment:198 - 
+--- Start Training CNN_SE_Skip Model (Hyperparameter Tuning) ---
+2025-06-22 18:01:21.460 | INFO     | __main__:run_experiment:210 - 
+--- Uitvoeren CNN_SE_Skip Experiment 1/2 voor heart_big_train_synthetic.parquet ---
+2025-06-22 18:01:21.461 | INFO     | __main__:run_experiment:225 - Berekende CNN_SE_Skip input_size_after_flattening voor lineaire laag: 1472
+2025-06-22 18:01:21.461 | INFO     | src.fh.training_framework:run_training:333 - Starting training run for model: cnn_se_skip_model, experiment: CNN_SE_Skip_Experiment_1_heart_big_train_synthetic
+2025-06-22 18:01:21.461 | DEBUG    | src.fh.training_framework:run_training:374 - Voorbereiding model 'cnn_se_skip_model' met feature_count=187, class_count=5, model_config={'input_channels': 1, 'hidden_size': 64, 'num_layers': 2, 'output_size': 5, 'conv_filters_per_block': 32, 'kernel_size_per_block': 3, 'use_dropout': False, 'dropout_rate': 0.3, 'reduction_ratio': 8, 'num_features': 187, 'input_size_after_flattening': 1472}
+2025-06-22 18:01:21.462 | INFO     | src.fh.model_selector:get_model:26 - Model selector: aanmaken van model 'cnn_se_skip_model' met config: {'input_channels': 1, 'hidden_size': 64, 'num_layers': 2, 'output_size': 5, 'conv_filters_per_block': 32, 'kernel_size_per_block': 3, 'use_dropout': False, 'dropout_rate': 0.3, 'reduction_ratio': 8, 'num_features': 187, 'input_size_after_flattening': 1472}
+2025-06-22 18:01:21.474 | INFO     | src.fh.training_framework:run_training:420 - Model 'cnn_se_skip_model' van experiment 'CNN_SE_Skip_Experiment_1_heart_big_train_synthetic' geïnitialiseerd en verplaatst naar cpu.
+2025-06-22 18:01:21.475 | DEBUG    | src.fh.training_framework:run_training:421 - Model architectuur: 
+CNNSESkipModel(
+  (features): Sequential(
+    (0): CNNSESkipBlock(
+      (conv): Conv1d(1, 32, kernel_size=(3,), stride=(1,), padding=(1,))
+      (relu): ReLU(inplace=True)
+      (pool): MaxPool1d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (se): SqueezeExcitation(
+        (avg_pool): AdaptiveAvgPool1d(output_size=1)
+        (fc): Sequential(
+          (0): Linear(in_features=32, out_features=4, bias=False)
+          (1): ReLU(inplace=True)
+          (2): Linear(in_features=4, out_features=32, bias=False)
+          (3): Sigmoid()
+        )
+      )
+      (skip_conv): Conv1d(1, 32, kernel_size=(1,), stride=(1,))
+    )
+    (1): CNNSESkipBlock(
+      (conv): Conv1d(32, 32, kernel_size=(3,), stride=(1,), padding=(1,))
+      (relu): ReLU(inplace=True)
+      (pool): MaxPool1d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (se): SqueezeExcitation(
+        (avg_pool): AdaptiveAvgPool1d(output_size=1)
+        (fc): Sequential(
+          (0): Linear(in_features=32, out_features=4, bias=False)
+          (1): ReLU(inplace=True)
+          (2): Linear(in_features=4, out_features=32, bias=False)
+          (3): Sigmoid()
+        )
+      )
+      (skip_conv): Identity()
+    )
+  )
+  (classifier): Sequential(
+    (0): Linear(in_features=1472, out_features=64, bias=True)
+    (1): ReLU()
+    (2): Identity()
+    (3): Linear(in_features=64, out_features=5, bias=True)
+  )
+  (softmax): Softmax(dim=1)
+)
+2025-06-22 18:01:21.475 | DEBUG    | src.fh.training_framework:run_training:422 - Model-specifieke configuratie voor 'cnn_se_skip_model': {'input_channels': 1, 'hidden_size': 64, 'num_layers': 2, 'output_size': 5, 'conv_filters_per_block': 32, 'kernel_size_per_block': 3, 'use_dropout': False, 'dropout_rate': 0.3, 'reduction_ratio': 8, 'num_features': 187, 'input_size_after_flattening': 1472}
+2025-06-22 18:01:21.475 | DEBUG    | src.fh.training_framework:_get_optimizer:125 - Attempting to get optimizer: Adam with learning rate: 0.001, weight_decay: 0.0
+2025-06-22 18:01:21.476 | DEBUG    | src.fh.training_framework:_get_optimizer:128 - Adam optimizer created.
+2025-06-22 18:01:21.476 | DEBUG    | src.fh.training_framework:_get_scheduler:153 - Attempting to get scheduler: ReduceLROnPlateau with kwargs: {'mode': 'min', 'factor': 0.1, 'patience': 5}
+2025-06-22 18:01:21.476 | ERROR    | src.fh.training_framework:run_training:468 - Fout bij het initialiseren van de scheduler voor CNN_SE_Skip_Experiment_1_heart_big_train_synthetic: ReduceLROnPlateau.__init__() got an unexpected keyword argument 'verbose'
+2025-06-22 18:01:21.478 | INFO     | __main__:run_experiment:210 - 
+--- Uitvoeren CNN_SE_Skip Experiment 2/2 voor heart_big_train_synthetic.parquet ---
+2025-06-22 18:01:21.479 | INFO     | __main__:run_experiment:225 - Berekende CNN_SE_Skip input_size_after_flattening voor lineaire laag: 1472
+2025-06-22 18:01:21.479 | INFO     | src.fh.training_framework:run_training:333 - Starting training run for model: cnn_se_skip_model, experiment: CNN_SE_Skip_Experiment_2_heart_big_train_synthetic
+2025-06-22 18:01:21.479 | DEBUG    | src.fh.training_framework:run_training:374 - Voorbereiding model 'cnn_se_skip_model' met feature_count=187, class_count=5, model_config={'input_channels': 1, 'hidden_size': 128, 'num_layers': 3, 'output_size': 5, 'conv_filters_per_block': 64, 'kernel_size_per_block': 5, 'use_dropout': True, 'dropout_rate': 0.4, 'reduction_ratio': 16, 'num_features': 187, 'input_size_after_flattening': 1472}
+2025-06-22 18:01:21.480 | INFO     | src.fh.model_selector:get_model:26 - Model selector: aanmaken van model 'cnn_se_skip_model' met config: {'input_channels': 1, 'hidden_size': 128, 'num_layers': 3, 'output_size': 5, 'conv_filters_per_block': 64, 'kernel_size_per_block': 5, 'use_dropout': True, 'dropout_rate': 0.4, 'reduction_ratio': 16, 'num_features': 187, 'input_size_after_flattening': 1472}
+2025-06-22 18:01:21.494 | INFO     | src.fh.training_framework:run_training:420 - Model 'cnn_se_skip_model' van experiment 'CNN_SE_Skip_Experiment_2_heart_big_train_synthetic' geïnitialiseerd en verplaatst naar cpu.
+2025-06-22 18:01:21.495 | DEBUG    | src.fh.training_framework:run_training:421 - Model architectuur: 
+CNNSESkipModel(
+  (features): Sequential(
+    (0): CNNSESkipBlock(
+      (conv): Conv1d(1, 64, kernel_size=(5,), stride=(1,), padding=(2,))
+      (relu): ReLU(inplace=True)
+      (pool): MaxPool1d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (se): SqueezeExcitation(
+        (avg_pool): AdaptiveAvgPool1d(output_size=1)
+        (fc): Sequential(
+          (0): Linear(in_features=64, out_features=4, bias=False)
+          (1): ReLU(inplace=True)
+          (2): Linear(in_features=4, out_features=64, bias=False)
+          (3): Sigmoid()
+        )
+      )
+      (skip_conv): Conv1d(1, 64, kernel_size=(1,), stride=(1,))
+    )
+    (1): Dropout(p=0.4, inplace=False)
+    (2): CNNSESkipBlock(
+      (conv): Conv1d(64, 64, kernel_size=(5,), stride=(1,), padding=(2,))
+      (relu): ReLU(inplace=True)
+      (pool): MaxPool1d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (se): SqueezeExcitation(
+        (avg_pool): AdaptiveAvgPool1d(output_size=1)
+        (fc): Sequential(
+          (0): Linear(in_features=64, out_features=4, bias=False)
+          (1): ReLU(inplace=True)
+          (2): Linear(in_features=4, out_features=64, bias=False)
+          (3): Sigmoid()
+        )
+      )
+      (skip_conv): Identity()
+    )
+    (3): Dropout(p=0.4, inplace=False)
+    (4): CNNSESkipBlock(
+      (conv): Conv1d(64, 64, kernel_size=(5,), stride=(1,), padding=(2,))
+      (relu): ReLU(inplace=True)
+      (pool): MaxPool1d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+      (se): SqueezeExcitation(
+        (avg_pool): AdaptiveAvgPool1d(output_size=1)
+        (fc): Sequential(
+          (0): Linear(in_features=64, out_features=4, bias=False)
+          (1): ReLU(inplace=True)
+          (2): Linear(in_features=4, out_features=64, bias=False)
+          (3): Sigmoid()
+        )
+      )
+      (skip_conv): Identity()
+    )
+    (5): Dropout(p=0.4, inplace=False)
+  )
+  (classifier): Sequential(
+    (0): Linear(in_features=1472, out_features=128, bias=True)
+    (1): ReLU()
+    (2): Dropout(p=0.4, inplace=False)
+    (3): Linear(in_features=128, out_features=5, bias=True)
+  )
+  (softmax): Softmax(dim=1)
+)
+2025-06-22 18:01:21.495 | DEBUG    | src.fh.training_framework:run_training:422 - Model-specifieke configuratie voor 'cnn_se_skip_model': {'input_channels': 1, 'hidden_size': 128, 'num_layers': 3, 'output_size': 5, 'conv_filters_per_block': 64, 'kernel_size_per_block': 5, 'use_dropout': True, 'dropout_rate': 0.4, 'reduction_ratio': 16, 'num_features': 187, 'input_size_after_flattening': 1472}
+2025-06-22 18:01:21.496 | DEBUG    | src.fh.training_framework:_get_optimizer:125 - Attempting to get optimizer: Adam with learning rate: 0.001, weight_decay: 0.0
+2025-06-22 18:01:21.496 | DEBUG    | src.fh.training_framework:_get_optimizer:128 - Adam optimizer created.
+2025-06-22 18:01:21.497 | DEBUG    | src.fh.training_framework:_get_scheduler:153 - Attempting to get scheduler: ReduceLROnPlateau with kwargs: {'mode': 'min', 'factor': 0.1, 'patience': 5}
+2025-06-22 18:01:21.497 | ERROR    | src.fh.training_framework:run_training:468 - Fout bij het initialiseren van de scheduler voor CNN_SE_Skip_Experiment_2_heart_big_train_synthetic: ReduceLROnPlateau.__init__() got an unexpected keyword argument 'verbose'
+2025-06-22 18:01:21.500 | INFO     | __main__:run_experiment:235 - CNN_SE_Skip model training voltooid voor heart_big_train_synthetic.parquet.
+2025-06-22 18:01:21.500 | INFO     | __main__:run_experiment:241 - 
+--- Start Training GRU Model (Hyperparameter Tuning) ---
+2025-06-22 18:01:21.500 | INFO     | __main__:run_experiment:252 - 
+--- Uitvoeren GRU Experiment 1/2 voor heart_big_train_synthetic.parquet ---
+2025-06-22 18:01:21.501 | INFO     | src.fh.training_framework:run_training:333 - Starting training run for model: gru_model, experiment: GRU_Experiment_1_heart_big_train_synthetic
+2025-06-22 18:01:21.501 | DEBUG    | src.fh.training_framework:run_training:374 - Voorbereiding model 'gru_model' met feature_count=187, class_count=5, model_config={'input_size': 187, 'hidden_size': 64, 'num_layers': 1, 'output_size': 5, 'dropout': 0.0}
+2025-06-22 18:01:21.502 | INFO     | src.fh.model_selector:get_model:26 - Model selector: aanmaken van model 'gru_model' met config: {'input_size': 187, 'hidden_size': 64, 'num_layers': 1, 'output_size': 5, 'dropout': 0.0}
+2025-06-22 18:01:21.502 | INFO     | src.fh.models.gru_model:__init__:20 - Initializing GRUModel...
+2025-06-22 18:01:21.508 | DEBUG    | src.fh.models.gru_model:__init__:59 - GRU layer initialized: input_size=187, hidden_size=64, num_layers=1, dropout=0.0
+2025-06-22 18:01:21.510 | DEBUG    | src.fh.models.gru_model:__init__:62 - Fully connected layer initialized: in_features=64, out_features=5
+2025-06-22 18:01:21.511 | INFO     | src.fh.models.gru_model:__init__:64 - GRUModel initialized. Total parameters: 48901
+2025-06-22 18:01:21.513 | INFO     | src.fh.training_framework:run_training:420 - Model 'gru_model' van experiment 'GRU_Experiment_1_heart_big_train_synthetic' geïnitialiseerd en verplaatst naar cpu.
+2025-06-22 18:01:21.513 | DEBUG    | src.fh.training_framework:run_training:421 - Model architectuur: 
+GRUModel(
+  (gru): GRU(187, 64, batch_first=True)
+  (fc): Linear(in_features=64, out_features=5, bias=True)
+)
+2025-06-22 18:01:21.514 | DEBUG    | src.fh.training_framework:run_training:422 - Model-specifieke configuratie voor 'gru_model': {'input_size': 187, 'hidden_size': 64, 'num_layers': 1, 'output_size': 5, 'dropout': 0.0}
+2025-06-22 18:01:21.514 | DEBUG    | src.fh.training_framework:_get_optimizer:125 - Attempting to get optimizer: Adam with learning rate: 0.001, weight_decay: 0.0
+2025-06-22 18:01:21.514 | DEBUG    | src.fh.training_framework:_get_optimizer:128 - Adam optimizer created.
+2025-06-22 18:01:21.515 | DEBUG    | src.fh.training_framework:_get_scheduler:153 - Attempting to get scheduler: ReduceLROnPlateau with kwargs: {'mode': 'min', 'factor': 0.1, 'patience': 5}
+2025-06-22 18:01:21.515 | ERROR    | src.fh.training_framework:run_training:468 - Fout bij het initialiseren van de scheduler voor GRU_Experiment_1_heart_big_train_synthetic: ReduceLROnPlateau.__init__() got an unexpected keyword argument 'verbose'
+2025-06-22 18:01:21.515 | INFO     | __main__:run_experiment:252 - 
+--- Uitvoeren GRU Experiment 2/2 voor heart_big_train_synthetic.parquet ---
+2025-06-22 18:01:21.516 | INFO     | src.fh.training_framework:run_training:333 - Starting training run for model: gru_model, experiment: GRU_Experiment_2_heart_big_train_synthetic
+2025-06-22 18:01:21.516 | DEBUG    | src.fh.training_framework:run_training:374 - Voorbereiding model 'gru_model' met feature_count=187, class_count=5, model_config={'input_size': 187, 'hidden_size': 128, 'num_layers': 2, 'output_size': 5, 'dropout': 0.2}
+2025-06-22 18:01:21.516 | INFO     | src.fh.model_selector:get_model:26 - Model selector: aanmaken van model 'gru_model' met config: {'input_size': 187, 'hidden_size': 128, 'num_layers': 2, 'output_size': 5, 'dropout': 0.2}
+2025-06-22 18:01:21.517 | INFO     | src.fh.models.gru_model:__init__:20 - Initializing GRUModel...
+2025-06-22 18:01:21.517 | DEBUG    | src.fh.models.gru_model:__init__:50 - GRU dropout rate set to 0.2 for 2 layers.
+2025-06-22 18:01:21.526 | DEBUG    | src.fh.models.gru_model:__init__:59 - GRU layer initialized: input_size=187, hidden_size=128, num_layers=2, dropout=0.2
+2025-06-22 18:01:21.527 | DEBUG    | src.fh.models.gru_model:__init__:62 - Fully connected layer initialized: in_features=128, out_features=5
+2025-06-22 18:01:21.528 | INFO     | src.fh.models.gru_model:__init__:64 - GRUModel initialized. Total parameters: 221445
+2025-06-22 18:01:21.529 | INFO     | src.fh.training_framework:run_training:420 - Model 'gru_model' van experiment 'GRU_Experiment_2_heart_big_train_synthetic' geïnitialiseerd en verplaatst naar cpu.
+2025-06-22 18:01:21.530 | DEBUG    | src.fh.training_framework:run_training:421 - Model architectuur: 
+GRUModel(
+  (gru): GRU(187, 128, num_layers=2, batch_first=True, dropout=0.2)
+  (fc): Linear(in_features=128, out_features=5, bias=True)
+)
+2025-06-22 18:01:21.530 | DEBUG    | src.fh.training_framework:run_training:422 - Model-specifieke configuratie voor 'gru_model': {'input_size': 187, 'hidden_size': 128, 'num_layers': 2, 'output_size': 5, 'dropout': 0.2}
+2025-06-22 18:01:21.531 | DEBUG    | src.fh.training_framework:_get_optimizer:125 - Attempting to get optimizer: Adam with learning rate: 0.001, weight_decay: 0.0
+2025-06-22 18:01:21.531 | DEBUG    | src.fh.training_framework:_get_optimizer:128 - Adam optimizer created.
+2025-06-22 18:01:21.531 | DEBUG    | src.fh.training_framework:_get_scheduler:153 - Attempting to get scheduler: ReduceLROnPlateau with kwargs: {'mode': 'min', 'factor': 0.1, 'patience': 5}
+2025-06-22 18:01:21.532 | ERROR    | src.fh.training_framework:run_training:468 - Fout bij het initialiseren van de scheduler voor GRU_Experiment_2_heart_big_train_synthetic: ReduceLROnPlateau.__init__() got an unexpected keyword argument 'verbose'
+2025-06-22 18:01:21.533 | INFO     | __main__:run_experiment:262 - GRU model training voltooid voor heart_big_train_synthetic.parquet.
+2025-06-22 18:01:21.541 | SUCCESS  | __main__:run_experiment:271 - Alle experiment samenvattingen opgeslagen naar /home/azureuser/mads-exam-fharren/src/fh/../../runs/20250622-180119_all_model_summary.parquet
+2025-06-22 18:01:21.541 | INFO     | __main__:run_experiment:275 - 
+--- Einde Experiment ---
+2025-06-22 18:01:21.543 | INFO     | __main__:<module>:375 - Hoofdscript succesvol voltooid.
