@@ -7,9 +7,9 @@ __pycache__
 **/ray/
 .lock
 *.egg-info
-**/logs
+#**/logs
 **/mlruns
 *.db
 .notebookcache
 
-runs/
+#runs/
