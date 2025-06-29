@@ -45,6 +45,9 @@ De repository is modulair opgezet voor helderheid en reproduceerbaarheid:
 
 ```
 .
+├── dev/                            # datapreparatie
+│   └── populate/                   # GAN
+│       └── populate.py             # GAN voor vier minority klassen
 ├── data/
 │   ├── heart_big_train.parq        # Originele trainingsdata
 │   ├── heart_big_train_synthetic.parquet # Synthetische trainingsdata (voor augmentatie)
