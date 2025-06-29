@@ -63,9 +63,6 @@ De repository is modulair opgezet voor helderheid en reproduceerbaarheid:
 └── runs/                           # Directory voor resultaten van runs (automatisch aangemaakt)
 └── logs/                           # Directory voor gedetailleerde logs (automatisch aangemaakt)
 
-
-
-
 ## 5. Gebruik
 
 ### 5.1. Configuratie
