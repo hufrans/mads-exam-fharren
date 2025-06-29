@@ -3,8 +3,11 @@
 Dit project omvat een diepgaand onderzoek naar de toepassing van neurale netwerken voor de vroege detectie en classificatie van hartritmestoornissen op basis van ECG-signalen. Het doel is om een deep learning-model te ontwikkelen dat automatisch kan bepalen of een persoon een normaal of afwijkend hartritme heeft, en bij een afwijking de specifieke klasse van de stoornis kan identificeren.
 
 **Auteur:** Frans Harren
+
 **Studentnummer:** 189165115
+
 **Datum:** 29-06-2025
+
 **GitHub Repository:** [https://github.com/hufrans/mads-exam-fharren.git](https://github.com/hufrans/mads-exam-fharren.git)
 
 ## 1. Project Doelstelling
@@ -40,6 +43,7 @@ De modelconfiguraties (aantal lagen, hidden sizes, etc.) worden beheerd via het 
 
 De repository is modulair opgezet voor helderheid en reproduceerbaarheid:
 
+```
 .
 ├── data/
 │   ├── heart_big_train.parq        # Originele trainingsdata
@@ -62,6 +66,7 @@ De repository is modulair opgezet voor helderheid en reproduceerbaarheid:
 ├── README.md                       # Dit bestand
 └── runs/                           # Directory voor resultaten van runs (automatisch aangemaakt)
 └── logs/                           # Directory voor gedetailleerde logs (automatisch aangemaakt)
+```
 
 ## 5. Gebruik
 
